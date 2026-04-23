@@ -1,45 +1,71 @@
+/* --- 1. 動畫定義 --- */
 @keyframes number-pop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); color: #8b0000; }
-            100% { transform: scale(1); }
-        }
-        .animate-pop { display: inline-block; animation: number-pop 0.3s ease-out; }
-        
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: #8b0000; }
+    100% { transform: scale(1); }
+}
+
+@keyframes scroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+.animate-pop { display: inline-block; animation: number-pop 0.3s ease-out; }
+
+/* --- 2. 核心底色與字體 --- */
 body { 
     font-family: 'Noto Serif TC', serif; 
-    background-color:#8e8271; /* 稍微提亮，讓老舊紙張感更平衡 */
-    background-image:none;
-    color: #1a1816; /* 把字色調深一點，增加閱讀對比 */
+    background-color: #8e8271; /* 總監指定：低飽和復古咖啡色 */
+    color: #1a1816;           /* 深焦糖黑文字 */
+    margin: 0;
     -webkit-font-smoothing: antialiased;
 }
-        
-        .hero-banner { background-color: #4a443e; color: #d9d4cc; }
-.search-container { 
-    border: 2px solid #4a443e; 
-    background: #fdfcfb; /* 象牙白，視覺最舒服 */
-}
-        .tracking-widest-custom { letter-spacing: 0.3em; }
 
-        @keyframes scroll {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
+/* --- 3. 頂部狀態列 --- */
 .status-bar {
-    background: #2a2623;
-    color: #d9d4cc; /* 調亮文字 */
+    background: #2a2623;      /* 深黑色背景 */
+    color: #d9d4cc;           /* 淺米色文字，確保滾動條清晰 */
     font-size: 10px;
     overflow: hidden;
     white-space: nowrap;
     padding: 6px 0;
     letter-spacing: 0.1em;
 }
-        .status-content { display: inline-block; animation: scroll 25s linear infinite; }
 
- #search-result {
+.status-content { 
+    display: inline-block; 
+    animation: scroll 25s linear infinite; 
+}
+
+/* --- 4. 主視覺區塊 --- */
+.hero-banner {
+    background: transparent;  /* 讓 body 的咖啡色完全顯現 */
+}
+
+.tracking-widest-custom { 
+    letter-spacing: 0.3em; 
+}
+
+/* --- 5. 搜尋功能區塊 --- */
+.search-container {
+    background-color: #f0eee9; /* 淺米色底，讓輸入框區域跳出來 */
+    border: 1px solid #4a443e;
+}
+
+/* 自定義按鈕樣式 */
+.custom-btn {
+    background-color: #3d3832;
+    color: #d9d4cc;
+    border-bottom: 2px solid #2a2623;
+}
+
+/* --- 6. 搜尋結果顯示區 (最重要！) --- */
+#search-result {
     display: none; 
     margin-top: 2rem;
     padding: 1.5rem;
-    border-left: 4px solid #4a443e; 
-    background: rgba(245, 242, 237, 0.9); /* 接近實色的米白，保證字體清晰 */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+    border-left: 4px solid #4a443e;      /* 紮實的深色左邊框 */
+    background: rgba(245, 242, 237, 0.95); /* 接近不透明的米白紙張感 */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* 增加陰影讓它更有份量 */
+    color: #2c2621;                      /* 結果文字顏色 */
 }
