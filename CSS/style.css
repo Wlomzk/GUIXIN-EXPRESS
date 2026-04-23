@@ -7,9 +7,9 @@
         
         body { 
             font-family: 'Noto Serif TC', serif; 
-            background-color: #edeae6; 
-            background-image: url("https://www.transparenttextures.com/patterns/rough-paper.png");
-            color: #3d3631; 
+            background-color: #d9d4cc; /* 改用古紙黃，比原來的灰白色更暖 */
+    background-image: url("https://www.transparenttextures.com/patterns/rough-paper.png");
+    color: #3d3631;
             -webkit-font-smoothing: antialiased;
         }
         
