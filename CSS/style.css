@@ -1,0 +1,41 @@
+@keyframes number-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); color: #8b0000; }
+            100% { transform: scale(1); }
+        }
+        .animate-pop { display: inline-block; animation: number-pop 0.3s ease-out; }
+        
+        body { 
+            font-family: 'Noto Serif TC', serif; 
+            background-color: #edeae6; 
+            background-image: url("https://www.transparenttextures.com/patterns/rough-paper.png");
+            color: #3d3631; 
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .hero-banner { background-color: #4a443e; color: #d9d4cc; }
+        .search-container { border: 1px solid #4a443e; background: #ffffff; }
+        .tracking-widest-custom { letter-spacing: 0.3em; }
+
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .status-bar {
+            background: #2a2623;
+            color: #b5ada5;
+            font-size: 10px;
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 6px 0;
+            letter-spacing: 0.1em;
+        }
+        .status-content { display: inline-block; animation: scroll 25s linear infinite; }
+
+        #search-result {
+            display: none; 
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-left: 2px solid #d9d4cc;
+            background: rgba(255,255,255,0.05);
+        }
