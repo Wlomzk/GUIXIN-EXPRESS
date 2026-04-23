@@ -61,3 +61,19 @@ function renderArchive() {
 }
 
 document.addEventListener('DOMContentLoaded', renderArchive);
+// 切換頁面功能
+function showPage(pageName) {
+    // 1. 所有的頁面 ID
+    const pages = ['page-home', 'page-services', 'page-locations'];
+    
+    // 2. 先把所有頁面都藏起來 (加上 hidden)
+    pages.forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+    });
+    
+    // 3. 把點選的那一頁顯示出來 (移除 hidden)
+    document.getElementById('page-' + pageName).classList.remove('hidden');
+    
+    // 4. 自動捲動回頂端，才不會換頁後卡在中間
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
