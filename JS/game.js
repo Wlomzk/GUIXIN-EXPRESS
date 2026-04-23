@@ -1,79 +1,44 @@
+// 歸心物流：系統核心邏輯 (js/game.js)
+
+// 1. 定義物流資料庫 (那 25 個物件的家)
 const gameDatabase = {
-        "絳紅": { link: "red-silk.html", hint: "那是靈舒最後遺留下的顏色，懸掛於千年之木。" },
-        "RED-SILK": { link: "red-silk.html", hint: "那是靈舒最後遺留下的顏色，懸掛於千年之木。" },
-        "牧野": { link: "muye.html", hint: "消失的分撥中心，藏著不為人知的過去。" }
-    };
+    "絳紅": {
+        content: "「絳紅殘綢」：這是一段被時光磨損的絲綢，上面隱約可見靈舒的字跡。它曾在牧野分撥中心滯留了三百年，等待一個永遠不會來的收件人。"
+    },
+    "牧野": {
+        content: "「牧野分撥中心地圖」：地圖標註了消失的座標。據說在深夜，地圖上的路徑會自行蠕動，指向歸心物流最神祕的禁區。"
+    },
+    // 總監，接下來的 23 個物件，妳之後可以照這個格式一直加下去...
+};
 
-    let unlockedKeywords = JSON.parse(localStorage.getItem('guixin_archive')) || [];
-    const TOTAL_KEYWORDS = 20;
-
-    window.onload = function() {
-        if (unlockedKeywords.length > 0) {
-            document.getElementById('archive-section').classList.remove('hidden');
-        }
-        unlockedKeywords.forEach(key => renderKeywordBox(key));
-        updateProgress(false);
-    };
-
-    function handleTrack() {
-        const input = document.getElementById('trackInput');
-        const _raw = input.value.trim().toUpperCase(); 
-        if (!_raw) return;
-
-        document.getElementById('search-result').style.display = "block";
-
-        if (gameDatabase[_raw]) {
-            const foundKey = (_raw === "RED-SILK") ? "絳紅" : _raw;
-            document.getElementById('archive-section').classList.remove('hidden');
-            document.getElementById('result-content').innerText = ` [ 系統檢索成功 ] \n\n 物件：『${foundKey}』 \n 狀態：配送異常 - 滯留中。 \n\n 
-
-※ 提示：${gameDatabase[_raw].hint}`;
-
-            if (!unlockedKeywords.includes(foundKey)) {
-                unlockedKeywords.push(foundKey);
-                localStorage.setItem('guixin_archive', JSON.stringify(unlockedKeywords));
-                renderKeywordBox(foundKey);
-                updateProgress(true);
-            }
-        } else {
-            document.getElementById('result-content').innerText = " [ 檢索結果 ] \n\n 查無此單號。";
-        }
-        input.value = "";
+// 2. 核心查詢功能 (我們把它掛在 window 上，讓 HTML 絕對找得到)
+window.handleTrack = function() {
+    const input = document.getElementById('trackInput');
+    const resultArea = document.getElementById('search-result');
+    const resultContent = document.getElementById('result-content');
+    
+    if (!input || !input.value.trim()) {
+        alert("請輸入貨物檢索碼");
+        return;
     }
 
-    function renderKeywordBox(key) {
-        const list = document.getElementById('keyword-list');
-        const box = document.createElement('a');
-        const dataKey = (key === "絳紅") ? "絳紅" : key;
-        box.href = gameDatabase[dataKey] ? gameDatabase[dataKey].link : "#";
-        box.className = "px-3 py-1 border border-stone-300 text-[11px] tracking-widest text-stone-500 hover:bg-[#4a443e] hover:text-[#d9d4cc] 
-
-transition-all italic group";
-        box.innerHTML = `# ${key} <span class="ml-1 opacity-0 group-hover:opacity-100 transition-opacity">→</span>`;
-        list.appendChild(box);
+    const keyword = input.value.trim();
+    
+    // 顯示搜尋結果區域
+    resultArea.style.display = 'block';
+    
+    if (gameDatabase[keyword]) {
+        // 抓到了！顯示故事
+        resultContent.innerHTML = `<span class="text-[#3d3832] font-semibold">【檢索成功】</span><br>${gameDatabase[keyword].content}`;
+        resultContent.style.color = '#3d3832';
+    } else {
+        // 沒抓到，顯示系統錯誤
+        resultContent.innerHTML = `<span class="text-red-800 font-semibold">【查無此物】</span><br>警告：檢索碼「${keyword}」不存在於當前緯度，請確認輸入是否正確。`;
+        resultContent.style.color = '#7f1d1d';
     }
+};
 
-    function updateProgress(animate = false) {
-        const rate = document.getElementById('completion-rate');
-        rate.innerText = `PROGRESS: ${unlockedKeywords.length} / ${TOTAL_KEYWORDS}`;
-        if (animate) {
-            rate.classList.remove('animate-pop');
-            void rate.offsetWidth; 
-            rate.classList.add('animate-pop');
-        }
-    }
-
-    document.getElementById('trackInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleTrack(); });
-    document.getElementById('collect-link').onclick = () => alert("這裡收集了那些暫時找不到家的小物件。");
-// 手機選單開關邏輯
-const menuBtn = document.getElementById('mobile-menu-btn');
-const mobileMenu = document.getElementById('mobile-menu');
-const closeBtn = document.getElementById('close-menu');
-
-menuBtn.onclick = () => mobileMenu.classList.remove('hidden');
-closeBtn.onclick = () => mobileMenu.classList.add('hidden');
-
-// 點擊選單內的連結後也自動關閉
-document.querySelectorAll('.mobile-link').forEach(link => {
-    link.onclick = () => mobileMenu.classList.add('hidden');
+// 3. 系統初始化檢查
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("歸心系統：核心邏輯載入完成。");
 });
