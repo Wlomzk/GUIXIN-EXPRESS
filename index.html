@@ -42,27 +42,29 @@
         </button>
     </div>
 
-    <div id="mobile-menu" class="fixed inset-0 z-[100] hidden flex-col items-center justify-start bg-stone-900" style="background-color: rgba(26, 24, 22, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+    <div id="mobile-menu" class="fixed inset-0 z-[100] hidden flex-col items-center justify-start" style="background-color: #1a1816; backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);">
     
     <div class="w-full flex justify-end p-8">
-        <button id="close-menu" class="text-white/70 hover:text-white">
+        <button id="close-menu" class="text-white/70 hover:text-white transition-all">
             <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
         </button>
     </div>
 
-    <div class="flex flex-col items-center space-y-10 tracking-[0.5em] text-[#d9d4cc] pt-4">
-        <a href="javascript:void(0)" onclick="toggleMenu(); showPage('home')" class="text-2xl font-medium border-b border-transparent active:border-[#d9d4cc]">回 首 頁</a>
+    <div class="flex flex-col items-center space-y-12 tracking-[0.6em] text-[#d9d4cc] pt-10">
+        <a href="javascript:void(0)" onclick="toggleMenu(); showPage('home')" class="text-3xl font-light hover:text-white transition-colors">回 首 頁</a>
+        <a href="javascript:void(0)" onclick="toggleMenu(); showPage('services')" class="text-3xl font-light hover:text-white transition-colors">服 務 項 目</a>
+        <a href="javascript:void(0)" onclick="toggleMenu(); showPage('locations')" class="text-3xl font-light hover:text-white transition-colors">配 送 據 點</a>
+        <a href="pages/forget-something.html" class="text-3xl font-light hover:text-white transition-colors">失物招領處</a>
         
-        <a href="javascript:void(0)" onclick="toggleMenu(); showPage('services')" class="text-2xl font-medium border-b border-transparent active:border-[#d9d4cc]">服務項目</a>
-        
-        <a href="javascript:void(0)" onclick="toggleMenu(); showPage('locations')" class="text-2xl font-medium border-b border-transparent active:border-[#d9d4cc]">配送據點</a>
-        <a href="pages/forget-something.html" class="text-2xl font-medium border-b border-transparent active:border-[#d9d4cc]">失物招領處</a>
-        
-        <a href="login.html" class="mt-8 px-14 py-4 bg-[#d9d4cc] text-[#3d3832] rounded-sm text-lg font-bold shadow-2xl">
+        <a href="login.html" class="mt-8 px-16 py-4 bg-[#d9d4cc] text-[#3d3832] rounded-sm text-xl font-bold shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
             加 盟 登 入
         </a>
+    </div>
+
+    <div class="absolute bottom-12 text-[10px] text-white/20 tracking-[0.5em] uppercase">
+        Guixin Systems Access / v3.0
     </div>
 </div>
 </nav>
