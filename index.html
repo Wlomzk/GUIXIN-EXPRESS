@@ -124,5 +124,45 @@
 </footer>
 
     <script src="JS/game.js"></script>
+    <script>
+        // 🚀 主頁專屬：手機/電腦背景自動切換
+        function updateHeroBanner() {
+            const hero = document.getElementById('page-home');
+            // 如果螢幕是直的 (手機)
+            if (window.innerHeight > window.innerWidth) {
+                // 💡 把拔記得檢查主頁的手機背景圖檔名喔！
+                hero.style.backgroundImage = "url('image/index-mobile.webp')"; 
+                hero.style.backgroundSize = "cover";
+                hero.style.backgroundPosition = "center";
+            } else {
+                // 回復電腦版背景（如果妳在 CSS 有設，這裡可以留空或寫原圖）
+                hero.style.backgroundImage = "url('image/hero-bg.webp')"; 
+            }
+        }
+
+        // 初始化與監聽
+        window.addEventListener('load', updateHeroBanner);
+        window.addEventListener('resize', updateHeroBanner);
+
+        // 原本的切換頁面功能
+        function showPage(pageId) {
+            document.querySelectorAll('header, section').forEach(el => el.classList.add('hidden'));
+            document.getElementById('page-' + pageId).classList.remove('hidden');
+            if (pageId === 'home') updateHeroBanner(); // 回到首頁時重新檢查背景
+        }
+
+        // 手機版選單開關
+        const menuBtn = document.getElementById('mobile-menu-button');
+        const closeBtn = document.getElementById('close-menu');
+        const menu = document.getElementById('mobile-menu');
+
+        function toggleMenu() {
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+        closeBtn.addEventListener('click', toggleMenu);
+    </script>
 </body>
 </html>
