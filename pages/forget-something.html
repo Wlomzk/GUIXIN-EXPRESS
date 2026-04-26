@@ -15,11 +15,11 @@
             font-family: "Noto Sans TC", sans-serif;
         }
 
-        /* 導航欄 - 修正模糊與層級 */
+        /* 導航欄 */
         .header-bar {
             position: fixed; top: 0; left: 0; width: 100%;
             padding: 1.2rem 5%;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -31,44 +31,46 @@
             color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
             font-size: 0.9rem; letter-spacing: 0.2em;
-            transition: opacity 0.3s;
         }
-
-        .header-bar a:hover { opacity: 0.7; }
 
         .scene-wrapper {
             flex: 1;
             display: flex; justify-content: center; align-items: center;
             position: relative; width: 100%; height: 100vh;
-            background: #000;
         }
 
         .scene-container {
             position: relative;
-            /* 💡 修正：確保容器比例在手機上正確 */
             width: 100vw; height: 56.25vw; 
             max-height: 100vh; max-width: 177.78vh;
         }
 
         .scene-img {
             width: 100%; height: 100%;
-            object-fit: contain; /* 確保圖片不被切掉 */
+            object-fit: contain;
             display: block;
-            background: #000;
         }
 
-        /* 互動點 */
+        /* --- 互動點修正 --- */
         .hotspot {
             position: absolute;
             cursor: pointer;
             border-radius: 50%;
-            background: radial-gradient(circle at center, rgba(0, 255, 120, 0.4) 0%, transparent 70%);
-            transition: 0.4s;
-            filter: blur(5px);
+            background: radial-gradient(circle at center, rgba(0, 255, 120, 0.5) 0%, transparent 70%);
+            transition: all 0.3s ease;
+            filter: blur(8px);
             transform: translate(-50%, -50%);
             z-index: 500;
-            opacity: 0.3;
+            opacity: 0.2; /* 平常隱約可見 */
             animation: pulse 3s infinite ease-in-out;
+        }
+
+        /* 💡 修正：點擊或 Hover 時的「變亮」效果 */
+        .hotspot:hover, .hotspot.active {
+            opacity: 0.9 !important;
+            filter: blur(15px) brightness(1.5);
+            background: radial-gradient(circle at center, rgba(100, 255, 200, 1) 0%, transparent 80%);
+            transform: translate(-50%, -50%) scale(1.3);
         }
 
         /* [💻 桌機版座標 ] */
@@ -81,20 +83,19 @@
         /* [📱 手機版 RWD ] */
         @media (max-aspect-ratio: 1/1) {
             .scene-container {
-                width: 100vw; 
-                height: 177.78vw; /* 9:16 比例 */
+                width: 100vw; height: 177.78vw;
             }
-            /* 手機版熱點微調 */
-            #turtle-shell { width: 20%; height: 10%; left: 28%; top: 68%; }
-            #newspaper    { width: 20%; height: 10%; left: 25%; top: 85%; }
-            #crt-monitor  { width: 15%; height: 8%;  left: 45%; top: 75%; }
-            #lcd-monitor  { width: 20%; height: 10%; left: 75%; top: 58%; }
-            #phone-screen { width: 12%; height: 8%; left: 85%; top: 62%; }
+            /* 把拔如果覺得手機版位置不準，改下面這組座標就好 */
+            #turtle-shell { width: 22%; height: 12%; left: 15%; top: 69%; }
+            #newspaper    { width: 22%; height: 12%; left: 15%; top: 89%; }
+            #crt-monitor  { width: 18%; height: 10%; left: 40%; top: 80%; }
+            #lcd-monitor  { width: 20%; height: 12%; left: 90%; top: 65%; }
+            #phone-screen { width: 15%; height: 10%; left: 80%; top: 70%; }
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 0.1; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.2); }
+            0%, 100% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.15); }
         }
     </style>
 </head>
@@ -109,11 +110,11 @@
         <div class="scene-container">
             <img id="main-scene" src="" class="scene-img" alt="Warehouse">
             
-            <div class="hotspot" id="turtle-shell" onclick="alert('烏...烏龜的殼??')"></div>
-            <div class="hotspot" id="newspaper" onclick="alert('這些報紙似乎來自不同的時空。')"></div>
-            <div class="hotspot" id="crt-monitor" onclick="alert('這裡怎麼有台這麼舊的電腦??')"></div>
-            <div class="hotspot" id="lcd-monitor" onclick="alert('監視器畫面上只有一片雜訊。')"></div>
-            <div class="hotspot" id="phone-screen" onclick="triggerGlitch()"></div>
+            <div class="hotspot" id="turtle-shell" onclick="handleSpotClick(this, '烏...烏龜的殼??')"></div>
+            <div class="hotspot" id="newspaper" onclick="handleSpotClick(this, '這些報紙似乎來自不同的時空。')"></div>
+            <div class="hotspot" id="crt-monitor" onclick="handleSpotClick(this, '這裡怎麼有台這麼舊的電腦??')"></div>
+            <div class="hotspot" id="lcd-monitor" onclick="handleSpotClick(this, '監視器畫面上只有一片雜訊。')"></div>
+            <div class="hotspot" id="phone-screen" onclick="handleGlitch(this)"></div>
         </div>
     </div>
 
@@ -121,26 +122,31 @@
         function updateImageSource() {
             const img = document.getElementById('main-scene');
             if (!img) return;
-
-            // 💡 關鍵修正：因為是在 pages 資料夾，所以圖檔路徑要加 ../
             const pcImg = "../image/forget-something.webp";
             const mobileImg = "../image/forget-something-m.webp";
-
-            if (window.innerHeight > window.innerWidth) {
-                img.src = mobileImg;
-            } else {
-                img.src = pcImg;
-            }
+            img.src = (window.innerHeight > window.innerWidth) ? mobileImg : pcImg;
         }
 
-        // 初始化並監聽縮放
+        // 💡 點擊互動函數
+        function handleSpotClick(el, message) {
+            el.classList.add('active'); // 點擊時發光
+            setTimeout(() => {
+                alert(message);
+                el.classList.remove('active'); // 關掉彈窗後恢復
+            }, 100);
+        }
+
+        function handleGlitch(el) {
+            el.classList.add('active');
+            setTimeout(() => {
+                alert('訊息顯示：妳以為妳逃掉了嗎？');
+                el.classList.remove('active');
+            }, 100);
+        }
+
         updateImageSource();
         window.addEventListener('resize', updateImageSource);
         window.addEventListener('orientationchange', updateImageSource);
-
-        function triggerGlitch() {
-            alert('訊息顯示：妳以為妳逃掉了嗎？');
-        }
     </script>
 </body>
 </html>
