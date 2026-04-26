@@ -181,7 +181,14 @@
         .btn-left { border-right: 25px solid rgba(148, 76, 13, 0.9); margin-right: 10px; }
         .btn-right { border-left: 25px solid rgba(148, 76, 13, 0.9); margin-left: 10px; }
 
-        .dot-wrapper { display: flex; gap: 8px; align-items: center; }
+        .dot-wrapper { 
+    flex: 1;            /* 💡 搶占剩餘寬度 */
+    display: flex; 
+    justify-content: space-evenly; /* 💡 均勻分布：讓圈圈左右間距完全相等 */
+    align-items: center; 
+    margin: 0 15px;     /* 💡 給左右三角形留一點點呼吸空間，不要貼死 */
+    pointer-events: auto;
+}
         .dot {
             width: 10px; height: 10px; border-radius: 50%;
             background: rgba(255, 255, 255, 0.3);
