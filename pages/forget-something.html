@@ -92,30 +92,65 @@
             50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.15); }
         }
 
-        /* --- ✨ 新增：彈出特寫視窗 --- */
+        /* --- ✨ 彈出特寫視窗 --- */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: none; justify-content: center; align-items: center;
             z-index: 3000;
-            opacity: 0; transition: opacity 0.5s ease;
+            opacity: 0; transition: opacity 0.4s ease;
         }
 
         .overlay.show { display: flex; opacity: 1; }
 
-        /* 特寫圖片容器 */
         .detail-view { position: relative; display: flex; justify-content: center; align-items: center; }
 
-        /* 縱向圖：滿高 */
-        .img-portrait { height: 100vh; width: auto; object-fit: contain; }
-        
-        /* 方正圖：滿寬 */
-        .img-square { width: 100vw; height: auto; max-height: 100vh; object-fit: contain; }
+        .img-portrait { height: 90vh; width: auto; object-fit: contain; }
+        .img-square { width: 90vw; height: auto; max-height: 90vh; object-fit: contain; }
+
+        /* --- 📰 報紙專用 UI：黃色毛玻璃區域 --- */
+        .newspaper-ui {
+            position: absolute;
+            display: none; /* 預設隱藏，點擊報紙才顯示 */
+            width: 50%; height: 60%; /* 根據把拔附圖的黃框比例 */
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            pointer-events: none; /* 暫不阻擋點擊 */
+            z-index: 3010;
+        }
+
+        /* --- 📰 報紙專用 UI：紅色三角形按鈕 --- */
+        .nav-btn {
+            position: absolute;
+            width: 0; height: 0;
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            cursor: pointer;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));
+            transition: transform 0.2s;
+            z-index: 3020;
+            pointer-events: auto;
+        }
+
+        .nav-btn:active { transform: scale(0.9); }
+
+        .btn-left {
+            left: -50px;
+            border-right: 30px solid rgba(200, 30, 30, 0.9);
+        }
+
+        .btn-right {
+            right: -50px;
+            border-left: 30px solid rgba(200, 30, 30, 0.9);
+        }
 
         .close-btn {
             position: absolute; top: 20px; right: 20px;
-            color: #fff; font-size: 2rem; cursor: pointer; z-index: 3001;
-            text-shadow: 0 0 10px #000;
+            color: #fff; font-size: 2.5rem; cursor: pointer; z-index: 3100;
+            text-shadow: 0 0 15px #000;
         }
     </style>
 </head>
@@ -129,29 +164,34 @@
     <div class="scene-wrapper">
         <div class="scene-container">
             <img id="main-scene" src="" class="scene-img" alt="Warehouse">
-            
             <div class="hotspot" id="turtle-shell" onclick="handleDetailPopup('turtle')"></div>
             <div class="hotspot" id="newspaper" onclick="handleDetailPopup('newspaper')"></div>
-            <div class="hotspot" id="crt-monitor" onclick="handleDetailPopup('mirror')"></div> <div class="hotspot" id="lcd-monitor" onclick="handleDetailPopup('lcd')"></div>
+            <div class="hotspot" id="crt-monitor" onclick="handleDetailPopup('mirror')"></div> 
+            <div class="hotspot" id="lcd-monitor" onclick="handleDetailPopup('lcd')"></div>
             <div class="hotspot" id="phone-screen" onclick="handleDetailPopup('phone')"></div>
         </div>
     </div>
 
     <div class="overlay" id="detail-overlay" onclick="closeDetail()">
-        <div class="close-btn">&times;</div>
-        <div class="detail-view">
+        <div class="close-btn" onclick="closeDetail()">&times;</div>
+        
+        <div class="detail-view" onclick="event.stopPropagation()">
             <img id="detail-img" src="" alt="Detail View">
+
+            <div id="newspaper-extras" class="newspaper-ui">
+                <div class="nav-btn btn-left" onclick="console.log('上一頁')"></div>
+                <div class="nav-btn btn-right" onclick="console.log('下一頁')"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // 把拔，圖片路徑我在這裡幫妳設定好了！
         const detailAssets = {
-            'turtle':    { src: '../image/end3/turtle-shell.webp', type: 'portrait' }, // 第二層
-            'newspaper': { src: '../image/newspaper.webp',            type: 'portrait' }, // 第一層
-            'mirror':    { src: '../image/end2/mirror.webp',       type: 'portrait' }, // 第二層 (原CRT)
-            'lcd':       { src: '../image/end1/lcd-monitor.webp',  type: 'square'   }, // 第二層
-            'phone':     { src: '../image/phone.webp',                type: 'portrait' }  // 第一層
+            'turtle':    { src: '../image/end3/turtle-shell.webp', type: 'portrait' },
+            'newspaper': { src: '../image/newspaper.webp',      type: 'portrait' },
+            'mirror':    { src: '../image/end2/mirror.webp',       type: 'portrait' },
+            'lcd':       { src: '../image/end1/lcd-monitor.webp',  type: 'square'   },
+            'phone':     { src: '../image/phone.webp',             type: 'portrait' }
         };
 
         function updateImageSource() {
@@ -162,14 +202,21 @@
             img.src = (window.innerHeight > window.innerWidth) ? mobileImg : pcImg;
         }
 
-        // 💡 處理點擊彈出特寫
         function handleDetailPopup(key) {
             const asset = detailAssets[key];
             const overlay = document.getElementById('detail-overlay');
             const detailImg = document.getElementById('detail-img');
+            const newsExtras = document.getElementById('newspaper-extras');
 
             detailImg.src = asset.src;
             detailImg.className = (asset.type === 'portrait') ? 'img-portrait' : 'img-square';
+            
+            // 💡 判斷是否為報紙，顯示專屬 UI
+            if (key === 'newspaper') {
+                newsExtras.style.display = 'block';
+            } else {
+                newsExtras.style.display = 'none';
+            }
             
             overlay.style.display = 'flex';
             setTimeout(() => overlay.classList.add('show'), 10);
@@ -178,7 +225,7 @@
         function closeDetail() {
             const overlay = document.getElementById('detail-overlay');
             overlay.classList.remove('show');
-            setTimeout(() => overlay.style.display = 'none', 500);
+            setTimeout(() => overlay.style.display = 'none', 400);
         }
 
         updateImageSource();
