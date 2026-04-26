@@ -10,14 +10,23 @@
     100% { transform: translateX(-100%); }
 }
 
-.animate-pop { display: inline-block; animation: number-pop 0.3s ease-out; }
+/* Tailwind 可能沒抓到的動畫 class */
+.animate-marquee {
+    animation: scroll 25s linear infinite;
+}
+
+.animate-pop { 
+    display: inline-block; 
+    animation: number-pop 0.3s ease-out; 
+}
 
 /* --- 2. 核心底色與字體 --- */
 body { 
     font-family: 'Noto Serif TC', serif; 
-    background-color: #8e8271; /* 總監指定色 */
+    background-color: #8e8271; /* 總監指定：復古咖啡色 */
     color: #1a1816;           
     margin: 0;
+    overflow-x: hidden; /* 防止滾動條跑出來 */
     -webkit-font-smoothing: antialiased;
 }
 
@@ -34,18 +43,22 @@ body {
 
 .status-content { 
     display: inline-block; 
-    animation: scroll 25s linear infinite; 
-    will-change: transform; /* 🚀 提升滾動流暢度 */
+    will-change: transform; 
 }
 
-/* --- 4. 主視覺區塊 (修正重點) --- */
+/* --- 4. 主視覺區塊 (穩定修復) --- */
 .hero-banner {
-    background-color: transparent; 
+    /* 💡 改進：預設一個跟背景圖相近的底色，防止圖片載入前的白閃 */
+    background-color: #8e8271; 
     background-repeat: no-repeat;
     background-position: center center;
-    background-size: cover; /* 💡 確保圖片不管手機電腦都能填滿 */
-    transition: background-image 0.5s ease-in-out; /* 💡 切換圖片時有微微的淡入感 */
-    min-height: 500px; /* 確保沒圖時也有高度 */
+    background-size: cover;
+    transition: background-image 0.8s ease-in-out; /* 讓換圖更絲滑 */
+    min-height: 80vh; /* 增加高度感 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .tracking-widest-custom { 
@@ -54,21 +67,30 @@ body {
 
 /* --- 5. 搜尋功能區塊 --- */
 .search-container {
-    background-color: #f0eee9; 
+    background-color: rgba(240, 238, 233, 0.9); /* 帶一點點透明度 */
     border: 1px solid #4a443e;
-    backdrop-filter: blur(5px); /* 加一點點朦朧美 */
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease;
 }
 
+/* 讓搜尋框在手機上不要太擠 */
+#trackInput {
+    background: transparent;
+    border: none;
+}
+
+/* 自定義按鈕 */
 .custom-btn {
     background-color: #3d3832;
     color: #d9d4cc;
     border-bottom: 2px solid #2a2623;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
 }
 
 .custom-btn:hover {
     background-color: #4a443e;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 /* --- 6. 搜尋結果顯示區 --- */
@@ -77,17 +99,29 @@ body {
     margin-top: 2rem;
     padding: 1.5rem;
     border-left: 4px solid #4a443e;      
-    background: rgba(245, 242, 237, 0.95); 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+    background: rgba(245, 242, 237, 0.98); 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
     color: #2c2621;                      
-    border-radius: 0 4px 4px 0; /* 讓邊緣圓潤一點 */
+    border-radius: 0 8px 8px 0;
+    max-width: 600px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* 📱 手機版微調：確保搜尋結果不會被切掉 */
+/* 📱 手機版微調 */
 @media (max-width: 768px) {
+    .hero-banner {
+        min-height: 60vh;
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
     #search-result {
-        padding: 1rem;
+        padding: 1.2rem;
         font-size: 14px;
-        line-height: 1.6;
+        line-height: 1.8;
+    }
+    .status-bar {
+        font-size: 9px;
     }
 }

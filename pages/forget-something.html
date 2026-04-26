@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>歸心物流 - 忘了什麼嗎？</title>
-    <link rel="icon" href="image/GUIXIN.webp" type="image/webp">
+    <link rel="icon" href="../image/GUIXIN.webp" type="image/webp">
     <style>
         body, html {
             margin: 0; padding: 0;
@@ -15,97 +15,99 @@
             font-family: "Noto Sans TC", sans-serif;
         }
 
-        /* 導航欄 */
+        /* 導航欄 - 修正模糊與層級 */
         .header-bar {
             position: fixed; top: 0; left: 0; width: 100%;
-            padding: 1rem 5%;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px) brightness(0.6);
-            -webkit-backdrop-filter: blur(15px) brightness(0.6);
+            padding: 1.2rem 5%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex; justify-content: space-between; align-items: center;
-            box-sizing: border-box; z-index: 1000;
-            pointer-events: none; 
+            box-sizing: border-box; z-index: 2000;
         }
 
         .header-bar a {
-            pointer-events: auto;
             color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
-            font-size: 1rem; letter-spacing: 0.3em;
+            font-size: 0.9rem; letter-spacing: 0.2em;
+            transition: opacity 0.3s;
         }
+
+        .header-bar a:hover { opacity: 0.7; }
 
         .scene-wrapper {
             flex: 1;
             display: flex; justify-content: center; align-items: center;
-            position: relative; width: 100%; height: 100%;
+            position: relative; width: 100%; height: 100vh;
+            background: #000;
         }
 
         .scene-container {
             position: relative;
-            width: 100vw; height: 56.25vw; /* 桌機預設 16:9 */
+            /* 💡 修正：確保容器比例在手機上正確 */
+            width: 100vw; height: 56.25vw; 
             max-height: 100vh; max-width: 177.78vh;
-            overflow: visible !important;
         }
 
         .scene-img {
             width: 100%; height: 100%;
-            object-fit: cover;
+            object-fit: contain; /* 確保圖片不被切掉 */
             display: block;
+            background: #000;
         }
 
-        /* 互動點樣式 */
+        /* 互動點 */
         .hotspot {
             position: absolute;
             cursor: pointer;
             border-radius: 50%;
-            background: radial-gradient(circle at center, rgba(0, 255, 120, 0.6) 0%, transparent 80%);
+            background: radial-gradient(circle at center, rgba(0, 255, 120, 0.4) 0%, transparent 70%);
             transition: 0.4s;
-            filter: blur(10px);
+            filter: blur(5px);
             transform: translate(-50%, -50%);
             z-index: 500;
-            opacity: 0.1;
+            opacity: 0.3;
             animation: pulse 3s infinite ease-in-out;
         }
 
         /* [💻 桌機版座標 ] */
-        #turtle-shell { width: 18%; height: 22%; left: 11.5%; top: 69%; }
-        #newspaper    { width: 15%; height: 20%; left: 10%; top: 86%; }
-        #crt-monitor  { width: 10%; height: 14%; left: 24%; top: 77.5%; }
-        #lcd-monitor  { width: 12%; height: 18%; left: 84.5%; top: 61.5%; }
-        #phone-screen { width: 6%;  height: 12%; left: 92.5%; top: 66%; }
+        #turtle-shell { width: 10%; height: 15%; left: 11.5%; top: 69%; }
+        #newspaper    { width: 12%; height: 15%; left: 10%; top: 86%; }
+        #crt-monitor  { width: 8%; height: 10%; left: 24%; top: 77.5%; }
+        #lcd-monitor  { width: 10%; height: 15%; left: 84.5%; top: 61.5%; }
+        #phone-screen { width: 5%; height: 8%; left: 92.5%; top: 66%; }
 
-        /* [📱 手機版 RWD 容器修正] */
+        /* [📱 手機版 RWD ] */
         @media (max-aspect-ratio: 1/1) {
             .scene-container {
                 width: 100vw; 
-                height: 177.78vw; /* 直向比例 */
-                max-height: 80vh;
+                height: 177.78vw; /* 9:16 比例 */
             }
-            /* 手機熱點 */
-            #turtle-shell { width: 25%; height: 12%; left: 28%; top: 68%; }
-            #newspaper    { width: 22%; height: 10%; left: 25%; top: 85%; }
-            #crt-monitor  { width: 18%; height: 8%;  left: 45%; top: 75%; }
-            #lcd-monitor  { width: 22%; height: 12%; left: 75%; top: 58%; }
-            #phone-screen { width: 15%; height: 10%; left: 85%; top: 62%; }
+            /* 手機版熱點微調 */
+            #turtle-shell { width: 20%; height: 10%; left: 28%; top: 68%; }
+            #newspaper    { width: 20%; height: 10%; left: 25%; top: 85%; }
+            #crt-monitor  { width: 15%; height: 8%;  left: 45%; top: 75%; }
+            #lcd-monitor  { width: 20%; height: 10%; left: 75%; top: 58%; }
+            #phone-screen { width: 12%; height: 8%; left: 85%; top: 62%; }
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 0.05; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 0.2; transform: translate(-50%, -50%) scale(1.1); }
+            0%, 100% { opacity: 0.1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.2); }
         }
     </style>
 </head>
 <body>
 
     <nav class="header-bar">
-        <a href="forget-something.html" class="logo-text">歸心物流 | 失物招領處</a>
-        <a href="index.html" class="logo-text" style="font-size: 0.7rem; opacity: 0.5;">回 到 首 頁</a>
+        <a href="forget-something.html">歸心物流 | 失物招領處</a>
+        <a href="../index.html" style="font-size: 0.75rem; color: #aaa;">回到首頁</a>
     </nav>
 
     <div class="scene-wrapper">
         <div class="scene-container">
-            <img id="main-scene" src="image/forget-something.webp" class="scene-img" alt="Warehouse">
+            <img id="main-scene" src="" class="scene-img" alt="Warehouse">
             
             <div class="hotspot" id="turtle-shell" onclick="alert('烏...烏龜的殼??')"></div>
             <div class="hotspot" id="newspaper" onclick="alert('這些報紙似乎來自不同的時空。')"></div>
@@ -116,21 +118,25 @@
     </div>
 
     <script>
-        // 🚀 自動換圖腳本
         function updateImageSource() {
             const img = document.getElementById('main-scene');
-            // 如果螢幕高度大於寬度 (直向手機)
+            if (!img) return;
+
+            // 💡 關鍵修正：因為是在 pages 資料夾，所以圖檔路徑要加 ../
+            const pcImg = "../image/forget-something.webp";
+            const mobileImg = "../image/forget-something-m.webp";
+
             if (window.innerHeight > window.innerWidth) {
-                img.src = "image/forget-something-m.webp";
+                img.src = mobileImg;
             } else {
-                img.src = "image/forget-something.webp";
+                img.src = pcImg;
             }
         }
 
-        // 初始化檢查一次
+        // 初始化並監聽縮放
         updateImageSource();
-        // 螢幕轉動或縮放時再檢查
         window.addEventListener('resize', updateImageSource);
+        window.addEventListener('orientationchange', updateImageSource);
 
         function triggerGlitch() {
             alert('訊息顯示：妳以為妳逃掉了嗎？');
