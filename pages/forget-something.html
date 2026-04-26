@@ -172,7 +172,7 @@
     transition: transform 0.2s, opacity 0.2s;
     opacity: 0.8;
         }
-        
+
         .nav-btn:hover {
     opacity: 1;
     transform: scale(1.1);
@@ -199,10 +199,24 @@
         }
 
         .page-content {
-            color: white; text-align: center; font-size: 1.1rem;
-            text-shadow: 0 0 10px rgba(0,0,0,0.8);
-            letter-spacing: 0.1em;
-        }
+    color: white;
+    text-align: center;
+    
+    /* 1. 字體大小設定在這裡 */
+    font-size: 0.8rem;      /* 💡 稍微縮小一點（原為 1.1rem），增加精緻感 */
+    line-height: 1.4;        /* 設定行高，讓多行字時不會太擠 */
+    
+    /* 2. 固定高度：這是防止按鈕被往上擠的關鍵 */
+    height: 2.8em;           /* 💡 固定兩行字的高度，多出來的字會藏起來 */
+    overflow: hidden;        /* 💡 萬一字太多，也不准撐開容器 */
+    
+    text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    letter-spacing: 0.1em;
+    pointer-events: none;
+    
+    /* 3. 與上方圈圈的間距 */
+    margin-top: 5px; 
+}
 
         .close-btn {
             position: absolute; top: 20px; right: 20px;
@@ -261,16 +275,16 @@
         let currentPage = 0;
         const totalPages = 10;
         const pageTexts = [
-            "第一頁：自白時報 - 創刊號",
-            "第二頁：那晚的風，吹開了塵封的箱子...",
-            "第三頁：物流單上的名字，漸漸滲出了血跡。",
-            "第四頁：誰在天花板上行走？",
-            "第五頁：不要打開那個紅色信封。",
-            "第六頁：銅鏡裡的妳，真的在笑嗎？",
-            "第七頁：歸心物流，歸的是誰的心？",
-            "第八頁：失物招領：一隻斷掉的手錶。",
-            "第九頁：影子在燈光下慢慢剝離。",
-            "第十頁：真相，就在妳身後。"
+            "第一頁：自自自自自自自自",
+            "第二頁：自自自自自自自自自",
+            "第三頁：自自自自自自自自自自",
+            "第四頁：自自自自自自自自自自自",
+            "第五頁：自自自自自自自自自自自自",
+            "第六頁：自自自自自自自自自自自自自",
+            "第七頁：自自自自自自自自自自自自自自",
+            "第八頁：自自自自自自自自自自自自自自自",
+            "第九頁：自自自自自自自自自自自自自自自自",
+            "第十頁：自自自自自自自自自自自自自自自自自"
         ];
 
         function updateImageSource() {
