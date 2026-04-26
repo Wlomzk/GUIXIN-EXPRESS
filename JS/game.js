@@ -77,3 +77,22 @@ function showPage(pageName) {
     // 4. 自動捲動回頂端，才不會換頁後卡在中間
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+window.toggleMenu = function() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu) {
+        mobileMenu.classList.toggle('translate-x-full');
+        mobileMenu.classList.toggle('translate-x-0');
+    }
+};
+
+// 等網頁載入完後，綁定點擊事件
+document.addEventListener('DOMContentLoaded', () => {
+    const menuBtn = document.getElementById('mobile-menu-button');
+    const closeBtn = document.getElementById('close-menu');
+    const overlay = document.getElementById('menu-overlay');
+
+    if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
+    if (closeBtn) closeBtn.addEventListener('click', toggleMenu);
+    if (overlay) overlay.addEventListener('click', toggleMenu);
+});

@@ -20,9 +20,7 @@
     <nav class="px-6 py-0.5 md:px-16 md:py-1 flex justify-between items-center bg-white/60 backdrop-blur-md shadow-sm sticky top-0 z-50">
     
     <div class="flex items-center space-x-2 md:space-x-3 cursor-pointer" onclick="showPage('home')">
-        <img src="image/GUIXIN.webp" alt="歸心物流 Logo" 
-             class="w-16 h-16 md:w-20 md:h-20 object-contain transition-transform hover:scale-105">
-        
+        <img src="image/GUIXIN.webp" alt="歸心物流 Logo" class="w-16 h-16 md:w-20 md:h-20 object-contain transition-transform hover:scale-105">
         <div class="flex flex-col border-l-2 border-stone-300 pl-3 md:pl-4">
             <span class="text-xl md:text-3xl font-semibold tracking-widest text-stone-800 leading-tight" style="font-family: 'Noto Serif TC', serif;">歸心物流</span>
             <span class="text-[10px] md:text-[12px] uppercase opacity-60 tracking-[0.4em] text-stone-600 leading-none">Guixin Express</span>
@@ -33,10 +31,28 @@
         <a href="javascript:void(0)" onclick="showPage('services')" class="hover:text-stone-900 transition-colors">服務項目</a>
         <a href="javascript:void(0)" onclick="showPage('locations')" class="hover:text-stone-900 transition-colors">配送據點</a>
         <a href="pages/forget-something.html" class="hover:text-stone-900 transition-colors">失物招領處</a>
-        
-        <a href="login.html" class="text-[12px] tracking-[0.2em] bg-[#3d3832] text-[#d9d4cc] px-6 py-1.5 rounded border-b-2 border-[#2a2623] shadow-md hover:bg-[#2d2825] transition-all ml-2">
-            加盟登入
-        </a>
+        <a href="login.html" class="text-[12px] tracking-[0.2em] bg-[#3d3832] text-[#d9d4cc] px-6 py-1.5 rounded border-b-2 border-[#2a2623] shadow-md hover:bg-[#2d2825] transition-all ml-2">加盟登入</a>
+    </div>
+
+    <div class="md:hidden flex items-center">
+        <button id="mobile-menu-button" class="text-stone-800 focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <div id="mobile-menu" class="fixed inset-0 z-[60] transform translate-x-full transition-transform duration-300 ease-in-out md:hidden">
+        <div class="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" id="menu-overlay"></div>
+        <div class="absolute right-0 top-0 h-full w-64 bg-white/95 shadow-xl flex flex-col p-8 space-y-8 tracking-[0.2em]">
+            <button id="close-menu" class="self-end text-stone-500">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <a href="javascript:void(0)" onclick="toggleMenu(); showPage('services')" class="text-stone-800 text-lg border-b border-stone-100 pb-2">服務項目</a>
+            <a href="javascript:void(0)" onclick="toggleMenu(); showPage('locations')" class="text-stone-800 text-lg border-b border-stone-100 pb-2">配送據點</a>
+            <a href="pages/forget-something.html" class="text-stone-800 text-lg border-b border-stone-100 pb-2">失物招領處</a>
+            <a href="login.html" class="bg-[#3d3832] text-[#d9d4cc] px-4 py-3 rounded text-center shadow-lg mt-4">加盟登入</a>
+        </div>
     </div>
 </nav>
 
