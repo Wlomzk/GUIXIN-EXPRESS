@@ -117,7 +117,9 @@
             display: none;
             width: 64%; height: 70%; 
             top: 18%; left: 18%;
-            
+            border-radius: 20px; /* 💡 微微的倒角，看起來更有層次感 */
+    overflow: hidden;
+
             background: radial-gradient(
         circle, 
         rgba(255, 255, 255, 0.15) 0%, 
@@ -165,7 +167,16 @@
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));
             transition: transform 0.2s;
             pointer-events: auto;
+            border-radius: 4px;  /* 💡 雖然是三角形，但微圓角可以讓頂點看起來不那麼刺 */
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));
+    transition: transform 0.2s, opacity 0.2s;
+    opacity: 0.8;
         }
+        
+        .nav-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
         .nav-btn:active { transform: scale(0.9); }
         .btn-left { border-right: 25px solid rgba(148, 76, 13, 0.9); margin-right: 10px; }
         .btn-right { border-left: 25px solid rgba(148, 76, 13, 0.9); margin-left: 10px; }
