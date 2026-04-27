@@ -8,16 +8,24 @@
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #000; display: flex; flex-direction: column; overflow: hidden; font-family: "Noto Sans TC", sans-serif; }
     .header-bar {
-    position: fixed; top: 0; left: 0; width: 100%;
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%;
     padding: 1.2rem 5%;
-    /* 核心：背景色一定要有透明度 (0.7)，毛玻璃才透得過去 */
-    background: rgba(0, 0, 0, 0.7); 
-    /* 核心：這兩行是靈魂 */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px); 
+    /* 1. 背景色調亮一點點，並保持 0.6 的透明度 */
+    background: rgba(25, 25, 25, 0.6) !important; 
+    /* 2. 毛玻璃的核心：模糊數值不用太大，但要確保後方有東西 */
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important; 
+    /* 3. 增加一條細細的邊框，加強「玻璃」邊界感 */
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex; justify-content: space-between; align-items: center;
-    box-sizing: border-box; z-index: 2000;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    box-sizing: border-box; 
+    /* 4. 確保它在最上層 */
+    z-index: 5000 !important; 
 }
         .header-bar a { color: rgba(255, 255, 255, 0.9); text-decoration: none; font-size: 0.9rem; letter-spacing: 0.2em; }
         .scene-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; width: 100%; height: 100vh; }
@@ -55,7 +63,7 @@
         
         /* --- 彩蛋組座標：每一頁的圖片與文字偏移 --- */
         #group-1 { top: 3%; left: -1%; width: 50%; height: 23%; }
-        #egg-desc-1 { position: absolute; top: 5%; left: 107%; width: 116px; height: 117px; }
+        #egg-desc-1 { position: absolute; top: 5%; left: 107%; width: 116px; height: 77px; }
         #group-2 { top: 28%; left: 50%; width: 48%; height: 30%; }
         #egg-desc-2 { position: absolute; top: 107%; left: 11%; width: 100px; height: 57px; }
         #group-3 { top: 28%; left: -5%; width: 50%; height: 20%; }
