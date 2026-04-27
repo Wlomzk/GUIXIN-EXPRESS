@@ -98,68 +98,153 @@
 }
 
         .egg-layout {
-            display: flex; flex-direction: column; gap: 22px; width: 90%; height: 78%; margin: 15px auto 0;
-        }
+    position: relative; 
+    width: 100%; 
+    height: 100%; 
+    margin: 0;
+    /* 移除 flex，讓小孩自由飛翔 */
+}
 
-        .row-large { display: flex; gap: 15px; height: 38%; }
-        .row-small-1 { display: flex; gap: 15px; height: 22%; align-items: center; }
-        .row-small-2 { 
-            display: flex; gap: 15px; height: 18%; align-items: center;
-            width: 105%; margin-left: -5%; 
-        }
-
-        .egg-box { 
-            background: #000; border-radius: 4px; overflow: hidden;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 2px 2px 8px rgba(0,0,0,0.4);
-            filter: grayscale(0.2); transition: opacity 0.3s ease;
-        }
-        .egg-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        
-       .egg-desc {
-    flex: 1;
+/* --- 彩蛋小組：每一組包含一個圖和一個文 --- */
+.egg-group {
+    position: absolute;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    padding: 12px;
-    text-align: center;
+    flex-direction: column; /* 預設文字在圖片下面，如果想左右排再改 */
+    gap: 8px;
+    z-index: 3020;
+}
+
+/* 🚀 把拔！這裡就是你手動調整位置的地方 (Top, Left, Width, Height) */
+/* 你可以根據報紙上的位置，一組一組微調 */
+#group-1 { top: 3%; left: -1%; width: 50%; height: 23%; }
+#egg-desc-1 {
+    position: absolute; /* 關鍵：脫離圖片的束縛 */
+    top: 5%;             /* 相對於 group-1 的頂部距離 超過100就是圖片上面 -100即是下面 */
+    left: 105%;         /* 超過100就是圖片右邊 -100即是左邊 */
+    width: 100px;       /* 這裡可以單獨設定文字方塊的寬度 */
+    height: 60px;       /* 這裡可以單獨設定文字方塊的寬高度 */
+}
+#group-2 { top: 28%; left: 50%; width: 48%; height: 30%; }
+#egg-desc-2 {
+    position: absolute;
+    top: 105%;           
+    left: 2%;       
+    width: 100px;
+    height: 40px;
+}
+#group-3 { top: 28%; left: -5%; width: 50%; height: 20%; }
+#egg-desc-3 {
+    position: absolute;
+    top: 105%;          
+    left: 5%;
+    width: 80%; 
+    height: 80px;       
+}
+
+/* --- 圖片框：現在它是依照 Group 的寬度自動撐開 --- */
+.egg-box { 
+    width: 100%; 
+    height: 100%; /* 你也可以固定高度，例如 150px */
+    background: #000; 
+    border-radius: 4px; 
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    transition: opacity 0.3s ease;
+}
+
+.egg-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* --- 文字說明：現在它會跟著圖片跑 --- */
+.egg-desc {
+    position: absolute; /* 變成自由身！ */
+    /* 下面這些數值是「相對於整個報紙」的位置 */
+    top: 50px; 
+    left: 120%; /* 舉例：這會讓它出現在圖片組的右邊外面 */
+    width: 200px; /* 固定寬度比較好控制排版 */
+    
+    /* 原有的美化樣式保留 */
+    padding: 8px;
     color: #f0eada;
-    
-    /* 1. 背景色要「淡」一點，模糊才明顯 (0.45 剛好) */
-    background: rgba(20, 15, 10, 0.45); 
-    
-    /* 2. 毛玻璃效果 (20px 就非常糊了，50px 會變彩色雲霧) */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px); 
-    
-    /* 3. 加上一個細微的亮邊，能幫文字從背景跳出來 */
+    background: rgba(20, 15, 10, 0.6); 
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); 
     border: 1px solid rgba(255, 255, 255, 0.1);
-    
-    /* 4. 確保文字陰影夠重，防止被背景雜色干擾 */
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    font-size: 0.8rem;
+    border-radius: 4px;
+    z-index: 3021;
 }
 
         .pagination-container {
-            position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%);
-            width: 85%; display: flex; flex-direction: column; align-items: center;
-            pointer-events: none; background: rgba(0, 0, 0, 0.5);
-            padding: 10px 0; border-radius: 12px; backdrop-filter: blur(5px);
-        }
+    position: absolute; 
+    bottom: 3%; 
+    left: 50%; 
+    transform: translateX(-50%);
+    width: 85%; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
+    pointer-events: none; 
+    
+    /* 這裡改成透明，並移除毛玻璃 */
+    background: transparent; 
+    padding: 10px 0; 
+    border-radius: 0; 
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
 
         .controls-row { width: 100%; display: flex; justify-content: space-between; align-items: center; pointer-events: auto; }
-        .nav-btn { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; cursor: pointer; opacity: 0.8; transition: 0.2s; }
-        .btn-left { border-right: 25px solid rgba(148, 76, 13, 0.9); }
-        .btn-right { border-left: 25px solid rgba(148, 76, 13, 0.9); }
+        .nav-btn { 
+    width: 0; 
+    height: 0; 
+    border-top: 10px solid transparent; 
+    border-bottom: 10px solid transparent; 
+    cursor: pointer; 
+    opacity: 0.8; 
+    transition: 0.2s; 
+    /* 增加發光與陰影，確保在白報紙上被看到 */
+    filter: drop-shadow(0px 0px 3px rgba(0,0,0,0.8)); 
+}
+        .btn-left { border-right: 25px solid rgba(180, 100, 20, 1); }
+.btn-right { border-left: 25px solid rgba(180, 100, 20, 1); }
 
         .dot-wrapper { flex: 1; display: flex; justify-content: space-evenly; align-items: center; margin: 0 15px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); cursor: pointer; }
-        .dot.active { background: #f0eada; box-shadow: 0 0 8px #f0eada; }
+        .dot { 
+    width: 8px; 
+    height: 8px; 
+    border-radius: 50%; 
+    background: rgba(0, 0, 0, 0.5); /* 沒選中時深色一點 */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer; 
+}
+        .dot.active { 
+    background: #f0eada; 
+    box-shadow: 0 0 12px #f0eada; 
+    border: none;
+}
 
         .page-content {
-            color: #f0eada; text-align: center; font-size: 0.85rem; height: 2.8em; 
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden; margin-top: 8px; width: 100%;
-        }
+    color: #f0eada; 
+    text-align: center; 
+    font-size: 1rem; /* 稍微放大一點點，更有氣勢 */
+    font-weight: bold;
+    height: 2.8em; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    overflow: hidden; 
+    margin-top: 8px; 
+    width: 100%;
+    
+    /* 🚀 核心：強大的四向文字陰影，確保文字「浮」在報紙上 */
+    text-shadow: 
+        1px 1px 2px #000, 
+        -1px -1px 2px #000, 
+        1px -1px 2px #000, 
+        -1px 1px 2px #000,
+        0px 0px 10px rgba(0,0,0,0.8);
+}
 
         .close-btn { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 2.5rem; cursor: pointer; z-index: 3100; }
     </style>
@@ -188,19 +273,21 @@
             <img id="detail-img" src="" alt="Detail View">
             <div id="newspaper-extras" class="newspaper-ui">
                 <div class="egg-layout">
-                    <div class="row-large">
-                        <div class="egg-box" style="flex: 2;"><img id="egg-img-1" src=""></div>
-                        <div class="egg-desc" id="egg-desc-1">預留說明</div>
-                    </div>
-                    <div class="row-small-1">
-                        <div class="egg-desc" id="egg-desc-2">預留說明</div>
-                        <div class="egg-box" style="flex: 1; height: 100%;"><img id="egg-img-2" src=""></div>
-                    </div>
-                    <div class="row-small-2">
-                        <div class="egg-box" style="flex: 0.8; height: 100%;"><img id="egg-img-3" src=""></div>
-                        <div class="egg-desc" id="egg-desc-3" style="text-align: left;">預留說明</div>
-                    </div>
-                </div>
+    <div class="egg-group" id="group-1">
+        <div class="egg-box"><img id="egg-img-1" src=""></div>
+        <div class="egg-desc" id="egg-desc-1">預留說明 1</div>
+    </div>
+
+    <div class="egg-group" id="group-2">
+        <div class="egg-box"><img id="egg-img-2" src=""></div>
+        <div class="egg-desc" id="egg-desc-2">預留說明 2</div>
+    </div>
+
+    <div class="egg-group" id="group-3">
+        <div class="egg-box"><img id="egg-img-3" src=""></div>
+        <div class="egg-desc" id="egg-desc-3">預留說明 3</div>
+    </div>
+</div>
                 <div class="pagination-container">
                     <div class="controls-row">
                         <div class="nav-btn btn-left" onclick="changePage(-1)"></div>
@@ -227,7 +314,7 @@
         
         // 🚀 把拔，這裡就是你要預留填空的所有頁面，資料完全補齊了！
         const pageData = [
-            { text: "第一頁：自自自自自自自自", eggImgs: ["","",""], eggDescs: ["大塊的描述在此","細節 A","細節 B"] },
+            { text: "第一頁：自自自自自自自自", eggImgs: ["","",""], eggDescs: ["大塊的標題","右邊的標題","左邊的標題"] },
             { text: "第二頁：自自自自自自自自自", eggImgs: ["","",""], eggDescs: ["這頁的主線索","細節 C","細節 D"] },
             { text: "第三頁：自自自自自自自自自自", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
             { text: "第四頁：自自自自自自自自自自自", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
