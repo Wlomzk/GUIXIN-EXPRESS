@@ -38,7 +38,9 @@
         #lcd-monitor { width: 10%; height: 15%; left: 84.5%; top: 61.5%; } 
         #phone-screen { width: 5%; height: 8%; left: 92.5%; top: 66%; }
 
-        /* 【重要】手機版樣式修正 (max-aspect-ratio: 1/1) */
+        /* ============================================================
+           【手機版專屬樣式區塊】 (max-aspect-ratio: 1/1)
+           ============================================================ */
         @media (max-aspect-ratio: 1/1) { 
             .scene-container { width: 100vw; height: 177.78vw; } 
             #turtle-shell { width: 20%; height: 10%; left: 13%; top: 74%; } 
@@ -47,26 +49,27 @@
             #lcd-monitor { width: 17%; height: 9%; left: 85%; top: 67%; } 
             #phone-screen { width: 7%; height: 4%; left: 76%; top: 73%; } 
 
-            /* 手機版報紙 UI 範圍重新定位 */
+            /* 手機版報紙 UI 座標覆蓋 */
             .newspaper-ui {
-                width: 80% !important;
-                height: 70% !important;
-                left: 10% !important;
-                top: 15% !important;
+                width: 89% !important;
+                height: 74% !important;
+                left: 6% !important;
+                top: 18% !important;
             }
 
-            /* 手機版各組內容座標對齊報紙欄位 */
-            #group-1 { top: 0%; left: 0%; width: 50%; height: 25%; }
-            #egg-desc-1 { top: 5%; left: 105%; width: 100px; height: auto; }
+            /* 手機版內容組座標覆蓋 */
+            #group-1 { top: 1% !important; left: -1% !important; width: 52% !important; height: 24% !important; }
+            #egg-desc-1 { top: 5% !important; left: 105% !important; width: 150px !important; height: 110px !important; }
 
-            #group-2 { top: 32%; left: 45%; width: 55%; height: 28%; }
-            #egg-desc-2 { top: 105%; left: 0%; width: 100%; height: auto; }
+            /* 修正：把中右圖組縮回去 (不動原本的 top/left/width) */
+            #group-2 { top: 32% !important; left: 51% !important; width: 45% !important; height: 30% !important; }
+            #egg-desc-2 { top: 107% !important; left: 4% !important; width:82% !important; height: 43% !important; }
 
-            #group-3 { top: 32%; left: -8%; width: 50%; height: 20%; }
-            #egg-desc-3 { top: 105%; left: 10%; width: 80%; height: auto; }
+            #group-3 { top: 33% !important; left: -3% !important; width: 48% !important; height: 20% !important; }
+            #egg-desc-3 { top: 110% !important; left: 1% !important; width: 80% !important; height: 80% !important; }
 
             .pagination-container { bottom: 5% !important; }
-            .page-content { font-size: 0.9rem; }
+            .page-content { font-size: 0.9rem !important; }
         }
 
         /* Overlay 與 詳解視圖 */
@@ -83,7 +86,7 @@
             .pagination-container { bottom: 11%; }
         }
 
-        /* 報紙內容元件 (預設) */
+        /* 報紙內容元件 (預設/電腦版) */
         .egg-layout { position: relative; width: 100%; height: 100%; }
         .egg-group { position: absolute; display: flex; flex-direction: column; gap: 8px; z-index: 3020; }
         #group-1 { top: 3%; left: -1%; width: 50%; height: 23%; } 
