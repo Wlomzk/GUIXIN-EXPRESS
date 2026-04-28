@@ -1,218 +1,443 @@
 <!DOCTYPE html>
+
 <html lang="zh-TW">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>歸心物流 - 失物招領處</title>
+
     <link rel="icon" href="../image/GUIXIN.webp" type="image/webp">
+
     <style>
+
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #000; display: flex; flex-direction: column; overflow: hidden; font-family: "Noto Sans TC", sans-serif; }
-        
-        .header-bar {
-            position: fixed; top: 0; left: 0; width: 100%; padding: 1.2rem 5%;
-            background: rgba(25, 25, 25, 0.6);
-            backdrop-filter: blur(35px);
-            -webkit-backdrop-filter: blur(35px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex; justify-content: space-between; align-items: center;
-            box-sizing: border-box; z-index: 2500;
-        }
+
+    .header-bar {
+
+    position: fixed; 
+
+    top: 0; 
+
+    left: 0; 
+
+    width: 100%;
+
+    padding: 1.2rem 5%;
+
+    /* 1. 背景色調亮一點點，並保持 0.6 的透明度 */
+
+    background: rgba(25, 25, 25, 0.6) !important; 
+
+    /* 2. 毛玻璃的核心：模糊數值不用太大，但要確保後方有東西 */
+
+    backdrop-filter: blur(35px) !important;
+
+    -webkit-backdrop-filter: blur(35px) !important; 
+
+    /* 3. 增加一條細細的邊框，加強「玻璃」邊界感 */
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    display: flex; 
+
+    justify-content: space-between; 
+
+    align-items: center;
+
+    box-sizing: border-box; 
+
+    z-index: 2500 ; 
+
+}
+
         .header-bar a { color: rgba(255, 255, 255, 0.9); text-decoration: none; font-size: 0.9rem; letter-spacing: 0.2em; }
 
         .scene-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; width: 100%; height: 100vh; }
-        .scene-container { position: relative; width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; margin: 0 auto; }
+
+        .scene-container { position: relative; width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; }
+
         .scene-img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
         .hotspot { position: absolute; cursor: pointer; border-radius: 50%; background: radial-gradient(circle, rgba(245, 240, 225, 0.3) 0%, rgba(200, 190, 170, 0.08) 100%); transition: all 0.3s ease; filter: blur(6px); transform: translate(-50%, -50%); z-index: 500; opacity: 0.2; animation: pulse 3s infinite ease-in-out; }
+
         
+
+        /* --- 座標微調區：把拔你表演 F12 的舞台 --- */
+
         #turtle-shell { width: 10%; height: 15%; left: 11.5%; top: 69%; }
+
         #newspaper    { width: 12%; height: 15%; left: 10%; top: 86%; }
+
         #mirror       { width: 11%; height: 26%; left: 32%; top: 56.5%; }
+
         #lcd-monitor  { width: 10%; height: 15%; left: 84.5%; top: 61.5%; }
+
         #phone-screen { width: 5%; height: 8%; left: 92.5%; top: 66%; }
 
+
+
         @media (max-aspect-ratio: 1/1) {
+
             .scene-container { width: 100vw; height: 177.78vw; }
+
             #turtle-shell { width: 20%; height: 10%; left: 13%; top: 74%; }
+
             #newspaper    { width: 19%; height: 10%; left: 11%; top: 87%; }
+
             #mirror       { width: 22%; height: 12%; left: 35%; top: 72%; }
+
             #lcd-monitor  { width: 17%; height: 9%; left: 85%; top: 67%; }
+
             #phone-screen { width: 7%; height: 4%; left: 76%; top: 73%; }
+
         }
+
+
 
         @keyframes pulse { 0%, 100% { opacity: 0.1; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.15); } }
 
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: none; justify-content: center; align-items: center; z-index: 3000; opacity: 0; transition: opacity 0.4s ease; }
+
         .overlay.show { display: flex; opacity: 1; }
-        
-        .detail-view { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
-        
-        /* 基礎樣式，具體行為交給 JS 控制 */
-        #detail-img { max-width: 100vw; max-height: 90vh; object-fit: contain; }
+
+        .detail-view { position: relative; display: flex; justify-content: center; align-items: center; }
+
+        .img-portrait { height: 90vh; width: auto; object-fit: contain; }
+
+        .img-square { width: 90vw; height: auto; max-height: 90vh; object-fit: contain; }
+
+
+
+        /* --- 報紙蒐集系統 UI --- */
 
         .newspaper-ui { position: absolute; display: none; width: 64%; height: 75%; top: 16.5%; left: 18%; background: transparent; z-index: 3010; touch-action: pan-y; filter: sepia(0.4) saturate(0.7) brightness(0.8) contrast(0.9); }
+
         .egg-layout { position: relative; width: 100%; height: 100%; margin: 0; }
+
         .egg-group { position: absolute; display: flex; flex-direction: column; gap: 8px; z-index: 3020; }
+
         
+
+        /* --- 彩蛋組座標：每一頁的圖片與文字偏移 --- */
+
         #group-1 { top: 3%; left: -1%; width: 50%; height: 23%; }
+
         #egg-desc-1 { position: absolute; top: 5%; left: 107%; width: 116px; height: 60px; }
+
         #group-2 { top: 28%; left: 50%; width: 48%; height: 30%; }
+
         #egg-desc-2 { position: absolute; top: 107%; left: 7%; width: 100px; height: 45px; }
+
         #group-3 { top: 28%; left: -5%; width: 50%; height: 20%; }
-        #egg-desc-3 { position: absolute; top: 109%; left: 13%; width: 60%; height: 85px; }
+
+        #egg-desc-3 { position: absolute; top: 109%; left: 13%  ; width: 60%; height: 85px; }
+
+
 
         .egg-box { width: 100%; height: 100%; background: #000; border-radius: 4px; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.5); transition: opacity 0.3s ease; }
+
         .egg-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
         .egg-desc { position: absolute; padding: 8px; color: #f0eada; background: rgba(20, 15, 10, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); font-size: 0.8rem; border-radius: 4px; z-index: 3021; }
-        
+
         .pagination-container { position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%); width: 85%; display: flex; flex-direction: column; align-items: center; pointer-events: none; background: transparent; padding: 10px 0; }
+
         .controls-row { width: 100%; display: flex; justify-content: space-between; align-items: center; pointer-events: auto; }
+
         .nav-btn { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; cursor: pointer; opacity: 0.8; transition: 0.2s; filter: drop-shadow(0px 0px 3px rgba(0,0,0,0.8)); }
+
         .btn-left { border-right: 25px solid rgba(180, 100, 20, 1); }
+
         .btn-right { border-left: 25px solid rgba(180, 100, 20, 1); }
+
         .dot-wrapper { flex: 1; display: flex; justify-content: space-evenly; align-items: center; margin: 0 15px; }
+
         .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.3); cursor: pointer; }
+
         .dot.active { background: #f0eada; box-shadow: 0 0 12px #f0eada; border: none; }
+
         .page-content { color: #f0eada; text-align: center; font-size: 1rem; font-weight: bold; height: 2.8em; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-top: 8px; width: 100%; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000, 0px 0px 10px rgba(0,0,0,0.8); }
+
         .close-btn { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 2.5rem; cursor: pointer; z-index: 3100; }
+
     </style>
+
 </head>
+
 <body>
+
     <nav class="header-bar">
+
         <a href="forget-something.html">歸心物流 | 失物招領處</a>
+
         <a href="../index.html" style="font-size: 0.75rem; color: #aaa;">回到首頁</a>
+
     </nav>
 
+
+
     <div class="scene-wrapper">
+
         <div class="scene-container">
+
             <img id="main-scene" src="" class="scene-img" alt="Warehouse">
+
             <div class="hotspot" id="turtle-shell" onclick="handleDetailPopup('turtle')"></div>
+
             <div class="hotspot" id="newspaper" onclick="handleDetailPopup('newspaper')"></div>
+
             <div class="hotspot" id="mirror" onclick="handleDetailPopup('mirror')"></div> 
+
             <div class="hotspot" id="lcd-monitor" onclick="handleDetailPopup('lcd')"></div>
+
             <div class="hotspot" id="phone-screen" onclick="handleDetailPopup('phone')"></div>
+
         </div>
+
     </div>
+
+
 
     <div class="overlay" id="detail-overlay" onclick="closeDetail()">
+
         <div class="close-btn" onclick="closeDetail()">&times;</div>
+
         <div class="detail-view" onclick="event.stopPropagation()">
+
             <img id="detail-img" src="" alt="Detail View">
+
             <div id="newspaper-extras" class="newspaper-ui">
+
                 <div class="egg-layout">
+
                     <div class="egg-group" id="group-1"><div class="egg-box"><img id="egg-img-1" src=""></div><div class="egg-desc" id="egg-desc-1"></div></div>
+
                     <div class="egg-group" id="group-2"><div class="egg-box"><img id="egg-img-2" src=""></div><div class="egg-desc" id="egg-desc-2"></div></div>
+
                     <div class="egg-group" id="group-3"><div class="egg-box"><img id="egg-img-3" src=""></div><div class="egg-desc" id="egg-desc-3"></div></div>
+
                 </div>
+
                 <div class="pagination-container">
+
                     <div class="controls-row">
+
                         <div class="nav-btn btn-left" onclick="changePage(-1)"></div>
+
                         <div class="dot-wrapper" id="dot-wrapper"></div>
+
                         <div class="nav-btn btn-right" onclick="changePage(1)"></div>
+
                     </div>
+
                     <div class="page-content" id="page-content">...</div>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
 
+
+
     <script>
+
+        /* --- 靜態資產定義 --- */
+
         const detailAssets = {
+
             'turtle':    { src: '../image/end3/turtle-shell.webp', type: 'portrait' },
+
             'newspaper': { src: '../image/newspaper.webp',      type: 'portrait' },
+
             'mirror':    { src: '../image/end2/mirror.webp',       type: 'portrait' },
+
             'lcd':       { src: '../image/end1/lcd-monitor.webp',  type: 'square'   },
+
             'phone':     { src: '../image/phone.webp',             type: 'portrait' }
+
         };
 
+
+
         let currentPage = 0;
+
         const totalPages = 10;
+
+        
+
+        /* --- 報紙內容資料庫：把拔之後要在這裡填寫下流的彩蛋路徑 --- */
+
         const pageData = [
-            { text: "第一頁：內文...", eggImgs: ["","",""], eggDescs: ["標題A","標題B","標題C"] },
-            { text: "第二頁：內文...", eggImgs: ["","",""], eggDescs: ["線索1","線索2","線索3"] }
+
+            { text: "第一頁：自自自自自自自自", eggImgs: ["","",""], eggDescs: ["大塊的標題","右邊的標題","左邊的標題"] },
+
+            { text: "第二頁：自自自自自自自自自", eggImgs: ["","",""], eggDescs: ["這頁的主線索","細節 C","細節 D"] },
+
+            { text: "第三頁：自自自...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
+
+            { text: "第四頁：自自自...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
+
+            { text: "第五頁：自自自...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
+
+            { text: "第六頁：自自自...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
+
+            { text: "第七頁：自自自...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
+
+            { text: "第八頁：自自自...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
+
+            { text: "第九頁：自自自...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
+
+            { text: "第十頁：自自自...", eggImgs: ["","",""], eggDescs: ["...","...","..."] }
+
         ];
 
+
+
+        /* --- 系統核心邏輯 --- */
+
         function updateImageSource() {
+
             const img = document.getElementById('main-scene');
+
             if (!img) return;
+
             img.src = (window.innerHeight > window.innerWidth) ? "../image/forget-something-m.webp" : "../image/forget-something.webp";
+
         }
 
+
+
         function initDots() {
+
             const wrapper = document.getElementById('dot-wrapper');
+
             wrapper.innerHTML = '';
+
             for (let i = 0; i < totalPages; i++) {
+
                 const dot = document.createElement('div');
+
                 dot.className = 'dot' + (i === currentPage ? ' active' : '');
+
                 dot.onclick = () => { currentPage = i; renderPage(); };
+
                 wrapper.appendChild(dot);
+
             }
+
         }
+
+
 
         function changePage(step) { currentPage = (currentPage + step + totalPages) % totalPages; renderPage(); }
 
+
+
         function renderPage() {
-            const data = pageData[currentPage] || { text: "...", eggImgs: ["","",""], eggDescs: ["","",""] };
+
+            const data = pageData[currentPage];
+
             document.getElementById('page-content').innerText = data.text;
+
             for(let i=1; i<=3; i++) {
+
                 const imgEl = document.getElementById(`egg-img-${i}`);
+
                 const descEl = document.getElementById(`egg-desc-${i}`);
+
+                const boxEl = imgEl.parentElement;
+
                 const hasImg = data.eggImgs[i-1] && data.eggImgs[i-1] !== "";
+
                 imgEl.src = hasImg ? data.eggImgs[i-1] : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-                imgEl.parentElement.style.opacity = hasImg ? "1" : "0.7";
+
+                boxEl.style.opacity = hasImg ? "1" : "0.7"; // 無圖時透出背景
+
                 descEl.innerText = data.eggDescs[i-1];
+
             }
+
             document.querySelectorAll('.dot').forEach((dot, index) => { dot.classList.toggle('active', index === currentPage); });
+
         }
+
+
 
         function handleDetailPopup(key) {
+
             const asset = detailAssets[key];
+
             const overlay = document.getElementById('detail-overlay');
+
             const detailImg = document.getElementById('detail-img');
+
             const newsExtras = document.getElementById('newspaper-extras');
-            
+
             detailImg.src = asset.src;
 
-            // 核心修正：直接操作 Style 屬性確保優先權，不再依賴 Class 互搶
-            if (key === 'lcd') {
-                detailImg.style.width = "100vw";
-                detailImg.style.height = "auto";
-            } else if (asset.type === 'portrait') {
-                detailImg.style.width = "auto";
-                detailImg.style.height = "90vh";
-            } else {
-                detailImg.style.width = "90vw";
-                detailImg.style.height = "auto";
-            }
+            detailImg.className = (asset.type === 'portrait') ? 'img-portrait' : 'img-square';
 
             if (key === 'newspaper') {
+
                 newsExtras.style.display = 'block';
+
                 initDots(); renderPage();
-            } else { 
-                newsExtras.style.display = 'none'; 
-            }
+
+            } else { newsExtras.style.display = 'none'; }
 
             overlay.style.display = 'flex';
+
             setTimeout(() => overlay.classList.add('show'), 10);
+
         }
+
+
 
         function closeDetail() {
+
             const overlay = document.getElementById('detail-overlay');
+
             overlay.classList.remove('show');
+
             setTimeout(() => { overlay.style.display = 'none'; }, 400);
+
         }
 
+
+
+        /* --- 手機滑動支援 --- */
+
         let touchStartX = 0;
+
         const newspaperUI = document.getElementById('newspaper-extras');
+
         newspaperUI.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
+
         newspaperUI.addEventListener('touchend', e => {
+
             let touchEndX = e.changedTouches[0].screenX;
+
             if (touchEndX < touchStartX - 50) changePage(1);
+
             if (touchEndX > touchStartX + 50) changePage(-1);
+
         }, false);
 
+
+
         updateImageSource();
+
         window.addEventListener('resize', updateImageSource);
+
     </script>
+
 </body>
+
 </html>
