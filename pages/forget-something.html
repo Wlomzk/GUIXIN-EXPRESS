@@ -29,7 +29,7 @@
         .header-bar a { color: rgba(255, 255, 255, 0.9); text-decoration: none; font-size: 0.9rem; letter-spacing: 0.2em; }
         .scene-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; width: 100%; height: 100vh; }
         .scene-container { position: relative; width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; }
-        .scene-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .scene-img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .hotspot { position: absolute; cursor: pointer; border-radius: 50%; background: radial-gradient(circle, rgba(245, 240, 225, 0.3) 0%, rgba(200, 190, 170, 0.08) 100%); transition: all 0.3s ease; filter: blur(6px); transform: translate(-50%, -50%); z-index: 500; opacity: 0.2; animation: pulse 3s infinite ease-in-out; }
         
         /* --- 座標微調區：把拔你表演 F12 的舞台 --- */
@@ -40,7 +40,7 @@
         #phone-screen { width: 5%; height: 8%; left: 92.5%; top: 66%; }
 
         @media (max-aspect-ratio: 1/1) {
-            .scene-container { width: 100vw; height: 177.78vw; }
+            .scene-container { position: relative; width: 100vw; height: 177.78vw; max-height: 100vh; max-width: 100%; }
             #turtle-shell { width: 20%; height: 10%; left: 13%; top: 74%; }
             #newspaper    { width: 19%; height: 10%; left: 11%; top: 87%; }
             #mirror       { width: 22%; height: 12%; left: 35%; top: 72%; }
