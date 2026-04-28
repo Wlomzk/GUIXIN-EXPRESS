@@ -31,13 +31,14 @@
         .puzzle-cell { border: 1px solid rgba(240, 234, 218, 0.5); background: rgba(20, 15, 10, 0.6); transition: all 0.2s; }
         .puzzle-cell:hover { background: rgba(180, 100, 20, 0.5); border-color: #b46414; }
 
-        /* 熱點座標 */
+        /* 熱點座標 (電腦版) */
         #turtle-shell { width: 10%; height: 15%; left: 11.5%; top: 69%; } 
         #newspaper { width: 12%; height: 15%; left: 10%; top: 86%; } 
         #mirror { width: 11%; height: 26%; left: 32%; top: 56.5%; } 
         #lcd-monitor { width: 10%; height: 15%; left: 84.5%; top: 61.5%; } 
         #phone-screen { width: 5%; height: 8%; left: 92.5%; top: 66%; }
 
+        /* 【重要】手機版樣式修正 (max-aspect-ratio: 1/1) */
         @media (max-aspect-ratio: 1/1) { 
             .scene-container { width: 100vw; height: 177.78vw; } 
             #turtle-shell { width: 20%; height: 10%; left: 13%; top: 74%; } 
@@ -45,6 +46,27 @@
             #mirror { width: 22%; height: 12%; left: 35%; top: 72%; } 
             #lcd-monitor { width: 17%; height: 9%; left: 85%; top: 67%; } 
             #phone-screen { width: 7%; height: 4%; left: 76%; top: 73%; } 
+
+            /* 手機版報紙 UI 範圍重新定位 */
+            .newspaper-ui {
+                width: 80% !important;
+                height: 70% !important;
+                left: 10% !important;
+                top: 15% !important;
+            }
+
+            /* 手機版各組內容座標對齊報紙欄位 */
+            #group-1 { top: 0%; left: 0%; width: 50%; height: 25%; }
+            #egg-desc-1 { top: 5%; left: 105%; width: 100px; height: auto; }
+
+            #group-2 { top: 32%; left: 45%; width: 55%; height: 28%; }
+            #egg-desc-2 { top: 105%; left: 0%; width: 100%; height: auto; }
+
+            #group-3 { top: 32%; left: -8%; width: 50%; height: 20%; }
+            #egg-desc-3 { top: 105%; left: 10%; width: 80%; height: auto; }
+
+            .pagination-container { bottom: 5% !important; }
+            .page-content { font-size: 0.9rem; }
         }
 
         /* Overlay 與 詳解視圖 */
@@ -53,7 +75,7 @@
         .detail-view { position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         .img-portrait { height: 90vh; width: auto; object-fit: contain; } 
 
-        /* 報紙 UI 樣式 */
+        /* 報紙 UI 樣式 (電腦版預設) */
         .newspaper-ui { position: absolute; display: none; width: 64%; height: 75%; top: 16.5%; left: 18%; background: transparent; z-index: 3010; touch-action: pan-y; filter: sepia(0.4) saturate(0.7) brightness(0.8) contrast(0.9); }
         @media (min-aspect-ratio: 1/1) {
             #img-news { height: 115vh; } 
@@ -61,7 +83,7 @@
             .pagination-container { bottom: 11%; }
         }
 
-        /* 報紙內容元件 */
+        /* 報紙內容元件 (預設) */
         .egg-layout { position: relative; width: 100%; height: 100%; }
         .egg-group { position: absolute; display: flex; flex-direction: column; gap: 8px; z-index: 3020; }
         #group-1 { top: 3%; left: -1%; width: 50%; height: 23%; } 
@@ -107,9 +129,7 @@
         <div class="close-btn" onclick="closeDetail()">&times;</div>
         <div class="detail-view" onclick="event.stopPropagation()">
             <img id="detail-img" src="">
-            
             <div id="turtle-puzzle" class="turtle-puzzle-ui"></div>
-
             <div id="newspaper-extras" class="newspaper-ui">
                 <div class="egg-layout">
                     <div class="egg-group" id="group-1"><div class="egg-box"><img id="egg-img-1" src=""></div><div class="egg-desc" id="egg-desc-1"></div></div>
@@ -149,7 +169,6 @@
         const pageContent = document.getElementById('page-content');
         const dotWrapper = document.getElementById('dot-wrapper');
 
-        // 初始化
         function initTurtlePuzzle() {
             turtlePz.innerHTML = '';
             for (let i = 0; i < 81; i++) {
@@ -160,7 +179,6 @@
         }
         initTurtlePuzzle();
 
-        // 中央 UI 管理器：開啟任何物件前先清空所有擴充層，確保不連動衝突
         function hideAllExtras() {
             newsEx.style.display = 'none';
             turtlePz.style.display = 'none';
@@ -173,31 +191,17 @@
             setTimeout(() => overlay.classList.add('show'), 10);
         }
 
-        // 事件綁定
-        function openTurtle() { 
-            hideAllExtras();
-            turtlePz.style.display = 'grid'; 
-            showOverlay(assets.turtle, true, 'turtle'); 
-        }
-        function openNewspaper() { 
-            hideAllExtras();
-            newsEx.style.display = 'block'; 
-            initDots(); renderPage(); 
-            showOverlay(assets.news, true, 'news'); 
-        }
+        function openTurtle() { hideAllExtras(); turtlePz.style.display = 'grid'; showOverlay(assets.turtle, true, 'turtle'); }
+        function openNewspaper() { hideAllExtras(); newsEx.style.display = 'block'; initDots(); renderPage(); showOverlay(assets.news, true, 'news'); }
         function openMirror() { hideAllExtras(); showOverlay(assets.mirror, true, 'mirror'); }
         function openLCD() { hideAllExtras(); showOverlay(assets.lcd, false, 'lcd'); }
         function openPhone() { hideAllExtras(); showOverlay(assets.phone, true, 'phone'); }
 
         function closeDetail() {
             overlay.classList.remove('show'); 
-            setTimeout(() => { 
-                overlay.style.display = 'none'; 
-                hideAllExtras();
-            }, 400);
+            setTimeout(() => { overlay.style.display = 'none'; hideAllExtras(); }, 400);
         }
 
-        // 報紙分頁邏輯
         function initDots() {
             dotWrapper.innerHTML = '';
             for (let i = 0; i < totalPages; i++) {
