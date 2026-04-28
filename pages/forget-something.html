@@ -6,6 +6,7 @@
     <title>歸心物流 - 失物招領處</title>
     <link rel="icon" href="../image/GUIXIN.webp" type="image/webp">
     <style>
+        /* 基礎樣式 */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; overflow: hidden; font-family: "Noto Sans TC", sans-serif; }
         .header-bar { position: fixed; top: 0; left: 0; width: 100%; padding: 1.2rem 5%; background: rgba(25, 25, 25, 0.6); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 2500; }
         .header-bar a { color: rgba(255, 255, 255, 0.9); text-decoration: none; font-size: 0.9rem; letter-spacing: 0.2em; }
@@ -13,14 +14,54 @@
         .scene-container { position: relative; width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; }
         .scene-img { width: 100%; height: 100%; object-fit: contain; display: block; }
         .hotspot { position: absolute; cursor: pointer; border-radius: 50%; background: radial-gradient(circle, rgba(245, 240, 225, 0.3) 0%, rgba(200, 190, 170, 0.08) 100%); transition: all 0.3s ease; filter: blur(6px); transform: translate(-50%, -50%); z-index: 500; opacity: 0.2; animation: pulse 3s infinite ease-in-out; }
-        #turtle-shell { width: 10%; height: 15%; left: 11.5%; top: 69%; } #newspaper { width: 12%; height: 15%; left: 10%; top: 86%; } #mirror { width: 11%; height: 26%; left: 32%; top: 56.5%; } #lcd-monitor { width: 10%; height: 15%; left: 84.5%; top: 61.5%; } #phone-screen { width: 5%; height: 8%; left: 92.5%; top: 66%; }
-        @media (max-aspect-ratio: 1/1) { .scene-container { width: 100vw; height: 177.78vw; } #turtle-shell { width: 20%; height: 10%; left: 13%; top: 74%; } #newspaper { width: 19%; height: 10%; left: 11%; top: 87%; } #mirror { width: 22%; height: 12%; left: 35%; top: 72%; } #lcd-monitor { width: 17%; height: 9%; left: 85%; top: 67%; } #phone-screen { width: 7%; height: 4%; left: 76%; top: 73%; } }
-        @keyframes pulse { 0%, 100% { opacity: 0.1; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.15); } }
+
+        /* --- 龜甲 9x9 獨立矩陣樣式 --- */
+        .turtle-puzzle-ui {
+            position: absolute;
+            display: none;
+            width: 70vw; height: 70vw;
+            max-width: 55vh; max-height: 55vh;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            gap: 4px;
+            z-index: 9999;
+            pointer-events: auto;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+        .puzzle-cell { border: 1px solid rgba(240, 234, 218, 0.5); background: rgba(20, 15, 10, 0.6); transition: all 0.2s; }
+        .puzzle-cell:hover { background: rgba(180, 100, 20, 0.5); border-color: #b46414; }
+
+        /* 熱點座標 */
+        #turtle-shell { width: 10%; height: 15%; left: 11.5%; top: 69%; } 
+        #newspaper { width: 12%; height: 15%; left: 10%; top: 86%; } 
+        #mirror { width: 11%; height: 26%; left: 32%; top: 56.5%; } 
+        #lcd-monitor { width: 10%; height: 15%; left: 84.5%; top: 61.5%; } 
+        #phone-screen { width: 5%; height: 8%; left: 92.5%; top: 66%; }
+
+        @media (max-aspect-ratio: 1/1) { 
+            .scene-container { width: 100vw; height: 177.78vw; } 
+            #turtle-shell { width: 20%; height: 10%; left: 13%; top: 74%; } 
+            #newspaper { width: 19%; height: 10%; left: 11%; top: 87%; } 
+            #mirror { width: 22%; height: 12%; left: 35%; top: 72%; } 
+            #lcd-monitor { width: 17%; height: 9%; left: 85%; top: 67%; } 
+            #phone-screen { width: 7%; height: 4%; left: 76%; top: 73%; } 
+        }
+
+        /* Overlay 與 詳解視圖 */
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: none; justify-content: center; align-items: center; z-index: 3000; opacity: 0; transition: opacity 0.4s ease; }
         .overlay.show { display: flex; opacity: 1; }
-        .detail-view { position: relative; display: flex; justify-content: center; align-items: center; }
-        .img-portrait { height: 90vh; width: auto; object-fit: contain; } .img-square { width: 90vw; height: auto; max-height: 90vh; object-fit: contain; }
+        .detail-view { position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .img-portrait { height: 90vh; width: auto; object-fit: contain; } 
+
+        /* 報紙 UI 樣式 */
         .newspaper-ui { position: absolute; display: none; width: 64%; height: 75%; top: 16.5%; left: 18%; background: transparent; z-index: 3010; touch-action: pan-y; filter: sepia(0.4) saturate(0.7) brightness(0.8) contrast(0.9); }
+        @media (min-aspect-ratio: 1/1) {
+            #img-news { height: 115vh; } 
+            .newspaper-ui { height: 80%; top: 16.5%; } 
+            .pagination-container { bottom: 11%; }
+        }
+
+        /* 報紙內容元件 */
         .egg-layout { position: relative; width: 100%; height: 100%; }
         .egg-group { position: absolute; display: flex; flex-direction: column; gap: 8px; z-index: 3020; }
         #group-1 { top: 3%; left: -1%; width: 50%; height: 23%; } 
@@ -29,15 +70,17 @@
         #egg-desc-2 { position: absolute; top: 107%; left: 7%; width: 100px; height: 45px; }
         #group-3 { top: 28%; left: -5%; width: 50%; height: 20%; } 
         #egg-desc-3 { position: absolute; top: 109%; left: 13%; width: 60%; height: 85px; }
-        .egg-box { width: 100%; height: 100%; background: #000; border-radius: 4px; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.5); transition: opacity 0.3s; }
+        .egg-box { width: 100%; height: 100%; background: #000; border-radius: 4px; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
         .egg-box img { width: 100%; height: 100%; object-fit: cover; }
         .egg-desc { position: absolute; padding: 8px; color: #f0eada; background: rgba(20, 15, 10, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); font-size: 0.8rem; border-radius: 4px; }
-        .pagination-container { position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%); width: 85%; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+        
+        /* 報紙分頁控制 */
+        .pagination-container { position: absolute; left: 50%; transform: translateX(-50%); width: 85%; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
         .controls-row { width: 100%; display: flex; justify-content: space-between; align-items: center; pointer-events: auto; }
-        .nav-btn { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; cursor: pointer; opacity: 0.8; transition: 0.2s; }
+        .nav-btn { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; cursor: pointer; opacity: 0.8; }
         .btn-left { border-right: 25px solid #b46414; } .btn-right { border-left: 25px solid #b46414; }
         .dot-wrapper { flex: 1; display: flex; justify-content: space-evenly; align-items: center; margin: 0 15px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.3); cursor: pointer; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0, 0, 0, 0.5); border: 2px solid rgba(255, 255, 255, 0.3); cursor: pointer; }
         .dot.active { background: #f0eada; box-shadow: 0 0 12px #f0eada; border: none; }
         .page-content { color: #f0eada; text-align: center; font-size: 1rem; font-weight: bold; height: 2.8em; display: flex; align-items: center; justify-content: center; margin-top: 8px; width: 100%; text-shadow: 0px 0px 10px rgba(0,0,0,0.8); }
         .close-btn { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 2.5rem; cursor: pointer; z-index: 3100; }
@@ -48,9 +91,10 @@
         <a href="forget-something.html">歸心物流 | 失物招領處</a>
         <a href="../index.html" style="font-size: 0.75rem; color: #aaa;">回到首頁</a>
     </nav>
+
     <div class="scene-wrapper">
         <div class="scene-container">
-            <img id="main-scene" src="" class="scene-img" alt="Warehouse">
+            <img id="main-scene" src="" class="scene-img">
             <div class="hotspot" id="turtle-shell" onclick="openTurtle()"></div>
             <div class="hotspot" id="newspaper" onclick="openNewspaper()"></div>
             <div class="hotspot" id="mirror" onclick="openMirror()"></div> 
@@ -58,10 +102,14 @@
             <div class="hotspot" id="phone-screen" onclick="openPhone()"></div>
         </div>
     </div>
+
     <div class="overlay" id="detail-overlay" onclick="closeDetail()">
         <div class="close-btn" onclick="closeDetail()">&times;</div>
         <div class="detail-view" onclick="event.stopPropagation()">
-            <img id="detail-img" src="" alt="Detail View">
+            <img id="detail-img" src="">
+            
+            <div id="turtle-puzzle" class="turtle-puzzle-ui"></div>
+
             <div id="newspaper-extras" class="newspaper-ui">
                 <div class="egg-layout">
                     <div class="egg-group" id="group-1"><div class="egg-box"><img id="egg-img-1" src=""></div><div class="egg-desc" id="egg-desc-1"></div></div>
@@ -75,9 +123,12 @@
             </div>
         </div>
     </div>
+
     <script>
         const assets = { turtle: '../image/end3/turtle-shell.webp', news: '../image/newspaper.webp', mirror: '../image/end2/mirror.webp', lcd: '../image/end1/lcd-monitor.webp', phone: '../image/phone.webp' };
-        let currentPage = 0; const totalPages = 10;
+        
+        let currentPage = 0; 
+        const totalPages = 10;
         const pageData = [
             { text: "第一頁：自自自自自自自自", eggImgs: ["","",""], eggDescs: ["大塊的標題","右邊的標題","左邊的標題"] },
             { text: "第二頁：自自自自自自自自自", eggImgs: ["","",""], eggDescs: ["這頁的主線索","細節 C","細節 D"] },
@@ -91,48 +142,90 @@
             { text: "第十頁：...", eggImgs: ["","",""], eggDescs: ["...","...","..."] }
         ];
 
-        const overlay = document.getElementById('detail-overlay'), detImg = document.getElementById('detail-img'), newsEx = document.getElementById('newspaper-extras');
-        function showOverlay(src, isPortrait) {
-            detImg.src = src; detImg.className = isPortrait ? 'img-portrait' : 'img-square';
-            overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('show'), 10);
-        }
-        function openTurtle() { newsEx.style.display = 'none'; showOverlay(assets.turtle, true); }
-        function openMirror() { newsEx.style.display = 'none'; showOverlay(assets.mirror, true); }
-        function openLCD() { newsEx.style.display = 'none'; showOverlay(assets.lcd, false); }
-        function openPhone() { newsEx.style.display = 'none'; showOverlay(assets.phone, true); }
-        function openNewspaper() { newsEx.style.display = 'block'; initDots(); renderPage(); showOverlay(assets.news, true); }
-        function closeDetail() { overlay.classList.remove('show'); setTimeout(() => { overlay.style.display = 'none'; }, 400); }
+        const overlay = document.getElementById('detail-overlay');
+        const detImg = document.getElementById('detail-img');
+        const newsEx = document.getElementById('newspaper-extras');
+        const turtlePz = document.getElementById('turtle-puzzle');
+        const pageContent = document.getElementById('page-content');
+        const dotWrapper = document.getElementById('dot-wrapper');
 
-        function initDots() {
-            const w = document.getElementById('dot-wrapper'); w.innerHTML = '';
-            for (let i = 0; i < totalPages; i++) {
-                const d = document.createElement('div'); d.className = 'dot' + (i === currentPage ? ' active' : '');
-                d.onclick = () => { currentPage = i; renderPage(); }; w.appendChild(d);
+        // 初始化
+        function initTurtlePuzzle() {
+            turtlePz.innerHTML = '';
+            for (let i = 0; i < 81; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'puzzle-cell';
+                turtlePz.appendChild(cell);
             }
+        }
+        initTurtlePuzzle();
+
+        // 中央 UI 管理器：開啟任何物件前先清空所有擴充層，確保不連動衝突
+        function hideAllExtras() {
+            newsEx.style.display = 'none';
+            turtlePz.style.display = 'none';
+        }
+
+        function showOverlay(src, isPortrait, objectId) {
+            detImg.src = src; detImg.id = "img-" + objectId;
+            detImg.className = isPortrait ? 'img-portrait' : 'img-square';
+            overlay.style.display = 'flex'; 
+            setTimeout(() => overlay.classList.add('show'), 10);
+        }
+
+        // 事件綁定
+        function openTurtle() { 
+            hideAllExtras();
+            turtlePz.style.display = 'grid'; 
+            showOverlay(assets.turtle, true, 'turtle'); 
+        }
+        function openNewspaper() { 
+            hideAllExtras();
+            newsEx.style.display = 'block'; 
+            initDots(); renderPage(); 
+            showOverlay(assets.news, true, 'news'); 
+        }
+        function openMirror() { hideAllExtras(); showOverlay(assets.mirror, true, 'mirror'); }
+        function openLCD() { hideAllExtras(); showOverlay(assets.lcd, false, 'lcd'); }
+        function openPhone() { hideAllExtras(); showOverlay(assets.phone, true, 'phone'); }
+
+        function closeDetail() {
+            overlay.classList.remove('show'); 
+            setTimeout(() => { 
+                overlay.style.display = 'none'; 
+                hideAllExtras();
+            }, 400);
+        }
+
+        // 報紙分頁邏輯
+        function initDots() {
+            dotWrapper.innerHTML = '';
+            for (let i = 0; i < totalPages; i++) {
+                const d = document.createElement('div');
+                d.className = 'dot' + (i === currentPage ? ' active' : '');
+                d.onclick = (e) => { e.stopPropagation(); currentPage = i; renderPage(); };
+                dotWrapper.appendChild(d);
+            }
+        }
+        function renderPage() {
+            const data = pageData[currentPage];
+            pageContent.innerText = data.text;
+            for(let i=1; i<=3; i++) {
+                const img = document.getElementById(`egg-img-${i}`);
+                const desc = document.getElementById(`egg-desc-${i}`);
+                img.src = data.eggImgs[i-1] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+                desc.innerText = data.eggDescs[i-1];
+            }
+            const dots = dotWrapper.querySelectorAll('.dot');
+            dots.forEach((dot, idx) => dot.classList.toggle('active', idx === currentPage));
         }
         function changePage(s) { currentPage = (currentPage + s + totalPages) % totalPages; renderPage(); }
-        function renderPage() {
-            const d = pageData[currentPage]; document.getElementById('page-content').innerText = d.text;
-            for(let i=1; i<=3; i++) {
-                const img = document.getElementById(`egg-img-${i}`), desc = document.getElementById(`egg-desc-${i}`), has = d.eggImgs[i-1] && d.eggImgs[i-1] !== "";
-                img.src = has ? d.eggImgs[i-1] : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-                img.parentElement.style.opacity = has ? "1" : "0.7"; desc.innerText = d.eggDescs[i-1];
-            }
-            document.querySelectorAll('.dot').forEach((dot, idx) => dot.classList.toggle('active', idx === currentPage));
-        }
-
-        let touchStartX = 0;
-        newsEx.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
-        newsEx.addEventListener('touchend', e => {
-            let touchEndX = e.changedTouches[0].screenX;
-            if (touchEndX < touchStartX - 50) changePage(1); if (touchEndX > touchStartX + 50) changePage(-1);
-        });
 
         function updateScene() {
-            const img = document.getElementById('main-scene');
-            if (img) img.src = (window.innerHeight > window.innerWidth) ? "../image/forget-something-m.webp" : "../image/forget-something.webp";
+            const isPortrait = window.innerHeight > window.innerWidth;
+            document.getElementById('main-scene').src = isPortrait ? "../image/forget-something-m.webp" : "../image/forget-something.webp";
         }
-        updateScene(); window.addEventListener('resize', updateScene);
+        window.addEventListener('resize', updateScene); updateScene();
     </script>
 </body>
 </html>
