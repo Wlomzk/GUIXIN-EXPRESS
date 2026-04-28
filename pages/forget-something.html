@@ -10,9 +10,9 @@
         
         .header-bar {
             position: fixed; top: 0; left: 0; width: 100%; padding: 1.2rem 5%;
-            background: rgba(25, 25, 25, 0.6) !important;
-            backdrop-filter: blur(35px) !important;
-            -webkit-backdrop-filter: blur(35px) !important;
+            background: rgba(25, 25, 25, 0.6);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex; justify-content: space-between; align-items: center;
             box-sizing: border-box; z-index: 2500;
@@ -22,8 +22,6 @@
         .scene-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; width: 100%; height: 100vh; }
         .scene-container { position: relative; width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; margin: 0 auto; }
         .scene-img { width: 100%; height: 100%; object-fit: contain; display: block; }
-
-        .full-width-lcd { width: 100vw; height: auto; max-height: 90vh; object-fit: contain; }
 
         .hotspot { position: absolute; cursor: pointer; border-radius: 50%; background: radial-gradient(circle, rgba(245, 240, 225, 0.3) 0%, rgba(200, 190, 170, 0.08) 100%); transition: all 0.3s ease; filter: blur(6px); transform: translate(-50%, -50%); z-index: 500; opacity: 0.2; animation: pulse 3s infinite ease-in-out; }
         
@@ -47,9 +45,10 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: none; justify-content: center; align-items: center; z-index: 3000; opacity: 0; transition: opacity 0.4s ease; }
         .overlay.show { display: flex; opacity: 1; }
         
-        .detail-view { position: relative; display: flex; justify-content: center; align-items: center; }
-        .img-portrait { height: 90vh; width: auto; object-fit: contain; }
-        .img-square { width: 90vw; height: auto; max-height: 90vh; object-fit: contain; }
+        .detail-view { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
+        
+        /* 基礎樣式，具體行為交給 JS 控制 */
+        #detail-img { max-width: 100vw; max-height: 90vh; object-fit: contain; }
 
         .newspaper-ui { position: absolute; display: none; width: 64%; height: 75%; top: 16.5%; left: 18%; background: transparent; z-index: 3010; touch-action: pan-y; filter: sepia(0.4) saturate(0.7) brightness(0.8) contrast(0.9); }
         .egg-layout { position: relative; width: 100%; height: 100%; margin: 0; }
@@ -128,11 +127,9 @@
 
         let currentPage = 0;
         const totalPages = 10;
-        
         const pageData = [
-            { text: "第一頁：自自自自自自自自", eggImgs: ["","",""], eggDescs: ["大塊的標題","右邊的標題","左邊的標題"] },
-            { text: "第二頁：自自自自自自自自自", eggImgs: ["","",""], eggDescs: ["這頁的主線索","細節 C","細節 D"] },
-            { text: "第三頁之後以此類推...", eggImgs: ["","",""], eggDescs: ["...","...","..."] }
+            { text: "第一頁：內文...", eggImgs: ["","",""], eggDescs: ["標題A","標題B","標題C"] },
+            { text: "第二頁：內文...", eggImgs: ["","",""], eggDescs: ["線索1","線索2","線索3"] }
         ];
 
         function updateImageSource() {
@@ -160,10 +157,9 @@
             for(let i=1; i<=3; i++) {
                 const imgEl = document.getElementById(`egg-img-${i}`);
                 const descEl = document.getElementById(`egg-desc-${i}`);
-                const boxEl = imgEl.parentElement;
                 const hasImg = data.eggImgs[i-1] && data.eggImgs[i-1] !== "";
                 imgEl.src = hasImg ? data.eggImgs[i-1] : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-                boxEl.style.opacity = hasImg ? "1" : "0.7";
+                imgEl.parentElement.style.opacity = hasImg ? "1" : "0.7";
                 descEl.innerText = data.eggDescs[i-1];
             }
             document.querySelectorAll('.dot').forEach((dot, index) => { dot.classList.toggle('active', index === currentPage); });
@@ -177,16 +173,24 @@
             
             detailImg.src = asset.src;
 
+            // 核心修正：直接操作 Style 屬性確保優先權，不再依賴 Class 互搶
             if (key === 'lcd') {
-                detailImg.className = 'full-width-lcd';
+                detailImg.style.width = "100vw";
+                detailImg.style.height = "auto";
+            } else if (asset.type === 'portrait') {
+                detailImg.style.width = "auto";
+                detailImg.style.height = "90vh";
             } else {
-                detailImg.className = (asset.type === 'portrait') ? 'img-portrait' : 'img-square';
+                detailImg.style.width = "90vw";
+                detailImg.style.height = "auto";
             }
 
             if (key === 'newspaper') {
                 newsExtras.style.display = 'block';
                 initDots(); renderPage();
-            } else { newsExtras.style.display = 'none'; }
+            } else { 
+                newsExtras.style.display = 'none'; 
+            }
 
             overlay.style.display = 'flex';
             setTimeout(() => overlay.classList.add('show'), 10);
