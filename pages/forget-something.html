@@ -43,7 +43,7 @@
         #mirror { width: 11%; height: 26%; left: 32%; top: 56.5%; }
         #lcd-monitor { width: 10%; height: 15%; left: 84.5%; top: 61.5%; }
         #phone-screen { width: 5%; height: 8%; left: 92.5%; top: 66%; }
-        
+
         /* -------------------------------------------------- */
         /* 手機版與電腦版切換區塊 (Mobile / Desktop Queries) */
         /* -------------------------------------------------- */
@@ -203,7 +203,6 @@
         const SECRET_ID = "GX9527"; 
         const SECRET_KEY = "HOME666";
         
-        // 使用引入的資料
         const pageData = NEWSPAPER_DATA;
 
         const overlay = document.getElementById('detail-overlay');
@@ -214,61 +213,92 @@
         const pageContent = document.getElementById('page-content');
         const dotWrapper = document.getElementById('dot-wrapper');
 
-        // --- 拖曳邏輯區 ---
+        // --- 拖曳邏輯優化區 ---
         let activeWin = null; 
-        let offset = { x: 0, y: 0 };
+        let startPos = { x: 0, y: 0 };
+        let startWinPos = { x: 0, y: 0 };
         let isDraggableInitialized = false;
 
         function initDraggable() {
-            if (isDraggableInitialized) return; // 拉姆防止重複掛載事件
-            
-            document.querySelectorAll('.win-header').forEach(header => {
+            if (isDraggableInitialized) return;
+            const headers = document.querySelectorAll('.win-header');
+            headers.forEach(header => {
+                // 強制禁止標頭內的文字被選取，避免拖曳時變反白
+                header.style.userSelect = 'none';
+                header.style.webkitUserSelect = 'none';
+
                 header.addEventListener('mousedown', (e) => startDrag(e, e.clientX, e.clientY));
-                header.addEventListener('touchstart', (e) => startDrag(e, e.touches[0].clientX, e.touches[0].clientY), { passive: false });
+                header.addEventListener('touchstart', (e) => {
+                    // 手機端必須禁止預設行為，否則會觸發頁面捲動
+                    if (e.cancelable) e.preventDefault();
+                    startDrag(e, e.touches[0].clientX, e.touches[0].clientY);
+                }, { passive: false });
             });
             isDraggableInitialized = true;
         }
 
         function startDrag(e, x, y) {
             activeWin = e.currentTarget.parentElement;
+            
+            // 提升層級
             document.querySelectorAll('.win-box').forEach(w => w.style.zIndex = "3100");
             activeWin.style.zIndex = "3200";
-            offset.x = x - activeWin.offsetLeft;
-            offset.y = y - activeWin.offsetTop;
+
+            // 記錄初始滑鼠/手指位置與視窗位置
+            startPos.x = x;
+            startPos.y = y;
+            startWinPos.x = activeWin.offsetLeft;
+            startWinPos.y = activeWin.offsetTop;
+
+            // --- 拉姆的防反白術式 ---
+            document.body.style.userSelect = 'none';
+            document.body.style.webkitUserSelect = 'none';
 
             if (e.type === 'mousedown') {
-                document.onmousemove = (ev) => dragMove(ev.clientX, ev.clientY);
-                document.onmouseup = stopDrag;
+                document.addEventListener('mousemove', dragMoveMouse);
+                document.addEventListener('mouseup', stopDrag);
             } else {
-                document.ontouchmove = (ev) => {
-                    ev.preventDefault(); // 避免手機端拖動時頁面捲動
-                    dragMove(ev.touches[0].clientX, ev.touches[0].clientY);
-                };
-                document.ontouchend = stopDrag;
+                document.addEventListener('touchmove', dragMoveTouch, { passive: false });
+                document.addEventListener('touchend', stopDrag);
             }
         }
 
-        function dragMove(x, y) {
+        function dragMoveMouse(e) { handleMove(e.clientX, e.clientY); }
+        function dragMoveTouch(e) { handleMove(e.touches[0].clientX, e.touches[0].clientY); }
+
+        function handleMove(currentX, currentY) {
             if (!activeWin) return;
-            let newX = x - offset.x; 
-            let newY = y - offset.y;
-            const maxX = window.innerWidth - activeWin.offsetWidth;
-            const maxY = window.innerHeight - activeWin.offsetHeight;
-            
-            activeWin.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
-            activeWin.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
-            activeWin.style.transform = 'none';
+
+            const dx = currentX - startPos.x;
+            const dy = currentY - startPos.y;
+
+            let newX = startWinPos.x + dx;
+            let newY = startWinPos.y + dy;
+
+            const maxX = lcdUI.clientWidth - activeWin.offsetWidth;
+            const maxY = lcdUI.clientHeight - activeWin.offsetHeight;
+
+            // 嚴格限制在螢幕內
+            newX = Math.max(0, Math.min(newX, maxX));
+            newY = Math.max(0, Math.min(newY, maxY));
+
+            activeWin.style.left = newX + 'px';
+            activeWin.style.top = newY + 'px';
         }
 
         function stopDrag() { 
             activeWin = null; 
-            document.onmousemove = null; 
-            document.onmouseup = null; 
-            document.ontouchmove = null; 
-            document.ontouchend = null; 
+            // --- 釋放防反白術式 ---
+            document.body.style.userSelect = '';
+            document.body.style.webkitUserSelect = '';
+
+            document.removeEventListener('mousemove', dragMoveMouse);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchmove', dragMoveTouch);
+            document.removeEventListener('touchend', stopDrag);
         }
 
-        // --- 函數掛載區：讓 HTML 點得到 ---
+        // --- 函數掛載區 ---
         window.checkLogin = function() {
             const id = document.getElementById('user-id').value;
             const pass = document.getElementById('user-pass').value;
@@ -284,38 +314,15 @@
                 setTimeout(() => { 
                     body.style.background = 'transparent'; 
                     errorMsg.style.opacity = '0'; 
-                }, 800); // 稍微拉長一點點提示時間
+                }, 800);
             }
         };
 
-        window.openTurtle = function() { 
-            hideAllExtras(); 
-            turtlePz.style.display = 'grid'; 
-            showOverlay(assets.turtle, 'img-portrait', 'turtle'); 
-        };
-
-        window.openNewspaper = function() { 
-            hideAllExtras(); 
-            newsEx.style.display = 'block'; 
-            initDots(); 
-            renderPage(); 
-            showOverlay(assets.news, 'img-portrait', 'news'); 
-        };
-
-        window.openMirror = function() { 
-            hideAllExtras(); 
-            showOverlay(assets.mirror, 'img-portrait', 'mirror'); 
-        };
-
-        window.openLCD = function() { 
-            hideAllExtras(); 
-            showOverlay(assets.lcd, 'img-lcd-special', 'lcd'); 
-        };
-
-        window.openPhone = function() { 
-            hideAllExtras(); 
-            showOverlay(assets.phone, 'img-portrait', 'phone'); 
-        };
+        window.openTurtle = function() { hideAllExtras(); turtlePz.style.display = 'grid'; showOverlay(assets.turtle, 'img-portrait', 'turtle'); };
+        window.openNewspaper = function() { hideAllExtras(); newsEx.style.display = 'block'; initDots(); renderPage(); showOverlay(assets.news, 'img-portrait', 'news'); };
+        window.openMirror = function() { hideAllExtras(); showOverlay(assets.mirror, 'img-portrait', 'mirror'); };
+        window.openLCD = function() { hideAllExtras(); showOverlay(assets.lcd, 'img-lcd-special', 'lcd'); };
+        window.openPhone = function() { hideAllExtras(); showOverlay(assets.phone, 'img-portrait', 'phone'); };
 
         window.toggleWin = function(id) { 
             const w = document.getElementById(id); 
@@ -338,10 +345,7 @@
             }, 400); 
         };
 
-        window.changePage = function(s) { 
-            currentPage = (currentPage + s + totalPages) % totalPages; 
-            renderPage(); 
-        };
+        window.changePage = function(s) { currentPage = (currentPage + s + totalPages) % totalPages; renderPage(); };
 
         // --- 內部輔助函數 ---
         function hideAllExtras() { 
@@ -370,19 +374,14 @@
             for (let i = 0; i < totalPages; i++) {
                 const d = document.createElement('div');
                 d.className = 'dot' + (i === currentPage ? ' active' : '');
-                d.onclick = (e) => { 
-                    e.stopPropagation(); 
-                    currentPage = i; 
-                    renderPage(); 
-                };
+                d.onclick = (e) => { e.stopPropagation(); currentPage = i; renderPage(); };
                 dotWrapper.appendChild(d);
             }
         }
 
         function renderPage() {
             const data = pageData[currentPage]; 
-            if (!data) return; // 拉姆的安全檢查
-
+            if (!data) return;
             pageContent.innerText = data.text || "";
             for(let i=1; i<=3; i++) {
                 const img = document.getElementById(`egg-img-${i}`); 
@@ -395,7 +394,6 @@
         }
 
         function updateScene() {
-            // 與 CSS 的比例判斷保持一致性
             const isPortrait = window.innerHeight > window.innerWidth;
             const mainImg = document.getElementById('main-scene');
             if (mainImg) {
@@ -403,12 +401,9 @@
             }
         }
 
-        /* 預留：將來若有其他初始化邏輯請寫在此處 */
-
         window.addEventListener('resize', updateScene); 
         updateScene();
 
-        // 拼圖格子初始化
         for (let i = 0; i < 81; i++) { 
             const cell = document.createElement('div'); 
             cell.className = 'puzzle-cell'; 
