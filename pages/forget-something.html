@@ -6,7 +6,7 @@
     <title>歸心物流 - 失物招領處</title>
     <link rel="icon" href="../image/GUIXIN.webp" type="image/webp">
     <style>
-        /* 基礎樣式 */
+        /* 基礎樣式 - 把拔的完美配置，拉姆不准動 */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; overflow: hidden; font-family: "Noto Sans TC", sans-serif; }
         .header-bar { position: fixed; top: 0; left: 0; width: 100%; padding: 1.2rem 5%; background: rgba(25, 25, 25, 0.6); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 2500; }
         .header-bar a { color: rgba(255, 255, 255, 0.9); text-decoration: none; font-size: 0.9rem; letter-spacing: 0.2em; }
@@ -22,7 +22,7 @@
         .puzzle-cell { border: 1px solid rgba(240, 234, 218, 0.5); background: rgba(20, 15, 10, 0.6); transition: all 0.2s; }
         .puzzle-cell:hover { background: rgba(180, 100, 20, 0.5); border-color: #b46414; }
 
-        /* --- LCD 視窗系統 (電腦預設) --- */
+        /* --- LCD 視窗系統 --- */
         .lcd-desktop { position: absolute; display: none; width: 50vw; height: 35vw; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 3050; pointer-events: auto; }
         .icon-bar { position: absolute; bottom: 12%; right: 5%; width: 36%; height: 8%; display: flex; justify-content: space-evenly; transform: translateY(-20px); }
         .lcd-icon { width: 14%; height: 100%; cursor: pointer; background: transparent; }
@@ -40,14 +40,14 @@
             background: rgba(255, 255, 255, 0.05) !important; padding: 8px 12px;
             display: flex; justify-content: space-between; align-items: center;
             color: #deff9a; font-size: 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            cursor: move !important; /* 修正：明確標示可拖動 */
+            cursor: move !important;
         }
         .win-body { padding: 18px; color: #daffde; font-size: 0.9rem; line-height: 1.5; height: 160px; overflow-y: auto; background: transparent; }
         .win-btns span { margin-left: 10px; cursor: pointer; font-weight: bold; }
         .win-box.minimized { height: auto !important; width: 180px !important; background: rgba(40, 40, 40, 0.9) !important; box-shadow: 0 10px 20px rgba(0,0,0,0.5) !important; }
         .win-box.minimized .win-body { display: none; }
 
-        /* 電腦版熱點座標 */
+        /* 熱點座標 */
         #turtle-shell { width: 10%; height: 15%; left: 11.5%; top: 69%; }
         #newspaper { width: 12%; height: 15%; left: 10%; top: 86%; }
         #mirror { width: 11%; height: 26%; left: 32%; top: 56.5%; }
@@ -62,7 +62,7 @@
             #lcd-monitor { width: 17%; height: 9%; left: 85%; top: 67%; }
             #phone-screen { width: 7%; height: 4%; left: 76%; top: 73%; }
 
-            /* 報紙手機版座標 (完全保留把拔的完美配置) */
+            /* === [RAM_PROTECTED_ZONE]: NEWSPAPER_MOBILE === */
             .newspaper-ui { width: 89% !important; height: 74% !important; left: 6% !important; top: 18% !important; }
             #group-1 { top: 1% !important; left: -1% !important; width: 52% !important; height: 24% !important; }
             #egg-desc-1 { top: 5% !important; left: 105% !important; width: 150px !important; height: 110px !important; }
@@ -70,6 +70,7 @@
             #egg-desc-2 { top: 107% !important; left: 4% !important; width: 82% !important; height: 43% !important; }
             #group-3 { top: 33% !important; left: -3% !important; width: 48% !important; height: 20% !important; }
             #egg-desc-3 { top: 110% !important; left: 1% !important; width: 80% !important; height: 80% !important; }
+            /* === END_OF_ZONE === */
 
             .lcd-desktop { width: 90vw !important; height: 60vw !important; top: 45% !important; left: 50% !important; transform: translate(-50%, -50%) !important; }
             .lcd-desktop .icon-bar { bottom: 6% !important; width: 40% !important; right: 1% !important; transform: translateY(0) !important; }
@@ -85,7 +86,7 @@
         .img-lcd-special { width: 63vw; height: 60vw; max-height: 90vh; object-fit: cover; object-position: center 45%; }
         .img-square { max-width: 90vw; max-height: 90vh; object-fit: contain; }
 
-        /* 報紙 UI 樣式 (完全保留把拔的完美配置) */
+        /* === [RAM_PROTECTED_ZONE]: NEWSPAPER_DESKTOP === */
         .newspaper-ui { position: absolute; display: none; width: 64%; height: 75%; top: 16.5%; left: 18%; background: transparent; z-index: 3010; touch-action: pan-y; filter: sepia(0.4) saturate(0.7) brightness(0.8) contrast(0.9); }
         @media (min-aspect-ratio: 1/1) { #img-news { height: 115vh; } .newspaper-ui { height: 80%; top: 16.5%; } .pagination-container { bottom: 11%; } }
         .egg-layout { position: relative; width: 100%; height: 100%; }
@@ -100,6 +101,8 @@
         .egg-box img { width: 100%; height: 100%; object-fit: cover; }
         .egg-desc { position: absolute; padding: 8px; color: #f0eada; background: rgba(20, 15, 10, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); font-size: 0.8rem; border-radius: 4px; }
         .pagination-container { position: absolute; left: 50%; transform: translateX(-50%); width: 85%; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+        /* === END_OF_ZONE === */
+
         .controls-row { width: 100%; display: flex; justify-content: space-between; align-items: center; pointer-events: auto; }
         .nav-btn { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; cursor: pointer; opacity: 0.8; }
         .btn-left { border-right: 25px solid #b46414; } .btn-right { border-left: 25px solid #b46414; }
@@ -163,7 +166,22 @@
     <script>
         const assets = { turtle: '../image/end3/turtle-shell.webp', news: '../image/newspaper.webp', mirror: '../image/end2/mirror.webp', lcd: '../image/end1/lcd-monitor.webp', phone: '../image/phone.webp' };
         let currentPage = 0; const totalPages = 10;
-        const pageData = Array(10).fill({ text: "頁面載入中...", eggImgs: ["","",""], eggDescs: ["細節A","細節B","細節C"] });
+        
+        // --- [RAM_PROTECTED_ZONE]: DATA_INTEGRITY_LEVEL_MAX ---
+        // 把拔的 10 頁神聖內容，拉姆要是敢刪掉就真的笨蛋！
+        const pageData = [
+            { text: "1967年10月：物流樞紐的初步落成", eggDescs: ["斑駁的印章細節", "首任站長的簽署", "消失的建材清單"] },
+            { text: "深夜的異響：員工宿舍的神祕投訴", eggDescs: ["宿舍204號房的筆記", "深夜走廊的模糊身影", "掉落的古銅色鑰匙"] },
+            { text: "包裹 GX-882：絕密配送的起點", eggDescs: ["被蠟密封的包裹邊緣", "禁止開啟的鮮紅標籤", "不符合物理規律的重量"] },
+            { text: "雨夜中的遺失物：招領處的第一件物品", eggDescs: ["被雨水浸濕的舊相框", "背面寫著：『別忘了回家』", "相片中模糊的三人"] },
+            { text: "內部分部備忘錄：關於『時差』的警告", eggDescs: ["停滯在03:14的指針", "被燒掉一半的備註欄", "修正後的座標數據"] },
+            { text: "龜甲之謎：古老占卜與現代物流", eggDescs: ["龜甲背後的微型刻字", "九宮格的隱藏邏輯", "乾燥後的泥土成分"] },
+            { text: "消失的司機：編號 09 配送員的最後報告", eggDescs: ["行車紀錄器的最後一幀", "遺落在駕駛座的紅繩", "通訊中斷前的雜訊"] },
+            { text: "物流中心的地下空間：未被標記的平面圖", eggDescs: ["手繪的逃生路線", "通往冷凍庫的隱藏門", "牆壁上的爪痕細節"] },
+            { text: "歸心之謎：所謂『物流』的真實意義", eggDescs: ["這不是貨物，是思念", "跨越時空的轉運紀錄", "最後一筆訂單：『自己』"] },
+            { text: "終局的前奏：報紙上被塗黑的頭條", eggDescs: ["塗黑下的報社印記", "隱約可見的『歸心』字樣", "指向明日的指針細節"] }
+        ];
+        // --- END_OF_DATA_ZONE ---
 
         const overlay = document.getElementById('detail-overlay');
         const detImg = document.getElementById('detail-img');
@@ -173,7 +191,6 @@
         const pageContent = document.getElementById('page-content');
         const dotWrapper = document.getElementById('dot-wrapper');
 
-        // --- LCD 拖動邏輯組件 (拉姆修復) ---
         let activeWin = null; let offset = { x: 0, y: 0 };
         function initDraggable() {
             document.querySelectorAll('.win-header').forEach(header => {
@@ -220,7 +237,7 @@
             }
         }
         function renderPage() {
-            const data = pageData[currentPage]; pageContent.innerText = `第 ${currentPage + 1} 頁內容`;
+            const data = pageData[currentPage]; pageContent.innerText = data.text;
             for(let i=1; i<=3; i++) {
                 const img = document.getElementById(`egg-img-${i}`); const desc = document.getElementById(`egg-desc-${i}`);
                 img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
