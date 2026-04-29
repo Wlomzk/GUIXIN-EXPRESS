@@ -6,7 +6,7 @@
     <title>歸心物流 - 失物招領處</title>
     <link rel="icon" href="../image/GUIXIN.webp" type="image/webp">
     <style>
-        /* [1. 基礎佈局區] - 維持原樣 */
+        /* [1. 基礎佈局區] - 絕對不動區 */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; overflow: hidden; font-family: "Noto Sans TC", sans-serif; }
         .header-bar { position: fixed; top: 0; left: 0; width: 100%; padding: 1.2rem 5%; background: rgba(25, 25, 25, 0.6); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 2500; }
         .header-bar a { color: rgba(255, 255, 255, 0.9); text-decoration: none; font-size: 0.9rem; letter-spacing: 0.2em; }
@@ -20,7 +20,7 @@
         .close-btn { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 2.5rem; cursor: pointer; z-index: 4100; }
         .detail-view { position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-        /* [2. 熱點元件] - 維持原樣 */
+        /* [2. 熱點元件] */
         .hotspot { position: absolute; cursor: pointer; border-radius: 50%; background: radial-gradient(circle, rgba(245, 240, 225, 0.3) 0%, rgba(200, 190, 170, 0.08) 100%); transition: all 0.3s ease; filter: blur(6px); transform: translate(-50%, -50%); z-index: 500; opacity: 0.2; animation: pulse 3s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.1); } }
         #turtle-shell { width: 10%; height: 15%; left: 11.5%; top: 69%; }
@@ -48,8 +48,8 @@
         .login-input { background: rgba(0, 0, 0, 0.5); border: 1px solid #deff9a; color: #fff; padding: 8px; border-radius: 4px; text-align: center; width: 80%; outline: none; }
         .login-btn { background: #deff9a; color: #000; border: none; padding: 6px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .mail-list { display: none; width: 100%; flex-direction: column; }
-        .mail-item { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; display: flex; justify-content: space-between; }
-        .mail-item.read { color: rgba(218, 255, 222, 0.4); }
+        .mail-item { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; display: flex; justify-content: space-between; }
+        .mail-item:hover { background: rgba(222, 255, 154, 0.1); }
         .mail-toolbar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px; margin-bottom: 8px; }
         .logout-btn { color: #ff5555; cursor: pointer; font-size: 0.75rem; border: 1px solid rgba(255, 85, 85, 0.3); padding: 2px 6px; border-radius: 4px; }
         .mail-content-view { display: none; }
@@ -59,7 +59,7 @@
         .power-led { position: absolute; bottom: -5.2%; right: 2.2%; width: 10px; height: 10px; background-color: #a1ff09; border-radius: 50%; z-index: 4000; animation: led-breath 4s infinite ease-in-out; }
         @keyframes led-breath { 0%, 100% { opacity: 0.3; box-shadow: 0 0 4px #39FF14; } 50% { opacity: 1; box-shadow: 0 0 8px #39FF14, 0 0 12px rgba(57, 255, 20, 0.6); } }
 
-        /* [7. 報紙與拼圖 UI] - 電腦版數值 */
+        /* [7. 報紙 UI] */
         .newspaper-ui { position: absolute; display: none; width: 64%; height: 75%; top: 16.5%; left: 18%; background: transparent; z-index: 3010; filter: sepia(0.4) saturate(0.7) brightness(0.8) contrast(0.9); }
         .egg-layout { position: relative; width: 100%; height: 100%; pointer-events: none; }
         .egg-group { position: absolute; display: flex; flex-direction: column; gap: 8px; z-index: 3020; pointer-events: auto; }
@@ -92,7 +92,6 @@
             #mirror { width: 22%; height: 12%; left: 35%; top: 72%; }
             #lcd-monitor { width: 17%; height: 9%; left: 85%; top: 67%; }
             #phone-screen { width: 7%; height: 4%; left: 76%; top: 73%; }
-            /* 報紙手機版 - 嚴格還原 */
             .newspaper-ui { width: 89% !important; height: 74% !important; left: 6% !important; top: 18% !important; }
             #group-1 { top: 1% !important; left: -1% !important; width: 52% !important; height: 24% !important; }
             #egg-desc-1 { top: 5% !important; left: 105% !important; width: 150px !important; height: 110px !important; }
@@ -100,18 +99,14 @@
             #egg-desc-2 { top: 107% !important; left: 4% !important; width: 82% !important; height: 43% !important; }
             #group-3 { top: 33% !important; left: -3% !important; width: 48% !important; height: 20% !important; }
             #egg-desc-3 { top: 110% !important; left: 1% !important; width: 80% !important; height: 80% !important; }
-            /* LCD 手機版 - 嚴格還原 */
             .lcd-desktop { width: 90vw !important; height: 60vw !important; top: 45% !important; }
             .lcd-desktop .icon-bar { bottom: 6% !important; width: 40% !important; right: 1% !important; transform: translateY(0) !important; }
             .power-led { right: 0.7% !important; bottom: -6.2% !important; }
             .img-lcd-special { width: 100vw !important; height: 92vw !important; object-position: center 40% !important; }
-            .pagination-container { bottom: 5% !important; }
         }
     </style>
 </head>
 <body>
-    <div class="transition-mask" id="page-mask"></div>
-
     <nav class="header-bar">
         <a href="forget-something.html">歸心物流 | 失物招領處</a>
         <a href="../index.html" style="font-size: 0.75rem; color: #aaa;">回到首頁</a>
@@ -145,35 +140,34 @@
 
                 <div id="win-mail" class="win-box" style="top:5%; left:5%;">
                     <div class="win-header">
-                        <span>系統郵件</span>
-                        <div class="win-btns"><span onclick="minWin('win-mail')">－</span><span onclick="toggleWin('win-mail')">×</span></div>
+                        <span id="mail-win-title">系統郵件 - 鎖定中</span>
+                        <div class="win-btns"><span onclick="toggleWin('win-mail')">×</span></div>
                     </div>
-                    <div class="win-body" id="mail-body">
+                    <div class="win-body">
                         <div id="login-view" class="login-container">
-                            <div style="font-size: 0.8rem;">GX-INTRANET ACCESS</div>
+                            <div style="font-size: 0.7rem; opacity: 0.7;">GX-INTRANET ACCESS</div>
                             <input type="text" id="user-id" class="login-input" placeholder="User ID">
-                            <input type="password" id="user-pass" class="login-input" placeholder="Key">
-                            <button class="login-btn" onclick="checkLogin()">登入</button>
+                            <input type="password" id="user-pass" class="login-input" placeholder="Access Key">
+                            <button class="login-btn" onclick="checkLogin()">存取</button>
                         </div>
                         <div id="mail-list-view" class="mail-list">
                             <div class="mail-toolbar">
-                                <span style="font-size:0.7rem; color:#deff9a">收件匣 (2)</span>
+                                <span id="user-display-name" style="font-size:0.7rem; color:#deff9a">User</span>
                                 <div class="logout-btn" onclick="logoutMail()">[登出]</div>
                             </div>
-                            <div class="mail-item" onclick="readMail(this, 'mail-001')"><span>【緊急】GX-9527...</span><span>10/24</span></div>
-                            <div class="mail-item" onclick="readMail(this, 'mail-002')"><span>[系統] 密碼過期提醒</span><span>10/22</span></div>
+                            <div id="mail-items-container"></div>
                         </div>
                         <div id="mail-content-view" class="mail-content-view">
                             <div class="back-btn" onclick="backToMailList()">← 返回</div>
-                            <div id="mail-detail-text"></div>
+                            <div id="mail-detail-text" style="border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; font-size: 0.8rem; line-height: 1.6; white-space: pre-wrap; color: #daffde;"></div>
                         </div>
                     </div>
                 </div>
 
                 <div id="win-browser" class="win-box" style="top:10%; left:10%;"><div class="win-header"><span>瀏覽器</span><div class="win-btns"><span onclick="toggleWin('win-browser')">×</span></div></div><div class="win-body">正在連線內部論壇...</div></div>
-                <div id="win-file" class="win-box" style="top:15%; left:15%;"><div class="win-header"><span>檔案</span><div class="win-btns"><span onclick="toggleWin('win-file')">×</span></div></div><div class="win-body">員工手冊.pdf</div></div>
-                <div id="win-truck" class="win-box" style="top:20%; left:20%;"><div class="win-header"><span>物流追蹤</span><div class="win-btns"><span onclick="toggleWin('win-truck')">×</span></div></div><div class="win-body">GX-9527：配送中</div></div>
-                <div id="win-setting" class="win-box" style="top:25%; left:25%;"><div class="win-header"><span>系統設定</span><div class="win-btns"><span onclick="toggleWin('win-setting')">×</span></div></div><div class="win-body">亮度：100%</div></div>
+                <div id="win-file" class="win-box" style="top:15%; left:15%;"><div class="win-header"><span>檔案</span><div class="win-btns"><span onclick="toggleWin('win-file')">×</span></div></div><div class="win-body">員工守冊.pdf (權限不足)</div></div>
+                <div id="win-truck" class="win-box" style="top:20%; left:20%;"><div class="win-header"><span>物流追蹤</span><div class="win-btns"><span onclick="toggleWin('win-truck')">×</span></div></div><div class="win-body">GX-9527：配送異常</div></div>
+                <div id="win-setting" class="win-box" style="top:25%; left:25%;"><div class="win-header"><span>系統</span><div class="win-btns"><span onclick="toggleWin('win-setting')">×</span></div></div><div class="win-body">系統版本：v10.4.2</div></div>
             </div>
 
             <div id="newspaper-extras" class="newspaper-ui">
@@ -187,52 +181,102 @@
                     <div class="page-content" id="page-content">...</div>
                 </div>
             </div>
-
             <div id="turtle-puzzle" class="turtle-puzzle-ui"></div>
         </div>
     </div>
 
-    <script type="module" src="../JS/mail_system.js"></script>
     <script type="module">
         import { NEWSPAPER_DATA } from '../data/newspaper_data.js';
+        import { MAIL_DATABASE } from '../data/mail_data.js';
+
         const assets = { turtle: '../image/end3/turtle-shell.webp', news: '../image/newspaper.webp', mirror: '../image/end2/mirror.webp', lcd: '../image/end1/lcd-monitor.webp', phone: '../image/phone.webp' };
         const overlay = document.getElementById('detail-overlay'), detImg = document.getElementById('detail-img'), newsEx = document.getElementById('newspaper-extras'), turtlePz = document.getElementById('turtle-puzzle'), lcdUI = document.getElementById('lcd-ui');
 
-        // [龜甲矩陣]
-        function initTurtle() { turtlePz.innerHTML = ''; for(let i=0; i<81; i++) { const c = document.createElement('div'); c.className='puzzle-cell'; turtlePz.appendChild(c); } }
+        let currentUserMails = [];
 
-        // [信件系統]
-        window.checkLogin = function() { document.getElementById('login-view').style.display='none'; document.getElementById('mail-list-view').style.display='flex'; };
-        window.logoutMail = function() { document.getElementById('login-view').style.display='flex'; document.getElementById('mail-list-view').style.display='none'; document.getElementById('mail-content-view').style.display='none'; document.getElementById('user-id').value=''; document.getElementById('user-pass').value=''; };
-        window.readMail = function(el, id) { el.classList.add('read'); document.getElementById('mail-list-view').style.display='none'; document.getElementById('mail-content-view').style.display='block'; document.getElementById('mail-detail-text').innerHTML = id==='mail-001' ? "內容：包裹嚴禁私自拆封。" : "內容：密碼定期更換通知。"; };
-        window.backToMailList = function() { document.getElementById('mail-list-view').style.display='flex'; document.getElementById('mail-content-view').style.display='none'; };
+        // [整合後的信件核心邏輯]
+        window.checkLogin = function() {
+            const userId = document.getElementById('user-id').value.trim();
+            const pass = document.getElementById('user-pass').value.trim();
+            
+            // 驗證邏輯：ID 必須存在於資料庫，且密碼必須為 HOME666
+            if (MAIL_DATABASE[userId] && pass === "HOME666") {
+                const userData = MAIL_DATABASE[userId];
+                currentUserMails = userData.mails;
+                document.getElementById('user-display-name').innerText = userData.userName;
+                document.getElementById('mail-win-title').innerText = "系統郵件 - " + userData.userName;
+                renderMailList();
+                document.getElementById('login-view').style.display = 'none';
+                document.getElementById('mail-list-view').style.display = 'flex';
+            } else {
+                alert("存取拒絕：無效的員工 ID 或 Access Key。");
+            }
+        };
 
-        // [顯示控制]
+        function renderMailList() {
+            const container = document.getElementById('mail-items-container');
+            container.innerHTML = '';
+            currentUserMails.forEach(mail => {
+                const item = document.createElement('div');
+                item.className = 'mail-item';
+                item.innerHTML = `<span>📩 ${mail.title}</span><span style="font-size:0.7rem; opacity:0.5">${mail.id}</span>`;
+                item.onclick = () => readMail(mail);
+                container.appendChild(item);
+            });
+        }
+
+        window.readMail = function(mail) {
+            document.getElementById('mail-list-view').style.display = 'none';
+            document.getElementById('mail-content-view').style.display = 'block';
+            document.getElementById('mail-detail-text').innerText = mail.content;
+        };
+
+        window.logoutMail = function() {
+            document.getElementById('login-view').style.display = 'flex';
+            document.getElementById('mail-list-view').style.display = 'none';
+            document.getElementById('mail-content-view').style.display = 'none';
+            document.getElementById('user-id').value = '';
+            document.getElementById('user-pass').value = '';
+            document.getElementById('mail-win-title').innerText = "系統郵件 - 鎖定中";
+        };
+
+        window.backToMailList = () => {
+            document.getElementById('mail-list-view').style.display = 'flex';
+            document.getElementById('mail-content-view').style.display = 'none';
+        };
+
+        // [UI 切換與報紙邏輯 - 嚴格維持正確定位]
         function hideAll() { newsEx.style.display='none'; turtlePz.style.display='none'; lcdUI.style.display='none'; detImg.className=''; }
-        window.openTurtle = () => { hideAll(); initTurtle(); turtlePz.style.display='grid'; show('turtle', 'img-portrait'); };
+        window.openTurtle = () => { hideAll(); turtlePz.style.display='grid'; initTurtle(); show('turtle', 'img-portrait'); };
         window.openNewspaper = () => { hideAll(); newsEx.style.display='block'; initDots(); renderPage(); show('news', 'img-portrait'); };
         window.openLCD = () => { hideAll(); lcdUI.style.display='block'; initDraggable(); show('lcd', 'img-lcd-special'); };
         window.openMirror = () => { hideAll(); show('mirror', 'img-portrait'); };
         window.openPhone = () => { hideAll(); show('phone', 'img-portrait'); };
-        function show(key, cls) { detImg.src=assets[key]; detImg.className=cls; overlay.style.display='flex'; setTimeout(()=>overlay.classList.add('show'), 10); }
+        function show(k, c) { detImg.src=assets[k]; detImg.className=c; overlay.style.display='flex'; setTimeout(()=>overlay.classList.add('show'),10); }
         window.closeDetail = () => { overlay.classList.remove('show'); setTimeout(()=>{ overlay.style.display='none'; hideAll(); }, 400); };
+        function initTurtle() { turtlePz.innerHTML=''; for(let i=0;i<81;i++) turtlePz.appendChild(document.createElement('div')).className='puzzle-cell'; }
+        
+        window.toggleWin = (id) => { 
+            const w=document.getElementById(id); 
+            if(w) { 
+                const isH=(window.getComputedStyle(w).display==='none'); 
+                w.style.display=isH?'flex':'none'; 
+                if(isH){ document.querySelectorAll('.win-box').forEach(b=>b.style.zIndex="3100"); w.style.zIndex="3200"; } 
+            } 
+        };
 
-        // [視窗管理]
-        window.toggleWin = (id) => { const w=document.getElementById(id); if(w) { const isH = (window.getComputedStyle(w).display==='none'); w.style.display = isH?'flex':'none'; if(isH){ document.querySelectorAll('.win-box').forEach(b=>b.style.zIndex="3100"); w.style.zIndex="3200"; } } };
-        window.minWin = (id) => document.getElementById(id).classList.toggle('minimized');
+        let curP=0;
+        window.changePage=(s)=>{ curP=(curP+s+10)%10; renderPage(); };
+        function initDots(){ const w=document.getElementById('dot-wrapper'); w.innerHTML=''; for(let i=0;i<10;i++){ const d=document.createElement('div'); d.className='dot'+(i===curP?' active':''); d.onclick=(e)=>{e.stopPropagation(); curP=i; renderPage();}; w.appendChild(d); } }
+        function renderPage(){ const d=NEWSPAPER_DATA[curP]; if(!d)return; document.getElementById('page-content').innerText=d.text||""; for(let i=1;i<=3;i++){ const im=document.getElementById(`egg-img-${i}`), ds=document.getElementById(`egg-desc-${i}`); if(im) im.src=d.eggImg||assets.news; if(ds) ds.innerText=(d.eggDescs && d.eggDescs[i-1])?d.eggDescs[i-1]:""; } document.querySelectorAll('.dot').forEach((dt,idx)=>dt.classList.toggle('active',idx===curP)); }
+
         let activeWin = null;
         function initDraggable() { document.querySelectorAll('.win-header').forEach(h => { h.onmousedown = (e) => { if(e.target.tagName==='SPAN') return; activeWin=h.parentElement; document.querySelectorAll('.win-box').forEach(b=>b.style.zIndex="3100"); activeWin.style.zIndex="3200"; }; }); }
         document.addEventListener('mousemove', (e) => { if(!activeWin) return; const r=lcdUI.getBoundingClientRect(); activeWin.style.left = Math.max(0, Math.min(e.clientX-r.left-activeWin.offsetWidth/2, r.width-activeWin.offsetWidth))+'px'; activeWin.style.top = Math.max(0, Math.min(e.clientY-r.top-15, r.height-activeWin.offsetHeight))+'px'; });
         document.addEventListener('mouseup', () => activeWin=null);
 
-        // [報紙邏輯]
-        let cur = 0;
-        window.changePage = (s) => { cur=(cur+s+10)%10; renderPage(); };
-        function initDots() { const w=document.getElementById('dot-wrapper'); w.innerHTML=''; for(let i=0;i<10;i++){ const d=document.createElement('div'); d.className='dot'+(i===cur?' active':''); d.onclick=(e)=>{e.stopPropagation(); cur=i; renderPage();}; w.appendChild(d); } }
-        function renderPage() { const d=NEWSPAPER_DATA[cur]; if(!d) return; document.getElementById('page-content').innerText=d.text||""; for(let i=1;i<=3;i++){ const im=document.getElementById(`egg-img-${i}`), ds=document.getElementById(`egg-desc-${i}`); if(im) im.src=d.eggImg||assets.news; if(ds) ds.innerText=(d.eggDescs && d.eggDescs[i-1])?d.eggDescs[i-1]:""; } document.querySelectorAll('.dot').forEach((dt,idx)=>dt.classList.toggle('active',idx===cur)); }
-
-        function update() { document.getElementById('main-scene').src = (window.innerHeight>window.innerWidth) ? "../image/forget-something-m.webp" : "../image/forget-something.webp"; }
-        window.addEventListener('resize', update); update();
+        function updateScene() { document.getElementById('main-scene').src = (window.innerHeight>window.innerWidth) ? "../image/forget-something-m.webp" : "../image/forget-something.webp"; }
+        window.addEventListener('resize', updateScene); updateScene();
     </script>
 </body>
 </html>
