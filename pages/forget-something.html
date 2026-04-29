@@ -15,57 +15,73 @@
         .scene-img { width: 100%; height: 100%; object-fit: contain; display: block; }
         .hotspot { position: absolute; cursor: pointer; border-radius: 50%; background: radial-gradient(circle, rgba(245, 240, 225, 0.3) 0%, rgba(200, 190, 170, 0.08) 100%); transition: all 0.3s ease; filter: blur(6px); transform: translate(-50%, -50%); z-index: 500; opacity: 0.2; animation: pulse 3s infinite ease-in-out; }
 
-        /* --- 龜甲 9x9 獨立矩陣樣式 --- */
-        .turtle-puzzle-ui {
-            position: absolute;
-            display: none;
-            width: 70vw; height: 70vw;
-            max-width: 55vh; max-height: 55vh;
-            grid-template-columns: repeat(9, 1fr);
-            grid-template-rows: repeat(9, 1fr);
-            gap: 4px;
-            z-index: 9999;
-            pointer-events: auto;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-        }
+        @keyframes pulse { 0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.1); } }
+
+        /* --- 龜甲 9x9 --- */
+        .turtle-puzzle-ui { position: absolute; display: none; width: 70vw; height: 70vw; max-width: 55vh; max-height: 55vh; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); gap: 4px; z-index: 9999; pointer-events: auto; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .puzzle-cell { border: 1px solid rgba(240, 234, 218, 0.5); background: rgba(20, 15, 10, 0.6); transition: all 0.2s; }
         .puzzle-cell:hover { background: rgba(180, 100, 20, 0.5); border-color: #b46414; }
 
-        /* 熱點座標 (電腦版) */
-        #turtle-shell { width: 10%; height: 15%; left: 11.5%; top: 69%; } 
-        #newspaper { width: 12%; height: 15%; left: 10%; top: 86%; } 
-        #mirror { width: 11%; height: 26%; left: 32%; top: 56.5%; } 
-        #lcd-monitor { width: 10%; height: 15%; left: 84.5%; top: 61.5%; } 
+        /* --- LCD 視窗系統 (電腦預設) --- */
+        .lcd-desktop { position: absolute; display: none; width: 50vw; height: 35vw; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 3050; pointer-events: auto; }
+        .icon-bar { position: absolute; bottom: 12%; right: 5%; width: 36%; height: 8%; display: flex; justify-content: space-evenly; transform: translateY(-20px); }
+        .lcd-icon { width: 14%; height: 100%; cursor: pointer; background: transparent; }
+        .win-box { position: absolute; width: 60%; background: #222; border: 1px solid #444; border-radius: 4px; display: none; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.8); overflow: hidden; z-index: 3100; }
+        .win-header { background: #333; padding: 5px 10px; display: flex; justify-content: space-between; align-items: center; color: #eee; font-size: 0.8rem; cursor: default; }
+        .win-body { padding: 15px; color: #ccc; font-size: 0.85rem; height: 150px; overflow-y: auto; background: #1a1a1a; }
+        .win-btns span { margin-left: 10px; cursor: pointer; font-weight: bold; }
+        .win-box.minimized { height: auto !important; width: 150px !important; bottom: 5% !important; top: auto !important; left: 5% !important; }
+        .win-box.minimized .win-body { display: none; }
+
+        /* 電腦版熱點座標 */
+        #turtle-shell { width: 10%; height: 15%; left: 11.5%; top: 69%; }
+        #newspaper { width: 12%; height: 15%; left: 10%; top: 86%; }
+        #mirror { width: 11%; height: 26%; left: 32%; top: 56.5%; }
+        #lcd-monitor { width: 10%; height: 15%; left: 84.5%; top: 61.5%; }
         #phone-screen { width: 5%; height: 8%; left: 92.5%; top: 66%; }
 
         /* ============================================================
-           【手機版專屬樣式區塊】 (max-aspect-ratio: 1/1)
+           【手機版專屬樣式區塊】
            ============================================================ */
-        @media (max-aspect-ratio: 1/1) { 
-            .scene-container { width: 100vw; height: 177.78vw; } 
-            #turtle-shell { width: 20%; height: 10%; left: 13%; top: 74%; } 
-            #newspaper { width: 19%; height: 10%; left: 11%; top: 87%; } 
-            #mirror { width: 22%; height: 12%; left: 35%; top: 72%; } 
-            #lcd-monitor { width: 17%; height: 9%; left: 85%; top: 67%; } 
-            #phone-screen { width: 7%; height: 4%; left: 76%; top: 73%; } 
+        @media (max-aspect-ratio: 1/1) {
+            .scene-container { width: 100vw; height: 177.78vw; }
+            #turtle-shell { width: 20%; height: 10%; left: 13%; top: 74%; }
+            #newspaper { width: 19%; height: 10%; left: 11%; top: 87%; }
+            #mirror { width: 22%; height: 12%; left: 35%; top: 72%; }
+            #lcd-monitor { width: 17%; height: 9%; left: 85%; top: 67%; }
+            #phone-screen { width: 7%; height: 4%; left: 76%; top: 73%; }
 
-            /* 手機版報紙 UI 座標覆蓋 */
-            .newspaper-ui {
-                width: 89% !important;
-                height: 74% !important;
-                left: 6% !important;
-                top: 18% !important;
-            }
-
-            /* 手機版內容組座標覆蓋 */
+            /* 報紙手機版座標 */
+            .newspaper-ui { width: 89% !important; height: 74% !important; left: 6% !important; top: 18% !important; }
             #group-1 { top: 1% !important; left: -1% !important; width: 52% !important; height: 24% !important; }
             #egg-desc-1 { top: 5% !important; left: 105% !important; width: 150px !important; height: 110px !important; }
-
             #group-2 { top: 32% !important; left: 51% !important; width: 45% !important; height: 30% !important; }
-            #egg-desc-2 { top: 107% !important; left: 4% !important; width:82% !important; height: 43% !important; }
-
+            #egg-desc-2 { top: 107% !important; left: 4% !important; width: 82% !important; height: 43% !important; }
             #group-3 { top: 33% !important; left: -3% !important; width: 48% !important; height: 20% !important; }
             #egg-desc-3 { top: 110% !important; left: 1% !important; width: 80% !important; height: 80% !important; }
+
+            /* LCD 手機版黑色外框定位 */
+            .lcd-desktop { 
+                width: 90vw !important; 
+                height: 60vw !important; 
+                top: 45% !important; 
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+            }
+            /* LCD 手機版 ICON BAR 定位 */
+            .lcd-desktop .icon-bar {
+                bottom: 6% !important;
+                width: 40% !important;
+                right: 1% !important;
+                transform: translateY(0) !important;
+            }
+
+            /* 手機版背景圖特殊定位修正 (防止人物被切掉) */
+            .img-lcd-special {
+                width: 100vw !important;
+                height: 92vw !important;
+                object-position: center 40% !important; /* 手機版向上微調 */
+            }
 
             .pagination-container { bottom: 5% !important; }
             .page-content { font-size: 0.9rem !important; }
@@ -75,30 +91,34 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: none; justify-content: center; align-items: center; z-index: 3000; opacity: 0; transition: opacity 0.4s ease; }
         .overlay.show { display: flex; opacity: 1; }
         .detail-view { position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        .img-portrait { height: 90vh; width: auto; object-fit: contain; } 
 
-        /* 報紙 UI 樣式 (電腦版預設) */
+        .img-portrait { height: 90vh; width: auto; object-fit: contain; }
+        
+        /* LCD 背景圖預設 (電腦版) */
+        .img-lcd-special { width: 63vw; height: 60vw; max-height: 90vh; object-fit: cover; object-position: center 45%; }
+        .img-square { max-width: 90vw; max-height: 90vh; object-fit: contain; }
+
+        /* 報紙 UI 樣式 */
         .newspaper-ui { position: absolute; display: none; width: 64%; height: 75%; top: 16.5%; left: 18%; background: transparent; z-index: 3010; touch-action: pan-y; filter: sepia(0.4) saturate(0.7) brightness(0.8) contrast(0.9); }
+        
         @media (min-aspect-ratio: 1/1) {
-            #img-news { height: 115vh; } 
-            .newspaper-ui { height: 80%; top: 16.5%; } 
+            #img-news { height: 115vh; }
+            .newspaper-ui { height: 80%; top: 16.5%; }
             .pagination-container { bottom: 11%; }
         }
 
-        /* 報紙內容元件 (預設/電腦版) */
         .egg-layout { position: relative; width: 100%; height: 100%; }
         .egg-group { position: absolute; display: flex; flex-direction: column; gap: 8px; z-index: 3020; }
-        #group-1 { top: 3%; left: -1%; width: 50%; height: 23%; } 
+        #group-1 { top: 3%; left: -1%; width: 50%; height: 23%; }
         #egg-desc-1 { position: absolute; top: 5%; left: 107%; width: 116px; height: 60px; }
-        #group-2 { top: 28%; left: 50%; width: 48%; height: 30%; } 
+        #group-2 { top: 28%; left: 50%; width: 48%; height: 30%; }
         #egg-desc-2 { position: absolute; top: 107%; left: 7%; width: 100px; height: 45px; }
-        #group-3 { top: 28%; left: -5%; width: 50%; height: 20%; } 
+        #group-3 { top: 28%; left: -5%; width: 50%; height: 20%; }
         #egg-desc-3 { position: absolute; top: 109%; left: 13%; width: 60%; height: 85px; }
         .egg-box { width: 100%; height: 100%; background: #000; border-radius: 4px; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
         .egg-box img { width: 100%; height: 100%; object-fit: cover; }
         .egg-desc { position: absolute; padding: 8px; color: #f0eada; background: rgba(20, 15, 10, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); font-size: 0.8rem; border-radius: 4px; }
         
-        /* 報紙分頁控制 */
         .pagination-container { position: absolute; left: 50%; transform: translateX(-50%); width: 85%; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
         .controls-row { width: 100%; display: flex; justify-content: space-between; align-items: center; pointer-events: auto; }
         .nav-btn { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; cursor: pointer; opacity: 0.8; }
@@ -121,7 +141,7 @@
             <img id="main-scene" src="" class="scene-img">
             <div class="hotspot" id="turtle-shell" onclick="openTurtle()"></div>
             <div class="hotspot" id="newspaper" onclick="openNewspaper()"></div>
-            <div class="hotspot" id="mirror" onclick="openMirror()"></div> 
+            <div class="hotspot" id="mirror" onclick="openMirror()"></div>
             <div class="hotspot" id="lcd-monitor" onclick="openLCD()"></div>
             <div class="hotspot" id="phone-screen" onclick="openPhone()"></div>
         </div>
@@ -131,6 +151,22 @@
         <div class="close-btn" onclick="closeDetail()">&times;</div>
         <div class="detail-view" onclick="event.stopPropagation()">
             <img id="detail-img" src="">
+            
+            <div id="lcd-ui" class="lcd-desktop">
+                <div class="icon-bar">
+                    <div class="lcd-icon" onclick="toggleWin('win-mail')"></div>
+                    <div class="lcd-icon" onclick="toggleWin('win-browser')"></div>
+                    <div class="lcd-icon" onclick="toggleWin('win-file')"></div>
+                    <div class="lcd-icon" onclick="toggleWin('win-truck')"></div>
+                    <div class="lcd-icon" onclick="toggleWin('win-setting')"></div>
+                </div>
+                <div id="win-mail" class="win-box" style="top:5%; left:5%;"><div class="win-header"><span>收件匣</span><div class="win-btns"><span onclick="minWin('win-mail')">－</span><span onclick="toggleWin('win-mail')">×</span></div></div><div class="win-body">未讀郵件...</div></div>
+                <div id="win-browser" class="win-box" style="top:10%; left:10%;"><div class="win-header"><span>瀏覽器</span><div class="win-btns"><span onclick="minWin('win-browser')">－</span><span onclick="toggleWin('win-browser')">×</span></div></div><div class="win-body">正在載入內部論壇...</div></div>
+                <div id="win-file" class="win-box" style="top:15%; left:15%;"><div class="win-header"><span>檔案</span><div class="win-btns"><span onclick="minWin('win-file')">－</span><span onclick="toggleWin('win-file')">×</span></div></div><div class="win-body">員工手冊.pdf</div></div>
+                <div id="win-truck" class="win-box" style="top:20%; left:20%;"><div class="win-header"><span>物流追蹤</span><div class="win-btns"><span onclick="minWin('win-truck')">－</span><span onclick="toggleWin('win-truck')">×</span></div></div><div class="win-body">GX-9527：配送中</div></div>
+                <div id="win-setting" class="win-box" style="top:25%; left:25%;"><div class="win-header"><span>系統設定</span><div class="win-btns"><span onclick="minWin('win-setting')">－</span><span onclick="toggleWin('win-setting')">×</span></div></div><div class="win-body">亮度：100%</div></div>
+            </div>
+
             <div id="turtle-puzzle" class="turtle-puzzle-ui"></div>
             <div id="newspaper-extras" class="newspaper-ui">
                 <div class="egg-layout">
@@ -148,61 +184,39 @@
 
     <script>
         const assets = { turtle: '../image/end3/turtle-shell.webp', news: '../image/newspaper.webp', mirror: '../image/end2/mirror.webp', lcd: '../image/end1/lcd-monitor.webp', phone: '../image/phone.webp' };
-        
-        let currentPage = 0; 
-        const totalPages = 10;
-        const pageData = [
-            { text: "第一頁：自自自自自自自自", eggImgs: ["","",""], eggDescs: ["大塊的標題","右邊的標題","左邊的標題"] },
-            { text: "第二頁：自自自自自自自自自", eggImgs: ["","",""], eggDescs: ["這頁的主線索","細節 C","細節 D"] },
-            { text: "第三頁：...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
-            { text: "第四頁：...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
-            { text: "第五頁：...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
-            { text: "第六頁：...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
-            { text: "第七頁：...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
-            { text: "第八頁：...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
-            { text: "第九頁：...", eggImgs: ["","",""], eggDescs: ["...","...","..."] },
-            { text: "第十頁：...", eggImgs: ["","",""], eggDescs: ["...","...","..."] }
-        ];
+        let currentPage = 0; const totalPages = 10;
+        const pageData = Array(10).fill({ text: "頁面載入中...", eggImgs: ["","",""], eggDescs: ["細節A","細節B","細節C"] });
 
         const overlay = document.getElementById('detail-overlay');
         const detImg = document.getElementById('detail-img');
         const newsEx = document.getElementById('newspaper-extras');
         const turtlePz = document.getElementById('turtle-puzzle');
+        const lcdUI = document.getElementById('lcd-ui');
         const pageContent = document.getElementById('page-content');
         const dotWrapper = document.getElementById('dot-wrapper');
 
-        function initTurtlePuzzle() {
-            turtlePz.innerHTML = '';
-            for (let i = 0; i < 81; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'puzzle-cell';
-                turtlePz.appendChild(cell);
-            }
-        }
-        initTurtlePuzzle();
+        function hideAllExtras() { newsEx.style.display = 'none'; turtlePz.style.display = 'none'; lcdUI.style.display = 'none'; detImg.className = ''; }
 
-        function hideAllExtras() {
-            newsEx.style.display = 'none';
-            turtlePz.style.display = 'none';
-        }
-
-        function showOverlay(src, isPortrait, objectId) {
+        function showOverlay(src, type, objectId) {
             detImg.src = src; detImg.id = "img-" + objectId;
-            detImg.className = isPortrait ? 'img-portrait' : 'img-square';
+            if(objectId === 'lcd') detImg.className = 'img-lcd-special';
+            else if(type === 'portrait') detImg.className = 'img-portrait';
+            else detImg.className = 'img-square';
+
             overlay.style.display = 'flex'; 
             setTimeout(() => overlay.classList.add('show'), 10);
+            if(objectId === 'lcd') lcdUI.style.display = 'block';
         }
 
-        function openTurtle() { hideAllExtras(); turtlePz.style.display = 'grid'; showOverlay(assets.turtle, true, 'turtle'); }
-        function openNewspaper() { hideAllExtras(); newsEx.style.display = 'block'; initDots(); renderPage(); showOverlay(assets.news, true, 'news'); }
-        function openMirror() { hideAllExtras(); showOverlay(assets.mirror, true, 'mirror'); }
-        function openLCD() { hideAllExtras(); showOverlay(assets.lcd, false, 'lcd'); }
-        function openPhone() { hideAllExtras(); showOverlay(assets.phone, true, 'phone'); }
+        function openTurtle() { hideAllExtras(); turtlePz.style.display = 'grid'; showOverlay(assets.turtle, 'portrait', 'turtle'); }
+        function openNewspaper() { hideAllExtras(); newsEx.style.display = 'block'; initDots(); renderPage(); showOverlay(assets.news, 'portrait', 'news'); }
+        function openMirror() { hideAllExtras(); showOverlay(assets.mirror, 'portrait', 'mirror'); }
+        function openLCD() { hideAllExtras(); showOverlay(assets.lcd, 'square', 'lcd'); }
+        function openPhone() { hideAllExtras(); showOverlay(assets.phone, 'portrait', 'phone'); }
 
-        function closeDetail() {
-            overlay.classList.remove('show'); 
-            setTimeout(() => { overlay.style.display = 'none'; hideAllExtras(); }, 400);
-        }
+        function toggleWin(id) { const w = document.getElementById(id); if (!w) return; w.classList.remove('minimized'); w.style.display = (w.style.display === 'flex') ? 'none' : 'flex'; }
+        function minWin(id) { const w = document.getElementById(id); w.classList.toggle('minimized'); event.stopPropagation(); }
+        function closeDetail() { overlay.classList.remove('show'); setTimeout(() => { overlay.style.display = 'none'; hideAllExtras(); }, 400); }
 
         function initDots() {
             dotWrapper.innerHTML = '';
@@ -214,12 +228,10 @@
             }
         }
         function renderPage() {
-            const data = pageData[currentPage];
-            pageContent.innerText = data.text;
+            const data = pageData[currentPage]; pageContent.innerText = `第 ${currentPage + 1} 頁內容`;
             for(let i=1; i<=3; i++) {
-                const img = document.getElementById(`egg-img-${i}`);
-                const desc = document.getElementById(`egg-desc-${i}`);
-                img.src = data.eggImgs[i-1] || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+                const img = document.getElementById(`egg-img-${i}`); const desc = document.getElementById(`egg-desc-${i}`);
+                img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 desc.innerText = data.eggDescs[i-1];
             }
             const dots = dotWrapper.querySelectorAll('.dot');
@@ -232,6 +244,7 @@
             document.getElementById('main-scene').src = isPortrait ? "../image/forget-something-m.webp" : "../image/forget-something.webp";
         }
         window.addEventListener('resize', updateScene); updateScene();
+        for (let i = 0; i < 81; i++) { const cell = document.createElement('div'); cell.className = 'puzzle-cell'; turtlePz.appendChild(cell); }
     </script>
 </body>
 </html>
