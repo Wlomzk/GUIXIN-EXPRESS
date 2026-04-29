@@ -1,91 +1,129 @@
-/* --- 1. 動畫定義 (精簡版) --- */
-@keyframes number-pop {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); color: #8b0000; }
-}
-
+/* --- 1. 動畫定義 --- */
 @keyframes scroll {
     from { transform: translateX(100%); }
     to { transform: translateX(-100%); }
 }
 
-.animate-marquee { animation: scroll 25s linear infinite; }
+@keyframes number-pop {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); color: #8b0000; }
+}
+
+.animate-marquee { 
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll 25s linear infinite; 
+}
 .animate-pop { display: inline-block; animation: number-pop 0.3s ease-out; }
 
-/* --- 2. 核心底色與佈局 --- */
-body { 
-    font-family: 'Noto Serif TC', serif; 
-    background-color: #8e8271; /* 總監指定色 */
-    color: #1a1816;           
+/* --- 2. 核心佈局 --- */
+body {  
+    font-family: 'Noto Serif TC', serif;  
+    background-color: #8e8271; 
+    color: #1a1816;            
     margin: 0;
     padding: 0;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-/* 🚀 優化：手機選單 */
-/* 移除 !important，改用正常的狀態控制 */
+/* --- 3. 跑馬燈 --- */
+.status-bar { 
+    background: #2a2623; 
+    color: #d9d4cc; 
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; 
+    overflow: hidden; 
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+}
+
+.status-content { 
+    line-height: 1;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+/* --- 4. 導覽列與選單 --- */
+nav { flex-shrink: 0; }
+
 #mobile-menu {
-    display: none; /* 預設隱藏 */
+    display: none; 
     background-color: #1a1816; 
     width: 100vw;
     height: 100vh;
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 0; left: 0;
     z-index: 9999;
     flex-direction: column;
 }
 
-/* 當 JS 移除 hidden 類別並加上 flex 類別時才顯示 */
-#mobile-menu.active {
-    display: flex;
-}
+#mobile-menu.flex { display: flex; }
 
-/* --- 3. 元素樣式優化 --- */
-.status-bar { 
-    background: #2a2623; 
-    color: #d9d4cc; 
-    font-size: 10px; 
-    padding: 6px 0; 
-    letter-spacing: 0.1em; 
-}
-
+/* --- 5. Hero Banner --- */
 .hero-banner {
+    flex: 1 0 auto;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;
     background-color: #8e8271; 
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
     transition: background-image 0.8s ease-in-out;
-    min-height: 80vh;
-    display: flex; 
-    flex-direction: column; 
-    justify-content: center; 
-    align-items: center;
+    padding: 2rem 1.5rem;
 }
 
 .search-container {
     background-color: rgba(240, 238, 233, 0.9);
     border: 1px solid #4a443e;
     backdrop-filter: blur(5px);
-    transition: transform 0.3s ease;
+    width: 100%;
+    max-width: 600px;
+    transition: transform 0.3s ease; /* 補回你的過渡效果 */
 }
 
 #search-result {
     display: none; 
     margin: 2rem auto 0;
     padding: 1.5rem;
-    border-left: 4px solid #4a443e;      
     background: rgba(245, 242, 237, 0.98); 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+    border-left: 4px solid #4a443e; /* 補回你的左側邊框 */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* 補回你的陰影 */
     border-radius: 0 8px 8px 0;
-    width: 90%; 
+    width: 90%;
     max-width: 600px;
 }
 
-/* --- 4. 響應式微調 --- */
+/* --- 6. 頁尾：修正換行問題 --- */
+footer {
+    margin-top: auto;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: rgba(214, 211, 204, 0.3);
+    width: 100%;
+}
+
+/* 新增這個小區塊，專門解決截圖的文字斷行 */
+footer p {
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+    word-break: keep-all;     /* 防止「保護。」掉下去的核心設定 */
+    overflow-wrap: break-word; 
+    font-size: 11px;
+    letter-spacing: 0.1em;
+}
+
+/* --- 7. 響應式微調 --- */
 @media (max-width: 768px) {
-    .hero-banner { min-height: 60vh; padding: 3rem 0; }
-    #search-result { padding: 1.2rem; font-size: 14px; line-height: 1.8; }
-    .status-bar { font-size: 9px; }
+    .hero-banner { min-height: 60vh; padding-top: 5rem; }
+    .status-bar { font-size: 9px; height: 28px; }
+    #search-result { padding: 1.2rem; font-size: 14px; } /* 補回手機版縮放 */
 }
