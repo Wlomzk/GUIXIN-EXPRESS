@@ -2,11 +2,11 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>歸心物流 - 失物招領處</title>
     <link rel="icon" href="../image/GUIXIN.webp" type="image/webp">
     <style>
-        /* [1. 基礎佈局區] - 絕對不動區 */
+        /* [1. 基礎佈局區] */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; overflow: hidden; font-family: "Noto Sans TC", sans-serif; }
         .header-bar { position: fixed; top: 0; left: 0; width: 100%; padding: 1.2rem 5%; background: rgba(25, 25, 25, 0.6); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 2500; }
         .header-bar a { color: rgba(255, 255, 255, 0.9); text-decoration: none; font-size: 0.9rem; letter-spacing: 0.2em; }
@@ -29,18 +29,17 @@
         #lcd-monitor { width: 10%; height: 15%; left: 84.5%; top: 61.5%; }
         #phone-screen { width: 5%; height: 8%; left: 92.5%; top: 66%; }
 
-        /* [3. 圖片顯示模式] */
         .img-portrait { height: 90vh; width: auto; object-fit: contain; }
         .img-lcd-special { width: 63vw; height: 60vw; max-height: 90vh; object-fit: cover; object-position: center 45%; }
 
         /* [4. LCD 系統與視窗] */
-        .lcd-desktop { position: absolute; display: none; width: 47vw; height: 31vw; top: 45%; left: 50%; transform: translate(-50%, -50%); z-index: 3050; pointer-events: auto; }
+        .lcd-desktop { position: absolute; display: none; width: 47vw; height: 31vw; top: 45%; left: 50%; transform: translate(-50%, -50%); z-index: 3050; pointer-events: auto; user-select: none; -webkit-user-select: none; }
         .icon-bar { position: absolute; bottom: 12%; right: 2%; width: 39%; height: 8%; display: flex; justify-content: space-evenly; transform: translateY(24px); }
         .lcd-icon { width: 14%; height: 100%; cursor: pointer; background: transparent; }
         
-        .win-box { position: absolute; width: 70%; background: rgba(25, 25, 25, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; display: none; flex-direction: column; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8); overflow: hidden; z-index: 3100; }
-        .win-header { background: rgba(255, 255, 255, 0.05); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; color: #deff9a; font-size: 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); cursor: move; }
-        .win-body { padding: 18px; color: #daffde; font-size: 0.9rem; line-height: 1.5; height: 160px; overflow-y: auto; }
+        .win-box { position: absolute; width: 70%; background: rgba(25, 25, 25, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; display: none; flex-direction: column; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8); overflow: hidden; z-index: 3100; touch-action: none; }
+        .win-header { background: rgba(255, 255, 255, 0.05); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; color: #deff9a; font-size: 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); cursor: move; touch-action: none; }
+        .win-body { padding: 18px; color: #daffde; font-size: 0.9rem; line-height: 1.5; height: 160px; overflow-y: auto; user-select: text; -webkit-user-select: text; }
         .win-btns span { margin-left: 10px; cursor: pointer; font-weight: bold; padding: 4px 8px; }
 
         /* [5. 信件介面] */
@@ -48,7 +47,7 @@
         .login-input { background: rgba(0, 0, 0, 0.5); border: 1px solid #deff9a; color: #fff; padding: 8px; border-radius: 4px; text-align: center; width: 80%; outline: none; }
         .login-btn { background: #deff9a; color: #000; border: none; padding: 6px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .mail-list { display: none; width: 100%; flex-direction: column; }
-        .mail-item { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; display: flex; justify-content: space-between; }
+        .mail-item { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; display: flex; flex-direction: column; } /* 改為 column 以便定位日期 */
         .mail-item:hover { background: rgba(222, 255, 154, 0.1); }
         .mail-toolbar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px; margin-bottom: 8px; }
         .logout-btn { color: #ff5555; cursor: pointer; font-size: 0.75rem; border: 1px solid rgba(255, 85, 85, 0.3); padding: 2px 6px; border-radius: 4px; }
@@ -84,7 +83,7 @@
         .turtle-puzzle-ui { position: absolute; display: none; width: 110vw; height: 110vw; max-width: 55vh; max-height: 55vh; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); gap: 4px; z-index: 3010; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .puzzle-cell { border: 1px solid rgba(240, 234, 218, 0.3); background: rgba(20, 15, 10, 0.4); }
 
-        /* [8. RWD 區] - 嚴格還原把拔的手機版定位 */
+        /* [8. RWD 區] */
         @media (max-aspect-ratio: 1/1) {
             .scene-container { width: 100vw; height: 177.78vw; }
             #turtle-shell { width: 20%; height: 10%; left: 13%; top: 74%; }
@@ -193,13 +192,15 @@
         const overlay = document.getElementById('detail-overlay'), detImg = document.getElementById('detail-img'), newsEx = document.getElementById('newspaper-extras'), turtlePz = document.getElementById('turtle-puzzle'), lcdUI = document.getElementById('lcd-ui');
 
         let currentUserMails = [];
+        
+        // --- 核心修正：已讀記憶系統 ---
+        // 從 localStorage 讀取已讀紀錄，若無則建立新的 Set
+        let readMails = new Set(JSON.parse(localStorage.getItem('readMails') || '[]'));
 
-        // [整合後的信件核心邏輯]
+        // [信件核心邏輯]
         window.checkLogin = function() {
             const userId = document.getElementById('user-id').value.trim();
             const pass = document.getElementById('user-pass').value.trim();
-            
-            // 驗證邏輯：ID 必須存在於資料庫，且密碼必須為 HOME666
             if (MAIL_DATABASE[userId] && pass === "HOME666") {
                 const userData = MAIL_DATABASE[userId];
                 currentUserMails = userData.mails;
@@ -219,8 +220,28 @@
             currentUserMails.forEach(mail => {
                 const item = document.createElement('div');
                 item.className = 'mail-item';
-                item.innerHTML = `<span>📩 ${mail.title}</span><span style="font-size:0.7rem; opacity:0.5">${mail.id}</span>`;
-                item.onclick = () => readMail(mail);
+                
+                // 檢查是否已讀
+                const isRead = readMails.has(mail.id);
+                
+                // 設定內容：標題在左，日期靠右下顯示
+                item.innerHTML = `
+                    <span class="mail-title" style="font-weight: ${isRead ? 'normal' : 'bold'}; color: ${isRead ? '#777' : '#deff9a'};">
+                        ${isRead ? '✉' : '📩'} ${mail.title}
+                    </span>
+                    <span class="mail-date" style="font-size: 0.65rem; opacity: 0.5; align-self: flex-end; margin-top: 4px;">
+                        ${mail.date || '2024/10/24'}
+                    </span>
+                `;
+                
+                item.onclick = () => {
+                    // 更新已讀狀態並存入 localStorage
+                    readMails.add(mail.id);
+                    localStorage.setItem('readMails', JSON.stringify(Array.from(readMails)));
+                    
+                    readMail(mail);
+                    renderMailList(); // 重新渲染清單以更新視覺效果
+                };
                 container.appendChild(item);
             });
         }
@@ -245,7 +266,7 @@
             document.getElementById('mail-content-view').style.display = 'none';
         };
 
-        // [UI 切換與報紙邏輯 - 嚴格維持正確定位]
+        // [UI 切換與報紙邏輯]
         function hideAll() { newsEx.style.display='none'; turtlePz.style.display='none'; lcdUI.style.display='none'; detImg.className=''; }
         window.openTurtle = () => { hideAll(); turtlePz.style.display='grid'; initTurtle(); show('turtle', 'img-portrait'); };
         window.openNewspaper = () => { hideAll(); newsEx.style.display='block'; initDots(); renderPage(); show('news', 'img-portrait'); };
@@ -265,15 +286,55 @@
             } 
         };
 
+        // [核心修正：支援手機與防止反白的拖曳系統]
+        let activeWin = null;
+        let startX, startY, initialX, initialY;
+
+        function initDraggable() {
+            document.querySelectorAll('.win-header').forEach(h => {
+                h.onmousedown = (e) => startDrag(e, h.parentElement);
+                h.ontouchstart = (e) => startDrag(e.touches[0], h.parentElement);
+            });
+        }
+
+        function startDrag(e, target) {
+            if (e.target.tagName === 'SPAN') return; 
+            activeWin = target;
+            document.querySelectorAll('.win-box').forEach(b => b.style.zIndex = "3100");
+            activeWin.style.zIndex = "3200";
+            startX = e.clientX;
+            startY = e.clientY;
+            initialX = activeWin.offsetLeft;
+            initialY = activeWin.offsetTop;
+            document.addEventListener('mousemove', dragMove, { passive: false });
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchmove', (e) => dragMove(e.touches[0]), { passive: false });
+            document.addEventListener('touchend', stopDrag);
+        }
+
+        function dragMove(e) {
+            if (!activeWin) return;
+            if (e.preventDefault) e.preventDefault();
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            const r = lcdUI.getBoundingClientRect();
+            let newX = initialX + dx;
+            let newY = initialY + dy;
+            activeWin.style.left = Math.max(0, Math.min(newX, r.width - activeWin.offsetWidth)) + 'px';
+            activeWin.style.top = Math.max(0, Math.min(newY, r.height - activeWin.offsetHeight)) + 'px';
+        }
+
+        function stopDrag() {
+            activeWin = null;
+            document.removeEventListener('mousemove', dragMove);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+
+        // 報紙分頁
         let curP=0;
         window.changePage=(s)=>{ curP=(curP+s+10)%10; renderPage(); };
         function initDots(){ const w=document.getElementById('dot-wrapper'); w.innerHTML=''; for(let i=0;i<10;i++){ const d=document.createElement('div'); d.className='dot'+(i===curP?' active':''); d.onclick=(e)=>{e.stopPropagation(); curP=i; renderPage();}; w.appendChild(d); } }
         function renderPage(){ const d=NEWSPAPER_DATA[curP]; if(!d)return; document.getElementById('page-content').innerText=d.text||""; for(let i=1;i<=3;i++){ const im=document.getElementById(`egg-img-${i}`), ds=document.getElementById(`egg-desc-${i}`); if(im) im.src=d.eggImg||assets.news; if(ds) ds.innerText=(d.eggDescs && d.eggDescs[i-1])?d.eggDescs[i-1]:""; } document.querySelectorAll('.dot').forEach((dt,idx)=>dt.classList.toggle('active',idx===curP)); }
-
-        let activeWin = null;
-        function initDraggable() { document.querySelectorAll('.win-header').forEach(h => { h.onmousedown = (e) => { if(e.target.tagName==='SPAN') return; activeWin=h.parentElement; document.querySelectorAll('.win-box').forEach(b=>b.style.zIndex="3100"); activeWin.style.zIndex="3200"; }; }); }
-        document.addEventListener('mousemove', (e) => { if(!activeWin) return; const r=lcdUI.getBoundingClientRect(); activeWin.style.left = Math.max(0, Math.min(e.clientX-r.left-activeWin.offsetWidth/2, r.width-activeWin.offsetWidth))+'px'; activeWin.style.top = Math.max(0, Math.min(e.clientY-r.top-15, r.height-activeWin.offsetHeight))+'px'; });
-        document.addEventListener('mouseup', () => activeWin=null);
 
         function updateScene() { document.getElementById('main-scene').src = (window.innerHeight>window.innerWidth) ? "../image/forget-something-m.webp" : "../image/forget-something.webp"; }
         window.addEventListener('resize', updateScene); updateScene();
