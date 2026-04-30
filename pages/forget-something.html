@@ -6,7 +6,9 @@
     <title>歸心物流 - 失物招領處</title>
     <link rel="icon" href="../image/GUIXIN.webp" type="image/webp">
     <style>
-        /* [1. 基礎佈局區] */
+        /* ============================================================
+           [1. 基礎佈局區] 
+           ============================================================ */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; overflow: hidden; font-family: "Noto Sans TC", sans-serif; }
         .header-bar { position: fixed; top: 0; left: 0; width: 100%; padding: 1.2rem 5%; background: rgba(25, 25, 25, 0.6); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 2500; }
         .header-bar a { color: rgba(255, 255, 255, 0.9); text-decoration: none; font-size: 0.9rem; letter-spacing: 0.2em; }
@@ -20,7 +22,9 @@
         .close-btn { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 2.5rem; cursor: pointer; z-index: 4100; }
         .detail-view { position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-        /* [2. 熱點元件] */
+        /* ============================================================
+           [2. 熱點元件] 
+           ============================================================ */
         .hotspot { position: absolute; cursor: pointer; border-radius: 50%; background: radial-gradient(circle, rgba(245, 240, 225, 0.3) 0%, rgba(200, 190, 170, 0.08) 100%); transition: all 0.3s ease; filter: blur(6px); transform: translate(-50%, -50%); z-index: 500; opacity: 0.2; animation: pulse 3s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.1); } }
         #turtle-shell { width: 10%; height: 15%; left: 11.5%; top: 69%; }
@@ -32,33 +36,39 @@
         .img-portrait { height: 90vh; width: auto; object-fit: contain; }
         .img-lcd-special { width: 63vw; height: 60vw; max-height: 90vh; object-fit: cover; object-position: center 45%; }
 
-        /* [4. LCD 系統與視窗] */
+        /* ============================================================
+           [4. LCD 系統與視窗] 
+           ============================================================ */
         .lcd-desktop { position: absolute; display: none; width: 47vw; height: 31vw; top: 45%; left: 50%; transform: translate(-50%, -50%); z-index: 3050; pointer-events: auto; user-select: none; -webkit-user-select: none; }
         .icon-bar { position: absolute; bottom: 12%; right: 2%; width: 39%; height: 8%; display: flex; justify-content: space-evenly; transform: translateY(24px); }
         .lcd-icon { width: 14%; height: 100%; cursor: pointer; background: transparent; }
         
         .win-box { position: absolute; width: 70%; background: rgba(25, 25, 25, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; display: none; flex-direction: column; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8); overflow: hidden; z-index: 3100; touch-action: none; }
         .win-header { background: rgba(255, 255, 255, 0.05); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; color: #deff9a; font-size: 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); cursor: move; touch-action: none; }
-        .win-body { padding: 18px; color: #daffde; font-size: 0.9rem; line-height: 1.5; height: 160px; overflow-y: auto; user-select: text; -webkit-user-select: text; }
+        .win-body { padding: 18px; color: #daffde; font-size: 0.9rem; line-height: 0.5; height: 160px; overflow-y: auto; user-select: text; -webkit-user-select: text; }
         .win-btns span { margin-left: 10px; cursor: pointer; font-weight: bold; padding: 4px 8px; }
 
-        /* [5. 信件介面] */
-        .login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 10px; }
+        /* ============================================================
+           [5. 信件介面] 
+           ============================================================ */
+        .login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 15px; }
         .login-input { background: rgba(0, 0, 0, 0.5); border: 1px solid #deff9a; color: #fff; padding: 8px; border-radius: 4px; text-align: center; width: 80%; outline: none; }
         .login-btn { background: #deff9a; color: #000; border: none; padding: 6px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .mail-list { display: none; width: 100%; flex-direction: column; }
-        .mail-item { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; display: flex; flex-direction: column; } /* 改為 column 以便定位日期 */
+        .mail-item { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; display: flex; flex-direction: column; } 
         .mail-item:hover { background: rgba(222, 255, 154, 0.1); }
         .mail-toolbar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px; margin-bottom: 8px; }
-        .logout-btn { color: #ff5555; cursor: pointer; font-size: 0.75rem; border: 1px solid rgba(255, 85, 85, 0.3); padding: 2px 6px; border-radius: 4px; }
+        .logout-btn { color: #ff5555; cursor: pointer; font-size: 0.75rem; border: 1px solid rgba(255, 85, 85, 0.3); padding: 6px 6px; border-radius: 4px; }
         .mail-content-view { display: none; }
-        .back-btn { color: #deff9a; cursor: pointer; border: 1px solid rgba(222, 255, 154, 0.3); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 10px; display: inline-block; }
+        .back-btn { color: #deff9a; cursor: pointer; border: 1px solid rgba(222, 255, 154, 0.3); padding: 6px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 10px; display: inline-block; }
 
         /* [6. 呼吸燈] */
         .power-led { position: absolute; bottom: -5.2%; right: 2.2%; width: 10px; height: 10px; background-color: #a1ff09; border-radius: 50%; z-index: 4000; animation: led-breath 4s infinite ease-in-out; }
         @keyframes led-breath { 0%, 100% { opacity: 0.3; box-shadow: 0 0 4px #39FF14; } 50% { opacity: 1; box-shadow: 0 0 8px #39FF14, 0 0 12px rgba(57, 255, 20, 0.6); } }
 
-        /* [7. 報紙 UI] */
+        /* ============================================================
+           [7. 報紙 UI] 
+           ============================================================ */
         .newspaper-ui { position: absolute; display: none; width: 64%; height: 75%; top: 16.5%; left: 18%; background: transparent; z-index: 3010; filter: sepia(0.4) saturate(0.7) brightness(0.8) contrast(0.9); }
         .egg-layout { position: relative; width: 100%; height: 100%; pointer-events: none; }
         .egg-group { position: absolute; display: flex; flex-direction: column; gap: 8px; z-index: 3020; pointer-events: auto; }
@@ -80,10 +90,13 @@
         .dot.active { background: #f0eada; border: none; box-shadow: 0 0 12px #f0eada; }
         .page-content { color: #f0eada; text-align: center; font-size: 1rem; font-weight: bold; margin-top: 8px; text-shadow: 0 0 10px #000; }
 
+        /* [龜殼拼圖] */
         .turtle-puzzle-ui { position: absolute; display: none; width: 110vw; height: 110vw; max-width: 55vh; max-height: 55vh; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); gap: 4px; z-index: 3010; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .puzzle-cell { border: 1px solid rgba(240, 234, 218, 0.3); background: rgba(20, 15, 10, 0.4); }
 
-        /* [8. RWD 區] */
+        /* ============================================================
+           [8. RWD 區 - 偵測螢幕比例與手機版樣式] 
+           ============================================================ */
         @media (max-aspect-ratio: 1/1) {
             .scene-container { width: 100vw; height: 177.78vw; }
             #turtle-shell { width: 20%; height: 10%; left: 13%; top: 74%; }
@@ -106,27 +119,32 @@
     </style>
 </head>
 <body>
+    <!-- [導覽列] -->
     <nav class="header-bar">
         <a href="forget-something.html">歸心物流 | 失物招領處</a>
         <a href="../index.html" style="font-size: 0.75rem; color: #aaa;">回到首頁</a>
     </nav>
 
+    <!-- [主場景區] -->
     <div class="scene-wrapper">
         <div class="scene-container">
             <img id="main-scene" src="" class="scene-img">
+            <!-- 熱點區 -->
             <div class="hotspot" id="turtle-shell" onclick="openTurtle()"></div>
             <div class="hotspot" id="newspaper" onclick="openNewspaper()"></div>
             <div class="hotspot" id="mirror" onclick="openMirror()"></div>
             <div class="hotspot" id="lcd-monitor" onclick="openLCD()"></div>
             <div class="hotspot" id="phone-screen" onclick="openPhone()"></div>
-        </div>
-    </div>
+        </div> <!-- END scene-container -->
+    </div> <!-- END scene-wrapper -->
 
+    <!-- [詳情彈窗層] -->
     <div class="overlay" id="detail-overlay" onclick="closeDetail()">
         <div class="close-btn" onclick="closeDetail()">&times;</div>
         <div class="detail-view" onclick="event.stopPropagation()">
             <img id="detail-img" src="">
             
+            <!-- LCD 系統 UI -->
             <div id="lcd-ui" class="lcd-desktop">
                 <div class="power-led"></div>
                 <div class="icon-bar">
@@ -137,6 +155,7 @@
                     <div class="lcd-icon" onclick="toggleWin('win-setting')"></div>
                 </div>
 
+                <!-- 郵件視窗 -->
                 <div id="win-mail" class="win-box" style="top:5%; left:5%;">
                     <div class="win-header">
                         <span id="mail-win-title">系統郵件 - 鎖定中</span>
@@ -144,14 +163,14 @@
                     </div>
                     <div class="win-body">
                         <div id="login-view" class="login-container">
-                            <div style="font-size: 0.7rem; opacity: 0.7;">GX-INTRANET ACCESS</div>
+                            <div style="font-size: 1rem; opacity: 0.7;">歸心物流信件匣</div>
                             <input type="text" id="user-id" class="login-input" placeholder="User ID">
                             <input type="password" id="user-pass" class="login-input" placeholder="Access Key">
-                            <button class="login-btn" onclick="checkLogin()">存取</button>
+                            <button class="login-btn" onclick="checkLogin()">登入</button>
                         </div>
                         <div id="mail-list-view" class="mail-list">
                             <div class="mail-toolbar">
-                                <span id="user-display-name" style="font-size:0.7rem; color:#deff9a">User</span>
+                                <span id="user-display-name" style="font-size:1rem; color:#deff9a">User</span>
                                 <div class="logout-btn" onclick="logoutMail()">[登出]</div>
                             </div>
                             <div id="mail-items-container"></div>
@@ -161,14 +180,15 @@
                             <div id="mail-detail-text" style="border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; font-size: 0.8rem; line-height: 1.6; white-space: pre-wrap; color: #daffde;"></div>
                         </div>
                     </div>
-                </div>
+                </div> <!-- END win-mail -->
 
                 <div id="win-browser" class="win-box" style="top:10%; left:10%;"><div class="win-header"><span>瀏覽器</span><div class="win-btns"><span onclick="toggleWin('win-browser')">×</span></div></div><div class="win-body">正在連線內部論壇...</div></div>
                 <div id="win-file" class="win-box" style="top:15%; left:15%;"><div class="win-header"><span>檔案</span><div class="win-btns"><span onclick="toggleWin('win-file')">×</span></div></div><div class="win-body">員工守冊.pdf (權限不足)</div></div>
                 <div id="win-truck" class="win-box" style="top:20%; left:20%;"><div class="win-header"><span>物流追蹤</span><div class="win-btns"><span onclick="toggleWin('win-truck')">×</span></div></div><div class="win-body">GX-9527：配送異常</div></div>
                 <div id="win-setting" class="win-box" style="top:25%; left:25%;"><div class="win-header"><span>系統</span><div class="win-btns"><span onclick="toggleWin('win-setting')">×</span></div></div><div class="win-body">系統版本：v10.4.2</div></div>
-            </div>
+            </div> <!-- END lcd-ui -->
 
+            <!-- 報紙細節 UI -->
             <div id="newspaper-extras" class="newspaper-ui">
                 <div class="egg-layout">
                     <div class="egg-group" id="group-1"><div class="egg-box"><img id="egg-img-1" src=""></div><div class="egg-desc" id="egg-desc-1"></div></div>
@@ -179,12 +199,17 @@
                     <div class="controls-row"><div class="nav-btn btn-left" onclick="changePage(-1)"></div><div class="dot-wrapper" id="dot-wrapper"></div><div class="nav-btn btn-right" onclick="changePage(1)"></div></div>
                     <div class="page-content" id="page-content">...</div>
                 </div>
-            </div>
+            </div> <!-- END newspaper-extras -->
+
+            <!-- 拼圖容器 -->
             <div id="turtle-puzzle" class="turtle-puzzle-ui"></div>
-        </div>
-    </div>
+        </div> <!-- END detail-view -->
+    </div> <!-- END overlay -->
 
     <script type="module">
+        /* ============================================================
+           [資料與模組載入] 
+           ============================================================ */
         import { NEWSPAPER_DATA } from '../data/newspaper_data.js';
         import { MAIL_DATABASE } from '../data/mail_data.js';
 
@@ -193,11 +218,14 @@
 
         let currentUserMails = [];
         
-        // --- 核心修正：已讀記憶系統 ---
-        // 從 localStorage 讀取已讀紀錄，若無則建立新的 Set
+        /* ============================================================
+           [已讀記憶系統] 
+           ============================================================ */
         let readMails = new Set(JSON.parse(localStorage.getItem('readMails') || '[]'));
 
-        // [信件核心邏輯]
+        /* ============================================================
+           [郵件系統邏輯] 
+           ============================================================ */
         window.checkLogin = function() {
             const userId = document.getElementById('user-id').value.trim();
             const pass = document.getElementById('user-pass').value.trim();
@@ -214,6 +242,26 @@
             }
         };
 
+        // 偵測 Enter 鍵進行登入
+        [document.getElementById('user-id'), document.getElementById('user-pass')].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkLogin();
+                }
+            });
+        });
+
+        // 偵測 Backspace 返回列表 (當不在輸入框內且在郵件內容頁時)
+        window.addEventListener('keydown', (e) => {
+            const isEditing = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
+            const isContentView = document.getElementById('mail-content-view').style.display === 'block';
+
+            if (e.key === 'Backspace' && !isEditing && isContentView) {
+                e.preventDefault(); // 防止瀏覽器預設的後退行為
+                backToMailList();
+            }
+        });
+
         function renderMailList() {
             const container = document.getElementById('mail-items-container');
             container.innerHTML = '';
@@ -221,10 +269,8 @@
                 const item = document.createElement('div');
                 item.className = 'mail-item';
                 
-                // 檢查是否已讀
                 const isRead = readMails.has(mail.id);
                 
-                // 設定內容：標題在左，日期靠右下顯示
                 item.innerHTML = `
                     <span class="mail-title" style="font-weight: ${isRead ? 'normal' : 'bold'}; color: ${isRead ? '#777' : '#deff9a'};">
                         ${isRead ? '✉' : '📩'} ${mail.title}
@@ -235,12 +281,10 @@
                 `;
                 
                 item.onclick = () => {
-                    // 更新已讀狀態並存入 localStorage
                     readMails.add(mail.id);
                     localStorage.setItem('readMails', JSON.stringify(Array.from(readMails)));
-                    
                     readMail(mail);
-                    renderMailList(); // 重新渲染清單以更新視覺效果
+                    renderMailList();
                 };
                 container.appendChild(item);
             });
@@ -266,7 +310,9 @@
             document.getElementById('mail-content-view').style.display = 'none';
         };
 
-        // [UI 切換與報紙邏輯]
+        /* ============================================================
+           [視窗切換與 UI 控制] 
+           ============================================================ */
         function hideAll() { newsEx.style.display='none'; turtlePz.style.display='none'; lcdUI.style.display='none'; detImg.className=''; }
         window.openTurtle = () => { hideAll(); turtlePz.style.display='grid'; initTurtle(); show('turtle', 'img-portrait'); };
         window.openNewspaper = () => { hideAll(); newsEx.style.display='block'; initDots(); renderPage(); show('news', 'img-portrait'); };
@@ -286,7 +332,9 @@
             } 
         };
 
-        // [核心修正：支援手機與防止反白的拖曳系統]
+        /* ============================================================
+           [視窗拖曳系統 - 支援手機觸控] 
+           ============================================================ */
         let activeWin = null;
         let startX, startY, initialX, initialY;
 
@@ -330,12 +378,15 @@
             document.removeEventListener('mouseup', stopDrag);
         }
 
-        // 報紙分頁
+        /* ============================================================
+           [報紙分頁系統] 
+           ============================================================ */
         let curP=0;
         window.changePage=(s)=>{ curP=(curP+s+10)%10; renderPage(); };
         function initDots(){ const w=document.getElementById('dot-wrapper'); w.innerHTML=''; for(let i=0;i<10;i++){ const d=document.createElement('div'); d.className='dot'+(i===curP?' active':''); d.onclick=(e)=>{e.stopPropagation(); curP=i; renderPage();}; w.appendChild(d); } }
         function renderPage(){ const d=NEWSPAPER_DATA[curP]; if(!d)return; document.getElementById('page-content').innerText=d.text||""; for(let i=1;i<=3;i++){ const im=document.getElementById(`egg-img-${i}`), ds=document.getElementById(`egg-desc-${i}`); if(im) im.src=d.eggImg||assets.news; if(ds) ds.innerText=(d.eggDescs && d.eggDescs[i-1])?d.eggDescs[i-1]:""; } document.querySelectorAll('.dot').forEach((dt,idx)=>dt.classList.toggle('active',idx===curP)); }
 
+        /* [自適應場景切換] */
         function updateScene() { document.getElementById('main-scene').src = (window.innerHeight>window.innerWidth) ? "../image/forget-something-m.webp" : "../image/forget-something.webp"; }
         window.addEventListener('resize', updateScene); updateScene();
     </script>
