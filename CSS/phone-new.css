@@ -1,0 +1,81 @@
+/* ==============================
+   歸心物流終端機 - 模組化 CSS
+   命名空間: .gx- (Guixin)
+   ============================== */
+
+/* 1. 終端機開關 (釘在右下角的小圖標) */
+.gx-terminal-trigger {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;  /* 小小的縱向圖片 */
+    height: 100px;
+    background-color: #1a1a1a; /* 工業黑 */
+    border: 2px solid #32CD32;   /* 螢光綠線條 */
+    
+    /* 這裡就是那個關鍵切角 - 模擬一個小儀器 */
+    clip-path: polygon(10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%);
+    
+    z-index: 10000; /* 絕對的最上層 */
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(50, 205, 50, 0.5); /* 螢光綠光暈 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease; /* 增加點擊動效 */
+}
+
+/* 觸摸時的效果 (增加點心理暗示) */
+.gx-terminal-trigger:hover {
+    box-shadow: 0 0 20px rgba(50, 205, 50, 0.8);
+    transform: scale(1.05);
+}
+
+/* 開關內部的文字/圖示 (模擬條碼) */
+.gx-terminal-trigger::after {
+    content: "GX-SYS"; /* 模擬系統代號 */
+    color: #32CD32;
+    font-family: 'Courier New', Courier, monospace; /* 復古打字機體 */
+    font-size: 12px;
+    writing-mode: vertical-rl; /* 文字縱向排列 */
+    text-orientation: mixed;
+}
+
+/* 2. 手機主介面 (預設隱藏) */
+.gx-phone-screen {
+    position: fixed;
+    bottom: -600px; /* 初始位置在螢幕下方 (隱藏) */
+    right: 20px;
+    width: 320px;   /* 手機寬度 */
+    height: 550px;  /* 手機高度 */
+    background: linear-gradient(135deg, #0f1c2b 0%, #06090f 100%); /* 深灰藍漸層 */
+    border: 4px solid #333;   /* 邊框 */
+    
+    /* 大螢幕的切角 */
+    clip-path: polygon(8% 0%, 92% 0%, 100% 8%, 100% 92%, 92% 100%, 8% 100%, 0% 92%, 0% 8%);
+    
+    z-index: 9999; /* 層級稍微比開關低一點點，或者差不多 */
+    box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+    
+    /* 核心特效：當我們加上 .gx-phone-screen.is-open 時，它會滑上來 */
+    transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* 有點彈性的滑動 */
+}
+
+/* 3. 當手機開啟時的樣式 */
+.gx-phone-screen.is-open {
+    bottom: 130px; /* 滑上來，離底部開關遠一點 */
+}
+
+/* 手機內部的「裂痕圖層」( pointer-events: none ) */
+#gx-crack-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('BROKEN_GLASS.png'); /* 妳要自己準備這張透明裂痕圖 */
+    background-size: cover;
+    pointer-events: none; /* 滑鼠點擊會穿透它 */
+    opacity: 0; /* 預設不顯示 */
+    z-index: 10; /* 蓋在內容上方 */
+}
