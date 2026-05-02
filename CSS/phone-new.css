@@ -10,7 +10,7 @@
     bottom: 3vh; 
     right: 3vw;
     /* 限制最大寬度，避免在電腦上看太大 */
-    width: 15vw; 
+    width: 12vw; 
     max-width: 60px; 
     height: auto;
     aspect-ratio: 1 / 1.6; /* 強制縱向比例 */
@@ -49,10 +49,10 @@
 .gx-phone-screen {
     position: fixed;
     bottom: -90vh; 
-    right: 3vw;
-    width: 90vw;
-    max-width: 350px; /* 超過 350px 就不會再變寬了 */
-    height: 70vh;     /* 手機高度佔螢幕 70% */
+    right: 8vw;
+    width: 87vw;
+    max-width: 310px; /* 超過 350px 就不會再變寬了 */
+    height: 77vh;     /* 手機高度佔螢幕 70% */
     background: linear-gradient(135deg, #0f1c2b 0%, #06090f 100%); /* 深灰藍漸層 */
     border: 4px solid #333;   /* 邊框 */
     
@@ -78,7 +78,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('BROKEN_GLASS.png'); /* 妳要自己準備這張透明裂痕圖 */
+    background-image: src="image/phone/BROKEN-small.webp"; /* 妳要自己準備這張透明裂痕圖 */
     background-size: cover;
     pointer-events: none; /* 滑鼠點擊會穿透它 */
     opacity: 0; /* 預設不顯示 */
