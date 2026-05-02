@@ -17,17 +17,17 @@
 /* 手機容器 */
 .gx-phone-wrapper {
     position: fixed;
-    bottom: -600px; /* 初始隱藏 */
+    bottom: -800px; /* 初始隱藏 */
     right: 82px;
     width: 300px;
-    height: 597px;
+    height: 667px;
     z-index: 9999;
     transition: bottom 0.5s ease;
 }
 
 /* 開啟狀態 */
 .gx-phone-wrapper.is-open {
-    bottom: 0px; /* 打開後距離底部 */
+    bottom: -70px; /* 打開後距離底部 */
 }
 
 /* 手機螢幕 */
@@ -55,7 +55,7 @@
     .gx-phone-wrapper {
         right: 0; 
         left: 0; 
-        bottom: -600px; /* 這是收起來的狀態，設回負值讓它藏起來 */
+        bottom: -800px; /* 這是收起來的狀態，設回負值讓它藏起來 */
         width: 90%;
         margin: 0 auto;
     }
