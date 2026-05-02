@@ -28,14 +28,33 @@
         <div class="gx-phone-close" id="gx-close" style="z-index: 100;">×</div>
     
     <div class="gx-app-layer">
-        <div style="color:#32CD32; padding:50px; font-family:Courier New, monospace;">
-            [歸心物流終端]<br>
-            ----------------<br>
-            系統已就緒...<br>
-            <button class="gx-interact-btn">【功能測試】</button>
+    <div class="gx-app-grid">
+        <div class="gx-app-item" onclick="openApp('系統日誌', '讀取中... [Access Denied]')">
+            <div class="gx-app-icon"><i class="fa-solid fa-terminal"></i></div>
+            <span class="gx-app-name">系統日誌</span>
+        </div>
+        <div class="gx-app-item" onclick="openApp('人員清單', '成員：阿強、小明、[數據損毀]')">
+            <div class="gx-app-icon"><i class="fa-solid fa-users-viewfinder"></i></div>
+            <span class="gx-app-name">人員清單</span>
+        </div>
+        <div class="gx-app-item" onclick="openApp('監控畫面', 'NO SIGNAL')">
+            <div class="gx-app-icon"><i class="fa-solid fa-video"></i></div>
+            <span class="gx-app-name">監控中心</span>
+        </div>
+        </div>
+
+    <div id="gx-modal" class="gx-modal">
+        <div class="gx-modal-content">
+            <div class="gx-modal-header">
+                <span id="modal-title">APP名稱</span>
+                <button class="gx-modal-close" onclick="closeApp()">×</button>
+            </div>
+            <div class="gx-modal-body">
+                <p id="modal-text">內容加載中...</p>
+            </div>
         </div>
     </div>
-
+</div>
     <div class="gx-crack-overlay"></div>
 `;
 
@@ -87,3 +106,14 @@ setInterval(updateClock, 1000);
 
 // 頁面載入時先執行一次，才不會等一秒才顯示
 updateClock();
+
+function openApp(title, content) {
+    const modal = document.getElementById('gx-modal');
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-text').innerText = content;
+    modal.style.display = 'block';
+}
+
+function closeApp() {
+    document.getElementById('gx-modal').style.display = 'none';
+}

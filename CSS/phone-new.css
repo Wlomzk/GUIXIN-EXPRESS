@@ -1,4 +1,8 @@
-/* 觸發按鈕 */
+/* ==============================
+   歸心物流終端機 - 整合優化版
+   ============================== */
+
+/* --- 1. 觸發與容器 --- */
 .gx-terminal-trigger {
     position: fixed;
     bottom: 20px;
@@ -14,10 +18,9 @@
     z-index: 9998;
 }
 
-/* 手機容器 */
 .gx-phone-wrapper {
     position: fixed;
-    bottom: -800px; /* 初始隱藏 */
+    bottom: -800px;
     right: 82px;
     width: 300px;
     height: 667px;
@@ -25,147 +28,180 @@
     transition: bottom 0.5s ease;
 }
 
-/* 開啟狀態 */
 .gx-phone-wrapper.is-open {
-    bottom: -70px; /* 打開後距離底部 */
+    bottom: -70px;
 }
 
-/* 手機螢幕(底層) */
 .gx-phone-screen {
-    position: relative; /* 這是必須的，作為內部層級的基準 */
+    position: relative;
     width: 100%;
     height: 100%;
-    background-image: url('../image/phone/phone-new.webp'); 
-    background-size: cover;       /* 確保圖片鋪滿 */
-    background-position: center;  /* 確保圖片置中 */
-
+    background-image: url('../image/phone/phone-new.webp');
+    background-size: cover;
+    background-position: center;
 }
 
-/* --- 2. 【中間層】 APP 互動元件層 --- */
+/* --- 2. APP 互動層 (核心排版) --- */
 .gx-app-layer {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10; /* 比背景高，但比破碎層低 */
+    /* 這裡透過設定邊距來控制範圍，不要寫 width/height */
+    top: 52px;
+    left: 37px;
+    right: 10px;
+    bottom: 150px;
+    /* 這裡替換成新的切角邏輯 */
+    /* 參數解釋：切角大小設定為 20px，您可以根據手機圖片實際的斜角大小微調這個數字 */
+    clip-path: polygon(
+        0 0,                        /* 左上角 (不動) */
+        100% 0,                     /* 右上角 (不動) */
+        100% calc(100% - 25px),     /* 右側邊緣往下直到切角起點 */
+        calc(100% - 25px) 100%,     /* 右下角切角點 */
+        25px 100%,                  /* 左下角切角點 */
+        0 calc(100% - 25px)         /* 左側邊緣往下直到切角起點 */
+        );
+    z-index: 10;
+    
 }
 
-/* 測試用的按鈕樣式 */
-.gx-interact-btn {
-    background: #1a1a1a;
-    border: 1px solid #32CD32;
-    color: #32CD32;
-    padding: 5px 10px;
+.gx-app-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 24px;
+    padding: 15px 13px;
+    height: 94%;
+    box-sizing: border-box;
+}
+
+.gx-app-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     cursor: pointer;
-    margin-top: 10px;
+    transition: transform 0.1s;
 }
 
-/* --- 3. 【最上層】 破碎螢幕層 (核心魔法) --- */
+.gx-app-item:active { transform: scale(0.9); }
+
+.gx-app-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(50, 205, 50, 0.2);
+    border: 1px solid #32CD32;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #32CD32;
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.gx-app-name {
+    color: #32CD32;
+    font-size: 11px;
+    font-family: monospace;
+}
+
+/* --- 3. 狀態列與破碎效果 --- */
 .gx-crack-overlay {
     position: absolute;
     top: 11px;
     left: 28px;
     width: 97%;
     height: 100%;
-    z-index: 20; /* 永遠在最上層 */
-    
-    /* 載入您提供的破碎圖片 */
-    background-image: url('../image/phone/BROKEN-small.webp'); /* 請確認圖片檔名與路徑 */
-    background-size: contain; /* 如果覺得圖片被拉伸，可以改成 contain */
+    z-index: 20;
+    background-image: url('../image/phone/BROKEN-small.webp');
+    background-size: contain;
     background-position: center 20px;
     background-repeat: no-repeat;
-
-    /* 核心：允許點擊穿透 (Pass-through) */
-    pointer-events: none; /* 關鍵！點擊會直接「穿過」這層，打在中間層的 APP 上 */
+    pointer-events: none;
 }
 
-/* 關閉按鈕樣式 */
-.gx-phone-close {
-    position: absolute;
-    top: 10px;
-    right: -10px;
-    color: #18c018;
-    font-size: 24px;
-    cursor: pointer;
-}
-
-/* 狀態列容器 */
 .gx-status-bar {
-    position: absolute; /* 關鍵：相對於手機螢幕定位 */
-    top: 21px;             /* 釘在最頂端 */
-    left: 38px;            /* 靠左對齊 */
-    width: 83%;        /* 寬度撐滿整個手機容器 */
-    box-sizing: border-box; /* 關鍵：確保 padding 不會讓寬度爆掉 */
-
-    /* 格式：左上角的X Y, 右上角的X Y, 右下角的X Y, 左下角的X Y */
+    position: absolute;
+    top: 21px;
+    left: 38px;
+    width: 83%;
+    box-sizing: border-box;
     clip-path: polygon(28px 0, calc(102% - 28px) 0, 105% 100%, 0 100%, 7% 0%);
-    
     display: flex;
     justify-content: space-between;
-    align-items: center; /* 讓訊號和電池垂直置中 */
-    
-    padding: 8px 15px; /* 您可以微調這個高度 */
+    align-items: center;
+    padding: 8px 15px;
     font-size: 12px;
     color: #32CD32;
-    background: rgba(0, 0, 0, 0.6); /* 給一點點深色底，避免字看不清 */
-    
-    z-index: 15;        /* 確保高於背景，低於破碎層 */
-    pointer-events: none; /* 讓狀態列本身不影響點擊 (如果是純顯示) */
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 15;
+    pointer-events: none;
 }
 
-/* 電池外框 */
-.battery-body {
-    width: 25px;
-    height: 10px;
-    border: 1px solid #32CD32;
-    display: inline-block;
-    vertical-align: middle;
-}
+.battery-body { width: 25px; height: 10px; border: 1px solid #32CD32; display: inline-block; vertical-align: middle; }
+.battery-fill { height: 100%; background: #32CD32; width: var(--battery-level, 100%); transition: width 0.5s ease, background 0.3s; }
+.gx-phone-close { position: absolute; top: 10px; right: -10px; color: #18c018; font-size: 24px; cursor: pointer; }
 
-/* 電池填充 (這裡用 CSS 變數控制寬度) */
-.battery-fill {
-    height: 100%;
-    background: #32CD32;
-    width: var(--battery-level, 100%); /* 預設 100% */
-    transition: width 0.5s ease, background 0.3s;
-}
-
-/* 充電狀態樣式 (之後會用到) */
-.is-charging .battery-fill {
-    background: #FFD700; /* 充電時變黃色 */
-}
-
-/* 手機版：滿版置中 */
-@media (max-width: 600px) {
-    .gx-phone-wrapper {
-        right: 0; 
-        left: 0; 
-        bottom: -800px; /* 這是收起來的狀態，設回負值讓它藏起來 */
-        width: 90%;
-        margin: 0 auto;
-    }
-
-    /* 這裡才是關鍵：當手機加上 is-open class 時，才讓它滑上來 */
-    .gx-phone-wrapper.is-open {
-        bottom: 20px; 
-    }
-
-    .gx-crack-overlay {
+/* --- 4. 彈出視窗 --- */
+.gx-modal {
+    display: none;
     position: absolute;
-    top: 11px;
-    left: 56px;
-    width: 83%;
-    height: 100%;
-    z-index: 20; /* 永遠在最上層 */
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 100;
 }
 
-.gx-status-bar {
-    position: absolute; /* 關鍵：相對於手機螢幕定位 */
-    top: 17px;             /* 釘在最頂端 */
-    left: 60px;            /* 靠左對齊 */
-    width: 73%;        /* 寬度撐滿整個手機容器 */
-    box-sizing: border-box; /* 關鍵：確保 padding 不會讓寬度爆掉 */
+.gx-modal-content {
+    position: absolute;
+    top: 5%; left: 5%;
+    width: 90%; height: 85%;
+    background: #0a0a0a;
+    border: 1px solid #32CD32;
+    color: #32CD32;
 }
 
+.gx-modal-header { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #32CD32; }
+.gx-modal-close { background: none; border: none; color: #ff4444; font-size: 20px; cursor: pointer; }
+.gx-modal-body { padding: 20px; font-family: monospace; }
+
+/* --- 5. 響應式調整 --- */
+@media (max-width: 600px) {
+    .gx-phone-wrapper { right: 0; left: 0; width: 90%; margin: 0 auto; }
+    .gx-phone-wrapper.is-open { bottom: 20px; }
+    .gx-phone-close { right: -77px; left: 323px; width: 90%; margin: 0 auto; }
+    .gx-crack-overlay { position: absolute; top: 11px; left: 56px; width: 83%; height: 100%; }
+    .gx-status-bar { position: absolute; top: 17px; left: 60px; width: 73%; }
+    .gx-app-layer { top: 50px; left: 61px; right: 32px; bottom: 152px; }
+    .gx-app-grid { gap: 16px; padding: 19px 13px; }
+}
+
+/* --- 故障效果核心邏輯 --- */
+
+/* 1. 更暴力的閃爍 (快、強烈) */
+@keyframes flicker {
+  0% { opacity: 1; }
+  10% { opacity: 0.3; }
+  20% { opacity: 1; }
+  30% { opacity: 0.5; }
+  40% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+/* 2. 真正的故障感 (顏色錯位 + 震動) */
+@keyframes glitch-shift {
+  0% { transform: translateX(0); filter: hue-rotate(0deg); }
+  20% { transform: translateX(-5px); filter: hue-rotate(90deg); } /* 產生色差錯位 */
+  40% { transform: translateX(5px); filter: hue-rotate(-90deg); }
+  60% { transform: translateX(-2px); }
+  100% { transform: translateX(0); filter: hue-rotate(0deg); }
+}
+
+/* --- 應用這些效果的 CSS 類別 --- */
+
+/* 當您想讓整個層級閃爍時，加上這個 class */
+.effect-flicker {
+  animation: flicker 0.1s infinite; /* 閃爍頻率非常快 */
+}
+
+/* 當您想讓畫面抖動一下時，加上這個 class */
+.effect-glitch {
+  animation: glitch-shift 0.2s; /* 只跑一次，模擬瞬間干擾 */
 }
