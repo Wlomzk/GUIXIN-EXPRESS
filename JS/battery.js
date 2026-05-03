@@ -140,3 +140,8 @@ setInterval(() => {
         console.log("狀態：背景耗電中... 目前電量:", batteryLevel + "%");
     }
 }, 5000);
+
+// --- 修正：確保網頁一載入，UI 就會立刻更新為記憶中的數值 ---
+window.addEventListener('DOMContentLoaded', () => {
+    updateBatteryUI();
+});
