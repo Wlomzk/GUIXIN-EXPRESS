@@ -7,16 +7,17 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         
-        // --- [SECTION: 初始化介面] ---
+        // --- [SECTION: 初始化介面容器] ---
         const phoneWrapper = document.createElement("div");
         phoneWrapper.className = "gx-phone-wrapper";
         phoneWrapper.id = "gx-phone";
 
-        // [新增] 側邊電池通知欄容器
+        // [側邊通知欄]
         const batteryNotifier = document.createElement("div");
         batteryNotifier.id = "gx-battery-notifier";
         phoneWrapper.appendChild(batteryNotifier);
 
+        // --- [SECTION: UI 渲染 (畫面結構)] ---
         const phoneScreen = document.createElement("div");
         phoneScreen.className = "gx-phone-screen";
         phoneScreen.innerHTML = `
@@ -64,11 +65,13 @@
         phoneWrapper.appendChild(phoneScreen);
         document.body.appendChild(phoneWrapper);
 
+        // [終端機啟動按鈕]
         const terminalTrigger = document.createElement("div");
         terminalTrigger.className = "gx-terminal-trigger";
         document.body.appendChild(terminalTrigger);
 
-        // --- [SECTION: 效果與監聽] ---
+        // --- [SECTION: 動態效果邏輯] ---
+        // 隨機故障效果
         function randomGlitch() {
             const effect = Math.random() > 0.5 ? 'effect-flicker' : 'effect-glitch';
             phoneWrapper.classList.add(effect);
@@ -77,27 +80,33 @@
         }
         randomGlitch();
 
+        // 螢幕開關切換
         function togglePhone() {
             const isOpen = phoneWrapper.classList.toggle("is-open");
             terminalTrigger.style.display = isOpen ? 'none' : 'flex';
         }
+        
+        // 監聽器綁定
         terminalTrigger.addEventListener("click", togglePhone);
         document.getElementById("gx-close").addEventListener("click", togglePhone);
 
+        // --- [SECTION: 背景循環執行] ---
         setInterval(updateClock, 1000);
         updateClock();
     });
 })();
 
-// --- [SECTION: UI 與應用控制] ---
+// --- [SECTION: 全域功能與控制 (APP 管理)] ---
 
+// 更新時鐘
 function updateClock() {
     const timeElement = document.getElementById('system-time');
     if (timeElement) timeElement.innerText = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 
+// 開啟 APP (統一介面控制)
 function openApp(title, content) {
-    // 呼叫 battery.js 裡面的 drainBattery 函數
+    // 呼叫 battery.js 裡面的 drainBattery 函數 (保持原有參數)
     if (typeof drainBattery === 'function') {
         drainBattery(10);
     }
@@ -107,6 +116,7 @@ function openApp(title, content) {
     modal.style.display = 'block';
 }
 
+// 關閉 APP
 function closeApp() { 
     document.getElementById('gx-modal').style.display = 'none'; 
 }

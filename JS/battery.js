@@ -48,6 +48,11 @@ function updateBatteryUI() {
 }
 
 function checkBatteryAlerts() {
+    // 【新增邏輯】如果系統正在充電中 (chargingInterval 不為 null)，
+    // 我們就暫停所有彈出式警示，避免干擾使用者。
+    if (chargingInterval !== null) {
+        return; 
+    }
     // 檢查 30% (優先級高，放在前面)
     if (batteryLevel <= 30 && !alert30Shown) {
         alert30Shown = true; // 鎖定狀態
@@ -140,6 +145,13 @@ setInterval(() => {
         console.log("狀態：背景耗電中... 目前電量:", batteryLevel + "%");
     }
 }, 5000);
+
+// 任何檔案只要發出 'battery-consume' 這個訊號，這裡就會收到
+document.addEventListener('battery-consume', (e) => {
+    const amount = e.detail.amount || 1; // 預設消耗 1%，除非 APP 指定
+    drainBattery(amount);
+    console.log(`[電池系統] 收到消耗指令，扣除: ${amount}%`);
+});
 
 // --- 修正：確保網頁一載入，UI 就會立刻更新為記憶中的數值 ---
 window.addEventListener('DOMContentLoaded', () => {
