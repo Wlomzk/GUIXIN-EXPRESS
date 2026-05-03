@@ -1,6 +1,5 @@
 export const MAIL_DATABASE = {
   "EMP001": {
-    userName: "拉姆",
     mails: [
       {
         id: "M1", date: "2024/10/20", sender: "HR部門",    // 這裡補上逗號（如果後面還有屬性
