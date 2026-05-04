@@ -1,6 +1,15 @@
 /* ==========================================================
    歸心物流終端機 - 主程式 (UI 與 互動)
    ========================================================== */
+// 在 JS/phone-new.js 的最上方加上這段
+if (window.hasInitializedPhone) {
+    console.warn("手機系統被重複載入，已攔截！");
+    // 如果已經載入過，直接停止執行後面的程式碼
+} else {
+    window.hasInitializedPhone = true;
+    console.log("手機系統初始化成功");
+    // 把妳原本的初始化邏輯放在這裡
+}
 
 (function() {
     console.log("歸心物流終端機：系統校準中...");
@@ -98,10 +107,17 @@
 
 // --- [SECTION: 全域功能與控制 (APP 管理)] ---
 
-// 更新時鐘
+// 把變數宣告在外面，確保只查找一次
+const timeElement = document.getElementById('system-time');
+
 function updateClock() {
-    const timeElement = document.getElementById('system-time');
-    if (timeElement) timeElement.innerText = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
+    if (timeElement) {
+        timeElement.innerText = new Date().toLocaleTimeString('zh-TW', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: true 
+        });
+    }
 }
 
 // 開啟 APP (統一介面控制)
