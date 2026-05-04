@@ -82,11 +82,11 @@
         .egg-layout { position: relative; width: 100%; height: 100%; pointer-events: none; }
         .egg-group { position: absolute; display: flex; flex-direction: column; gap: 8px; z-index: 3020; pointer-events: auto; }
         #group-1 { top: 3%; left: -1%; width: 50%; height: 23%; }
-        #egg-desc-1 { position: absolute; top: 5%; left: 107%; width: 116px; height: 60px; }
+        #egg-desc-1 { position: absolute; top: 5%; left: 107%; width: 130px; height: 90px; }
         #group-2 { top: 28%; left: 50%; width: 48%; height: 25%; }
-        #egg-desc-2 { position: absolute; top: 107%; left: 5%; width: 120px; height: 75px; }
+        #egg-desc-2 { position: absolute; top: 107%; left: 5%; width: 130px; height: 80px; }
         #group-3 { top: 28%; left: -5%; width: 50%; height: 20%; }
-        #egg-desc-3 { position: absolute; top: 109%; left: 10%; width: 70%; height: 75px; }
+        #egg-desc-3 { position: absolute; top: 109%; left: 10%; width: 75%; height: 80px; }
         .egg-box { width: 100%; height: 100%; background: #000; border-radius: 4px; overflow: hidden; }
         .egg-box img { width: 100%; height: 100%; object-fit: cover; }
         .egg-desc {
@@ -97,11 +97,20 @@
     backdrop-filter: none;    /* 移除背景模糊 */
     border: none;            /* 移除邊框 */
     border-radius: 0;        /* 移除圓角 */
-    font-size: 0.9rem;
-    line-height: 1.4;
+    font-size: 1rem;
+    line-height: 1.2;
+
+    /* 關鍵：改粗體 */
+    font-weight: bold;
     
-    /* 關鍵：浮空效果與加深對比 */
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.5);
+    /* 關鍵：加深陰影，產生浮空感並隔開底圖 */
+    /* 這裡用了兩層陰影：一層是實心描邊，一層是柔和外發光 */
+    text-shadow: 
+        1px 1px 0px rgba(0, 0, 0, 0.9),  /* 右下實心描邊 */
+        -1px -1px 0px rgba(0, 0, 0, 0.9), /* 左上實心描邊 */
+        1px -1px 0px rgba(0, 0, 0, 0.9),  /* 右上實心描邊 */
+        -1px 1px 0px rgba(0, 0, 0, 0.9),  /* 左下實心描邊 */
+        0px 0px 8px rgba(0, 0, 0, 0.6);   /* 柔和外發光，增加暈染感 */
     font-weight: 500; /* 可以稍微加粗字體，讓字看起來更有份量 */
 }
         .pagination-container { position: relative;; left: 50%; transform: translateX(-50%); width: 85%; display: flex; flex-direction: column; align-items: center; bottom: 20%; pointer-events: none; }
@@ -111,7 +120,13 @@
         .dot-wrapper { flex: 1; display: flex; justify-content: space-evenly; }
         .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0, 0, 0, 0.5); border: 2px solid rgba(255, 255, 255, 0.3); }
         .dot.active { background: #f0eada; border: none; box-shadow: 0 0 12px #f0eada; }
-        .page-content { color: #f0eada; text-align: center; font-size: 1rem; font-weight: bold; margin-top: 8px; text-shadow: 0 0 10px #000; }
+        .page-content { color: #f0eada; text-align: center; font-size: 1rem; font-weight: bold; margin-top: 8px; text-shadow: 
+        1px 1px 0px rgba(0, 0, 0, 0.9),  /* 右下實心描邊 */
+        -1px -1px 0px rgba(0, 0, 0, 0.9), /* 左上實心描邊 */
+        1px -1px 0px rgba(0, 0, 0, 0.9),  /* 右上實心描邊 */
+        -1px 1px 0px rgba(0, 0, 0, 0.9),  /* 左下實心描邊 */
+        0px 0px 8px rgba(0, 0, 0, 0.6);   /* 柔和外發光，增加暈染感 */
+     }
 
         /* [龜殼拼圖] */
         .turtle-puzzle-ui { position: absolute; display: none; width: 110vw; height: 110vw; max-width: 55vh; max-height: 55vh; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); gap: 4px; z-index: 3010; top: 50%; left: 50%; transform: translate(-50%, -50%); }
