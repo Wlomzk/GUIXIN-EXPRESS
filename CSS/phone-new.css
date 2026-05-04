@@ -16,7 +16,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 9998;
+    z-index: 9997;
 }
 
 .gx-phone-wrapper {
@@ -26,7 +26,7 @@
     right: 82px;
     width: 300px;
     height: 667px;
-    z-index: 9999;
+    z-index: 9998;
     transition: bottom 0.5s ease;
 }
 
