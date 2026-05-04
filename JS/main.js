@@ -1,3 +1,4 @@
+import './firebase-init.js';
 import { toggleMenu, showPage, updateHeroBanner } from './ui.js';
 import { handleTrack, renderArchive } from './archive.js';
 
