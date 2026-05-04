@@ -4,6 +4,7 @@
 
 /* --- 1. 觸發與容器 --- */
 .gx-terminal-trigger {
+    pointer-events: auto !important;
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -19,6 +20,7 @@
 }
 
 .gx-phone-wrapper {
+    pointer-events: none !important;
     position: fixed;
     bottom: -800px;
     right: 82px;
@@ -29,6 +31,7 @@
 }
 
 .gx-phone-wrapper.is-open {
+    pointer-events: auto !important;
     bottom: -70px;
 }
 
