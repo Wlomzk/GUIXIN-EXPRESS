@@ -348,3 +348,17 @@
 .effect-glitch {
   animation: glitch-shift 0.2s; /* 只跑一次，模擬瞬間干擾 */
 }
+
+/* --- 修正：將「點擊攔截」權限歸還給網頁 --- */
+
+/* 1. 將手機容器設為「點擊穿透」，滑鼠會直接忽略這個空殼 */
+.gx-phone-wrapper {
+    pointer-events: none !important;
+}
+
+/* 2. 把手機系統內部的功能元件設回「可點擊」，否則妳的終端機就按不動了 */
+.gx-phone-screen, 
+.gx-terminal-trigger,
+.gx-modal {
+    pointer-events: auto !important;
+}
