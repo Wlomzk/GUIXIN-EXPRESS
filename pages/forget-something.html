@@ -375,12 +375,20 @@ window.checkLogin = () => {
             document.getElementById('page-content').innerText=d.text||""; 
             for(let i=1;i<=3;i++){ 
                 const im=document.getElementById(`egg-img-${i}`), ds=document.getElementById(`egg-desc-${i}`); 
-                if(im) im.src=d.eggImg||assets.news; 
-                if(ds) ds.innerText=(d.eggDescs && d.eggDescs[i-1])?d.eggDescs[i-1]:""; 
-            } 
-            document.querySelectorAll('.dot').forEach((dt,idx)=>dt.classList.toggle('active',idx===curP)); 
-        }
-
+                // --- 這裡修正：讀取陣列中的對應索引 ---
+        // 確保如果圖片不存在，給一個預設圖
+        const imgPath = (d.eggImages && d.eggImages[i-1]) ? d.eggImages[i-1] : assets.news;
+        
+        if(im) im.src = imgPath; 
+        if(ds) ds.innerText = (d.eggDescs && d.eggDescs[i-1]) ? d.eggDescs[i-1] : ""; 
+        
+        // --- 解鎖狀態的關鍵 ---
+        // 這裡以後接 Firebase 時，判斷 d.id_i 是否在「已解鎖清單」裡
+        // 簡單判斷：如果是鎖定的，可以加個 CSS class 變灰
+        // im.style.filter = isUnlocked ? "none" : "grayscale(100%) brightness(0.2)";
+    } 
+    document.querySelectorAll('.dot').forEach((dt, idx) => dt.classList.toggle('active', idx === curP));
+}
         /* ============================================================
            [6. 自適應場景切換] 
            ============================================================ */

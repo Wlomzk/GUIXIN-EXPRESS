@@ -3,11 +3,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.x.x/firebas
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-firestore.js";
 
-const style = "background: #000; color: #0f0; font-family: monospace; padding: 5px; font-size: 14px;";
-
+// 請換成新產生的 Key
 const firebaseConfig = {
-  // 把你從 Firebase Console 拿到的那串貼到這裡
-  apiKey: "AIzaSyCvEngtZ2RHi5UmvSNuldzprx4FgwNqSUI",
+  apiKey: "新產生的_API_KEY",
   authDomain: "guixin-express.firebaseapp.com",
   projectId: "guixin-express",
   storageBucket: "guixin-express.firebasestorage.app",
@@ -20,11 +18,20 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+const style = "background: #000; color: #0f0; font-family: monospace; padding: 5px; font-size: 14px;";
+
 // 執行匿名登入
 signInAnonymously(auth)
-  .then(() => console.log("%c[系統通知] 外部連結已確認...", style))
-              console.log("%c[警告] 檢測到非法接入，正在分析IP位置...", "color: #ff0; font-weight: bold;");
-              console.log("%c[殷商遺存] 啟動中... 身分ID: " + user.uid.substring(0, 8) + "...", "color: #0ff;");
-  .catch((err) => console.error(%c[系統通知] 您已遺失在輪迴的洪流中...", err));
-
-  
+  .then((userCredential) => {
+    // 成功登入後，user 資料藏在 userCredential 裡面
+    const user = userCredential.user;
+    
+    // 這裡使用 console 敘事
+    console.log("%c[系統通知] 外部連結已確認...", style);
+    console.log("%c[警告] 檢測到非法接入，正在分析IP位置...", "color: #ff0; font-weight: bold;");
+    console.log("%c[殷商遺存] 啟動中... 身分ID: " + user.uid.substring(0, 8) + "...", "color: #0ff;");
+  })
+  .catch((err) => {
+    // console.error 不支援 %c CSS 樣式，所以這裡用純文字
+    console.error("[系統錯誤] 登入失敗：您已遺失在輪迴的洪流中...", err);
+  });
