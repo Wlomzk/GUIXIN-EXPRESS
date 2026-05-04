@@ -1,31 +1,32 @@
+// --- 模組引入 ---
 import './firebase-init.js';
 import { toggleMenu, showPage, updateHeroBanner } from './ui.js';
 import { handleTrack, renderArchive } from './archive.js';
 
-// 將函數掛載到 window，讓 HTML 的 onclick 可以呼叫到它們
-window.toggleMenu = toggleMenu;
-window.showPage = showPage;
-window.handleTrack = handleTrack;
-
+// --- 綁定事件初始化 ---
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. 執行基礎渲染
     renderArchive();
     updateHeroBanner();
 
-    const menuBtn = document.getElementById('mobile-menu-button');
-    const closeBtn = document.getElementById('close-menu');
-    
-    // 關鍵修正：宣告 searchBtn 但不強求它一定要存在
-    const searchBtn = document.getElementById('search-btn');
+    // 2. 綁定桌機導航連結
+    // 使用 ?. 語法確保如果元素不存在也不會報錯
+    document.getElementById('nav-home')?.addEventListener('click', () => showPage('home'));
+    document.getElementById('nav-services')?.addEventListener('click', () => showPage('services'));
+    document.getElementById('nav-locations')?.addEventListener('click', () => showPage('locations'));
 
-    if (menuBtn) menuBtn.onclick = toggleMenu;
-    if (closeBtn) closeBtn.onclick = toggleMenu;
+    // 3. 綁定手機版導航連結
+    document.getElementById('mobile-nav-home')?.addEventListener('click', () => showPage('home'));
+    document.getElementById('mobile-nav-services')?.addEventListener('click', () => showPage('services'));
+    document.getElementById('mobile-nav-locations')?.addEventListener('click', () => showPage('locations'));
 
-    // 嚴格的安全判斷：只有找到按鈕時，才綁定事件，這就是模組化需要的穩定性
-    if (searchBtn) {
-        searchBtn.onclick = handleTrack;
-    }
+    // 4. 綁定漢堡選單 (開啟與關閉)
+    document.getElementById('mobile-menu-button')?.addEventListener('click', toggleMenu);
+    document.getElementById('mobile-menu-close')?.addEventListener('click', toggleMenu);
 
+    // 5. 綁定查詢按鈕
+    document.getElementById('search-btn')?.addEventListener('click', handleTrack);
+
+    // 6. 視窗調整監聽
     window.addEventListener('resize', updateHeroBanner);
 });
-
-// /* 預留 */ 區塊已保留，邏輯執行順序已修正
