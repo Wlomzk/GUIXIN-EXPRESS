@@ -101,6 +101,16 @@ nav { flex-shrink: 0; }
     max-width: 600px;
 }
 
+/* 自定義配對區塊 - 這裡就是調整位置與大小的地方 */
+.custom-pairing-box {
+    margin-top: 2rem;      /* 距離上方的高度 (可調整) */
+    width: 100%;           /* 寬度 (預設滿版) */
+    max-width: 400px;      /* 最大寬度限制 (可調整) */
+    margin-left: auto;     /* 置中 */
+    margin-right: auto;    /* 置中 */
+    padding: 1.5rem;       /* 內距 */
+}
+
 /* --- 6. 頁尾：修正換行問題 --- */
 footer {
     margin-top: auto;

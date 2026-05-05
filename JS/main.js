@@ -25,6 +25,20 @@ function setupDeviceUI() {
 
 // --- 頁面載入執行 ---
 document.addEventListener('DOMContentLoaded', () => {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
+    const terminal = document.getElementById('terminal-ui'); // 這是顯示碼
+    const controller = document.getElementById('controller-ui'); // 這是輸入框
+    
+    if (isMobile) {
+        // 手機 -> 顯示配對碼 (Terminal UI)
+        terminal?.classList.remove('hidden');
+    } else {
+        // 電腦 -> 顯示輸入框 (Controller UI)
+        controller?.classList.remove('hidden');
+    }
+});
+
     // A. 先設定介面顯示
     const currentRole = setupDeviceUI();
     
@@ -81,4 +95,3 @@ document.addEventListener('DOMContentLoaded', () => {
             signInAnonymously(auth).catch((error) => console.error("登入失敗:", error));
         }
     });
-});
