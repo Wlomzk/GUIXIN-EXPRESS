@@ -1,21 +1,26 @@
 /* ==========================================================
    歸心物流終端機 - 主程式 (UI 與 互動)
    ========================================================== */
-// 在 JS/phone-new.js 的最上方加上這段
+
+// 1. 初始化防止重複載入
 if (window.hasInitializedPhone) {
     console.warn("手機系統被重複載入，已攔截！");
-    // 如果已經載入過，直接停止執行後面的程式碼
 } else {
     window.hasInitializedPhone = true;
     console.log("手機系統初始化成功");
-    // 把妳原本的初始化邏輯放在這裡
 }
+
+// 2. App 資料庫 (在這裡管理你的 App，增加或解鎖都在這裡改！)
+const appList = [
+    { id: 'app-logs', name: '系統日誌', icon: '🖥️', locked: true, title: '系統日誌', content: '讀取中... [Access Denied]' },
+    { id: 'app-secret-files', name: '人員清單', icon: '👤', locked: false, title: '人員清單', content: '成員：阿強、小明、[數據損毀]' },
+    { id: 'app-cam', name: '監控中心', icon: '📹', locked: true, title: '監控畫面', content: 'NO SIGNAL' }
+];
 
 (function() {
     console.log("歸心物流終端機：系統校準中...");
 
     document.addEventListener("DOMContentLoaded", function() {
-        
         // --- [SECTION: 初始化介面容器] ---
         const phoneWrapper = document.createElement("div");
         phoneWrapper.className = "gx-phone-wrapper";
@@ -32,31 +37,21 @@ if (window.hasInitializedPhone) {
         phoneScreen.innerHTML = `
             <div class="gx-status-bar">
                 <div class="gx-status-signal" id="status-signal">信号: 强</div>
-                <div id="system-time" style="font-size: 12px; font-family: monospace;">--:--</div>
+                <div id="system-time" class="gx-time-display">--:--</div>
                 <div class="gx-status-battery" id="status-battery">
                     <div class="battery-body">
                         <div class="battery-fill" id="battery-fill"></div>
                     </div>
                     <span id="battery-text">100%</span>
                 </div>
-            </div>    
+            </div>   
             <div class="gx-phone-close" id="gx-close" style="z-index: 100;">×</div>
+            
             <div class="gx-app-layer">
                 <div class="gx-app-grid">
-                    <div class="gx-app-item" id="app-logs" onclick="openApp('系統日誌', '讀取中... [Access Denied]')">
-                        <div class="gx-app-icon">🖥️</div>
-                        <span class="gx-app-name">系統日誌</span>
                     </div>
-                    <div class="gx-app-item is-locked" id="app-secret-files" onclick="openApp('人員清單', '成員：阿強、小明、[數據損毀]')">
-                        <div class="gx-app-icon">👤</div>
-                        <span class="gx-app-name">人員清單</span>
-                    </div>
-                    <div class="gx-app-item is-locked" id="app-cam" onclick="openApp('監控畫面', 'NO SIGNAL')">
-                        <div class="gx-app-icon">📹</div>
-                        <span class="gx-app-name">監控中心</span>
-                    </div>
-                </div>
             </div>
+
             <div class="gx-crack-overlay"></div>
             <div id="gx-modal" class="gx-modal">
                 <div class="gx-modal-content">
@@ -79,38 +74,61 @@ if (window.hasInitializedPhone) {
         terminalTrigger.className = "gx-terminal-trigger";
         document.body.appendChild(terminalTrigger);
 
-        // --- [SECTION: 動態效果邏輯] ---
-        // 隨機故障效果
-        function randomGlitch() {
-            const effect = Math.random() > 0.5 ? 'effect-flicker' : 'effect-glitch';
-            phoneWrapper.classList.add(effect);
-            setTimeout(() => { phoneWrapper.classList.remove(effect); }, 500);
-            setTimeout(randomGlitch, Math.random() * 5000 + 3000);
-        }
-        randomGlitch();
+        // --- [SECTION: 初始化功能] ---
+        renderAppGrid(); // 渲染 App 列表
+        randomGlitch();  // 啟動故障效果
+        setInterval(updateClock, 1000);
+        updateClock();
 
-        // 螢幕開關切換
-        function togglePhone() {
-            const isOpen = phoneWrapper.classList.toggle("is-open");
-            terminalTrigger.style.display = isOpen ? 'none' : 'flex';
-        }
-        
         // 監聽器綁定
         terminalTrigger.addEventListener("click", togglePhone);
         document.getElementById("gx-close").addEventListener("click", togglePhone);
-
-        // --- [SECTION: 背景循環執行] ---
-        setInterval(updateClock, 1000);
-        updateClock();
     });
 })();
 
-// --- [SECTION: 全域功能與控制 (APP 管理)] ---
+// --- [SECTION: 核心渲染與控制函數] ---
+
+// 自動渲染 App (只渲染未鎖定的)
+function renderAppGrid() {
+    const grid = document.querySelector('.gx-app-grid');
+    if (!grid) return;
+
+    grid.innerHTML = ''; // 清空舊的
+
+    // 只篩選出 locked 為 false 的 App
+    appList.filter(app => !app.locked).forEach(app => {
+        const appItem = document.createElement('div');
+        appItem.className = 'gx-app-item';
+        appItem.id = app.id;
+        // 綁定點擊事件
+        appItem.setAttribute('onclick', `openApp('${app.title}', '${app.content}')`);
+        
+        appItem.innerHTML = `
+            <div class="gx-app-icon">${app.icon}</div>
+            <span class="gx-app-name">${app.name}</span>
+        `;
+        grid.appendChild(appItem);
+    });
+}
+
+function randomGlitch() {
+    const phoneWrapper = document.getElementById('gx-phone');
+    if (!phoneWrapper) return;
+    const effect = Math.random() > 0.5 ? 'effect-flicker' : 'effect-glitch';
+    phoneWrapper.classList.add(effect);
+    setTimeout(() => { phoneWrapper.classList.remove(effect); }, 500);
+    setTimeout(randomGlitch, Math.random() * 5000 + 3000);
+}
+
+function togglePhone() {
+    const phoneWrapper = document.getElementById('gx-phone');
+    const terminalTrigger = document.querySelector('.gx-terminal-trigger');
+    const isOpen = phoneWrapper.classList.toggle("is-open");
+    terminalTrigger.style.display = isOpen ? 'none' : 'flex';
+}
 
 function updateClock() {
-    // 每次執行函數時，都重新在 DOM 裡找一次 #system-time，確保即使元素被重建也能正常更新
     const timeElement = document.getElementById('system-time');
-
     if (timeElement) {
         timeElement.innerText = new Date().toLocaleTimeString('zh-TW', { 
             hour: '2-digit', 
@@ -120,9 +138,7 @@ function updateClock() {
     }
 }
 
-// 開啟 APP (統一介面控制)
 function openApp(title, content) {
-    // 呼叫 battery.js 裡面的 drainBattery 函數 (保持原有參數)
     if (typeof drainBattery === 'function') {
         drainBattery(10);
     }
@@ -132,7 +148,6 @@ function openApp(title, content) {
     modal.style.display = 'block';
 }
 
-// 關閉 APP
 function closeApp() { 
     document.getElementById('gx-modal').style.display = 'none'; 
 }

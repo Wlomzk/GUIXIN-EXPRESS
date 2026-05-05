@@ -2,31 +2,83 @@
 import './firebase-init.js';
 import { toggleMenu, showPage, updateHeroBanner } from './ui.js';
 import { handleTrack, renderArchive } from './archive.js';
+import { testConnection, createPairingSession, joinPairingSession } from './session.js'; // 記得加上 joinPairingSession
+import { onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { auth } from './firebase-init.js';
 
-// --- 綁定事件初始化 ---
+// 1. 裝置角色判斷函式
+function getDeviceRole() {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    return isMobile ? 'controller' : 'terminal';
+}
+
+// 2. 初始化 UI 顯示 (純介面顯示，不觸發邏輯)
+function setupDeviceUI() {
+    const role = getDeviceRole();
+    if (role === 'terminal') {
+        document.getElementById('terminal-ui')?.classList.remove('hidden');
+    } else {
+        document.getElementById('controller-ui')?.classList.remove('hidden');
+    }
+    return role; // 回傳角色以便後續使用
+}
+
+// --- 頁面載入執行 ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. 執行基礎渲染
+    // A. 先設定介面顯示
+    const currentRole = setupDeviceUI();
+    
+    // B. 設定所有 UI 事件監聽 (這部分不會因為 uid 而出錯，隨時可執行)
     renderArchive();
     updateHeroBanner();
-
-    // 2. 綁定桌機導航連結
-    // 使用 ?. 語法確保如果元素不存在也不會報錯
+    
     document.getElementById('nav-home')?.addEventListener('click', () => showPage('home'));
     document.getElementById('nav-services')?.addEventListener('click', () => showPage('services'));
     document.getElementById('nav-locations')?.addEventListener('click', () => showPage('locations'));
-
-    // 3. 綁定手機版導航連結
     document.getElementById('mobile-nav-home')?.addEventListener('click', () => showPage('home'));
     document.getElementById('mobile-nav-services')?.addEventListener('click', () => showPage('services'));
     document.getElementById('mobile-nav-locations')?.addEventListener('click', () => showPage('locations'));
-
-    // 4. 綁定漢堡選單 (開啟與關閉)
     document.getElementById('mobile-menu-button')?.addEventListener('click', toggleMenu);
     document.getElementById('mobile-menu-close')?.addEventListener('click', toggleMenu);
-
-    // 5. 綁定查詢按鈕
     document.getElementById('search-btn')?.addEventListener('click', handleTrack);
 
-    // 6. 視窗調整監聽
-    window.addEventListener('resize', updateHeroBanner);
+    // C. 綁定配對按鈕事件
+    document.getElementById('btn-pair')?.addEventListener('click', async () => {
+        const code = document.getElementById('pairing-input').value;
+        const statusText = document.getElementById('pairing-status');
+        
+        if (code.length !== 8) {
+            statusText.innerText = "代碼錯誤，請輸入 8 位數";
+            return;
+        }
+
+        statusText.innerText = "配對中...";
+        // 這裡確保 auth.currentUser 存在才呼叫
+        if (auth.currentUser) {
+            const success = await joinPairingSession(code, auth.currentUser.uid);
+            statusText.innerText = success ? "配對成功！系統已同步。" : "配對失敗，請確認代碼。";
+        }
+    });
+
+    // D. 處理 Firebase 狀態 (這是核心！)
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            console.log("系統連結成功，用戶UID:", user.uid);
+            localStorage.setItem('game_uid', user.uid);
+            testConnection();
+
+            // 只有在電腦端(Terminal)才產生配對碼
+            if (currentRole === 'terminal') {
+                const sessionData = await createPairingSession(user.uid);
+                // 如果有產生碼，顯示在 UI 上
+                const displayCode = document.getElementById('display-code');
+                if (displayCode && sessionData?.pairingCode) {
+                    displayCode.innerText = sessionData.pairingCode;
+                }
+            }
+        } else {
+            console.log("尚未登入，執行匿名登入...");
+            signInAnonymously(auth).catch((error) => console.error("登入失敗:", error));
+        }
+    });
 });

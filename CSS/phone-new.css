@@ -67,9 +67,10 @@
 }
 
 .gx-app-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(4, 1fr);
+    display: flex;          /* 使用 Flexbox */
+    flex-wrap: wrap;        /* 自動換行 */
+    justify-content: flex-start; /* 核心：由左往右排列 */
+    align-content: flex-start;   /* 核心：由上往下排列 */
     gap: 24px;
     padding: 15px 13px;
     height: 94%;
@@ -78,6 +79,9 @@
 
 .gx-app-item {
     display: flex;
+    /* 確保每個 App 大小固定，不要被擠壓 */
+    flex: 0 0 calc(33.33% - 15px); 
+    box-sizing: border-box;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
@@ -147,6 +151,17 @@
     100% 100%,           /* 右下角 (不動) */
     0 100%
         );
+}
+
+/* 專門控制時間的樣式 */
+.gx-time-display {
+    font-size: 16px;         /* 你想調多大就改這裡 */
+    font-family: 'monospace'; /* 等寬字體，看起來才像數字鐘 */
+    font-weight: bold;        /* 加粗一點點更清楚 */
+    color: #fff3ba;          /* 如果背景深，字體要設亮一點 */
+    margin: 0 10px;           /* 跟旁邊的訊號、電池留點距離 */
+    letter-spacing: 1px;       /* 字距稍微拉開一點，讓數字更清晰 */
+    opacity: 0.8;
 }
 
 .battery-body { width: 25px; height: 10px; border: 1px solid #32CD32; display: inline-block; vertical-align: middle; }
@@ -305,7 +320,7 @@
 /* --- 5. 響應式調整 --- */
 @media (max-width: 600px) {
     .gx-phone-wrapper { right: 0; left: 0; width: 90%; margin: 0 auto; }
-    .gx-phone-wrapper.is-open { left: -55px; bottom: 20px; }
+    .gx-phone-wrapper.is-open { left: -30px; bottom: 20px; }
     .gx-phone-close { right: -77px; left: 323px; width: 90%; margin: 0 auto; }
     .gx-crack-overlay { position: absolute; top: 11px; left: 56px; width: 83%; height: 100%; }
     .gx-status-bar { position: absolute; top: 3px; left: 57px; width: 75%; }

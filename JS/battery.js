@@ -1,42 +1,40 @@
 /* ==========================================================
-   battery.js - 電池能源管理模組
+   battery.js - 電池能源管理模組 (全域持久化版)
    ========================================================== */
 
-   // 如果瀏覽器裡有存過電量，就拿出來用；沒有的話預設 100
-   const savedBattery = localStorage.getItem('gx_battery');
+// 1. 初始化電量
+const savedBattery = localStorage.getItem('gx_battery');
 window.batteryLevel = savedBattery !== null ? parseInt(savedBattery) : 100;
 
-// 全域變數 (掛載在 window 下確保其他檔案也能存取)
-window.lastAlertLevel = 0; // 紀錄上一次報警的層級
+// 全域變數
+window.lastAlertLevel = 0;
 window.chargingInterval = null;
-window.alert60Shown = false; 
+window.alert60Shown = false;
 window.alert30Shown = false;
 
-// --- 電池核心邏輯UI 更新函式 (自動存檔) ---
+// --- 核心邏輯 ---
 
 function updateBatteryUI() {
     const fill = document.getElementById('battery-fill');
     const text = document.getElementById('battery-text');
-    if (!fill) return;
     
+    // 更新電量數值與紀錄時間戳記 (關鍵！讓系統知道最後一次更新是何時)
+    localStorage.setItem('gx_battery', batteryLevel);
+    localStorage.setItem('gx_last_visit', Date.now()); 
+
+    if (!fill) return;
+
     fill.style.width = batteryLevel + '%';
     text.innerText = batteryLevel + '%';
 
-    // 【自動存檔機制】只要介面更新，就記錄電量
-    localStorage.setItem('gx_battery', batteryLevel);
-
-    // 即時更新提醒視窗內的數字
     const alertDisplay = document.getElementById('alert-level-display');
     if (alertDisplay) alertDisplay.innerText = batteryLevel;
 
-    // --- 【狀態重置機制】---
-    // 當電量充回 60% 以上，兩者都重置
+    // 狀態重置機制
     if (batteryLevel > 60) {
         alert60Shown = false;
         alert30Shown = false;
-    } 
-    // 當電量充回 30% 以上，重置 30% 的開關
-    else if (batteryLevel > 30) {
+    } else if (batteryLevel > 30) {
         alert30Shown = false;
     }
 
@@ -47,26 +45,85 @@ function updateBatteryUI() {
     checkBatteryAlerts();
 }
 
-function checkBatteryAlerts() {
-    // 【新增邏輯】如果系統正在充電中 (chargingInterval 不為 null)，
-    // 我們就暫停所有彈出式警示，避免干擾使用者。
-    if (chargingInterval !== null) {
-        return; 
+// 統一停止充電的邏輯
+function stopCharging() {
+    if (chargingInterval) {
+        clearInterval(chargingInterval);
+        chargingInterval = null;
     }
-    // 檢查 30% (優先級高，放在前面)
+    localStorage.setItem('isCharging', 'false');
+    hideChargingIndicator();
+}
+
+function handleCharge() {
+    if (chargingInterval) return;
+
+    closeBatteryAlert();
+    showChargingIndicator();
+    
+    // 記錄開始充電的狀態
+    localStorage.setItem('isCharging', 'true');
+    localStorage.setItem('chargeStartTime', Date.now());
+
+    chargingInterval = setInterval(() => {
+        if (batteryLevel < 100) {
+            batteryLevel++;
+            updateBatteryUI();
+        } else {
+            stopCharging();
+            alert("系統充能完畢。");
+            alert60Shown = false; // 重置警示
+            alert30Shown = false;
+        }
+    }, 1500); // 1.5秒充 1%
+}
+
+// --- 初始化與狀態恢復 (最重要！) ---
+window.addEventListener('DOMContentLoaded', () => {
+    const lastVisit = parseInt(localStorage.getItem('gx_last_visit') || Date.now());
+    const isCharging = localStorage.getItem('isCharging') === 'true';
+    const chargeStartTime = parseInt(localStorage.getItem('chargeStartTime') || Date.now());
+    
+    const now = Date.now();
+    const diffMs = now - lastVisit;
+
+    if (isCharging) {
+        // 如果原本在充電，計算離線期間充了多少電
+        const gainedPower = Math.floor(diffMs / 1500);
+        batteryLevel = Math.min(100, batteryLevel + gainedPower);
+        
+        // 恢復充電 UI 與計時器
+        handleCharge();
+    } else {
+        // 如果原本沒在充電，計算離線期間耗了多少電
+        const lostDrain = Math.floor(diffMs / 5000); // 5秒耗 1%
+        batteryLevel = Math.max(0, batteryLevel - lostDrain);
+    }
+
+    updateBatteryUI();
+});
+
+// --- 其他輔助函數 ---
+
+function drainBattery(amount) {
+    batteryLevel = Math.max(0, batteryLevel - amount);
+    updateBatteryUI();
+}
+
+function checkBatteryAlerts() {
+    if (chargingInterval !== null) return;
     if (batteryLevel <= 30 && !alert30Shown) {
-        alert30Shown = true; // 鎖定狀態
+        alert30Shown = true;
         showBatteryAlert(batteryLevel);
-    } 
-    // 檢查 60% (如果已經不是 30% 的狀態)
-    else if (batteryLevel <= 60 && !alert60Shown) {
-        alert60Shown = true; // 鎖定狀態
+    } else if (batteryLevel <= 60 && !alert60Shown) {
+        alert60Shown = true;
         showBatteryAlert(batteryLevel);
     }
 }
 
 function showBatteryAlert(level) {
     const notifier = document.getElementById('gx-battery-notifier');
+    if(!notifier) return;
     notifier.innerHTML = `
         <span onclick="closeBatteryAlert()" style="position:absolute; top:2px; right:6px; cursor:pointer; color:#FF4444; font-weight:bold;">×</span>
         <div style="flex-grow: 1; color: #32CD32; text-align:center;">
@@ -86,6 +143,9 @@ function closeBatteryAlert() {
 function showChargingIndicator() {
     const screen = document.querySelector('.gx-phone-screen');
     if(!screen) return;
+    // 避免重複生成
+    if(document.getElementById('gx-charging-box')) return;
+    
     const indicator = document.createElement('div');
     indicator.className = 'gx-charging-indicator';
     indicator.id = 'gx-charging-box';
@@ -98,59 +158,12 @@ function hideChargingIndicator() {
     if (box) box.remove();
 }
 
-function playChargingAnimation() { 
-    console.log("動畫播放中..."); 
-}
-
-function handleCharge() {
-    if (chargingInterval) return; 
-
-    closeBatteryAlert();
-    showChargingIndicator();
-    playChargingAnimation();
-    
-    chargingInterval = setInterval(() => {
-        if (batteryLevel < 100) {
-            batteryLevel++;
-            updateBatteryUI();
-        } else {
-            clearInterval(chargingInterval);
-            chargingInterval = null;
-            
-            // --- 修正這裡：改用新的變數名稱 ---
-            alert60Shown = false;
-            alert30Shown = false;
-            // -------------------------------
-            
-            hideChargingIndicator(); 
-            alert("系統充能完畢。");
-        }
-    }, 1500);
-}
-
-function drainBattery(amount) {
-    batteryLevel = Math.max(0, batteryLevel - amount);
-    updateBatteryUI();
-}
-
-// --- 背景耗電循環 ---
 setInterval(() => {
-    if (chargingInterval !== null) {
-        return; 
-    }
-
-    if (batteryLevel > 0) {
-        drainBattery(1); // 每 5 秒消耗 1%，這裡可以根據需要調整
-    }
+    if (chargingInterval !== null) return;
+    if (batteryLevel > 0) drainBattery(1);
 }, 5000);
 
-// 任何檔案只要發出 'battery-consume' 這個訊號，這裡就會收到
 document.addEventListener('battery-consume', (e) => {
-    const amount = e.detail.amount || 1; // 預設消耗 1%，除非 APP 指定
+    const amount = e.detail.amount || 1;
     drainBattery(amount);
-});
-
-// --- 修正：確保網頁一載入，UI 就會立刻更新為記憶中的數值 ---
-window.addEventListener('DOMContentLoaded', () => {
-    updateBatteryUI();
 });
