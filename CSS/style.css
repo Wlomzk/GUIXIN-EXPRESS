@@ -105,9 +105,9 @@ nav { flex-shrink: 0; }
 .custom-pairing-box {
     margin-top: 50px;      /* 區塊距離上方多少 */
     margin-bottom: 50px;   /* 區塊距離下方多少 */
-    padding: 20px;         /* 內距，決定區塊看起來有多胖 */
-    width: 90%;            /* 寬度，手機通常用百分比 */
-    max-width: 400px;      /* 限制最大寬度，電腦上才不會太寬 */
+    padding: 10px !important;         /* 內距，決定區塊看起來有多胖 */
+    width: 100%;            /* 寬度，手機通常用百分比 */
+    max-width: 500px !important;      /* 限制最大寬度，電腦上才不會太寬 */
     margin-left: auto;
     margin-right: auto;
     border: 1px solid #d6d3d1; /* 邊框顏色 */
