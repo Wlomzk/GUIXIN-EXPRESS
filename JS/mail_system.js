@@ -41,7 +41,7 @@ export function loadUserIntoMailSystem(data) {
     refreshMailUI(); 
     
     // 4. 隱藏登入介面，顯示列表
-    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('gx-login-overlay').style.display = 'none';
     document.getElementById('mail-list-view').style.display = 'flex';
 }
 
@@ -60,49 +60,38 @@ window.logoutMail = function() {
 // 3. UI 渲染與視覺控制區
 // ------------------------------------------------------------
 
-/** 刷新介面狀態 (登入/列表/內文切換) */
+/** 刷新介面狀態 */
 function refreshMailUI() {
-    const loginView = document.getElementById('login-view');
+    // 1. 抓取正確的 DOM 元素 (確保 ID 與 phone-new.js 定義的完全一致)
+    const loginView = document.getElementById('gx-login-overlay'); // 注意：如果手機版已經不需要這個，可考慮移除
     const mailListView = document.getElementById('mail-list-view');
     const mailContentView = document.getElementById('mail-content-view');
     const winTitle = document.getElementById('mail-win-title');
-    const nameDisplay = document.getElementById('user-display-name');
+
+    // 2. 如果使用者已登入 (currentUser 是從 phone-new.js 傳過來的)
     if (currentUser) {
-        const displayName = currentUser.name || "員工";
-        winTitle.innerText = `系統郵件 - ${displayName}`;
-        if(nameDisplay) nameDisplay.innerText = displayName;
+        // 設定標題
+        winTitle.innerText = `系統郵件 - ${currentUser.name || "員工"}`;
         
+        // 切換視圖
+        if (loginView) loginView.style.display = 'none';
+        if (mailListView) mailListView.style.display = 'flex';
+        if (mailContentView) mailContentView.style.display = 'none';
+        
+        // 渲染列表 (確保此函式在下方有定義)
         renderMailList();
-        updateLEDStatus(); 
+        
+        // 更新狀態燈號 (確保此函式有定義)
+        if (typeof updateLEDStatus === 'function') updateLEDStatus(); 
+
+    } else {
+        // 未登入的鎖定狀態
+        winTitle.innerText = `系統郵件 - 鎖定中`;
+        if (loginView) loginView.style.display = 'flex';
+        if (mailListView) mailListView.style.display = 'none';
+        if (mailContentView) mailContentView.style.display = 'none';
     }
 }
-
-    // --- 【除錯用】檢查看看變數與元素 ---
-    console.log("當前使用者:", currentUser); 
-    console.log("名字顯示元素:", nameDisplay);
-    // ----------------------------------
-
-    if (currentUser) {
-        loginView.style.display = 'none';
-        mailListView.style.display = 'flex';
-        mailContentView.style.display = 'none';
-
-        // 使用 || "員工" 當作預設值，避免 undefined 錯誤
-        const displayName =currentUser.name || currentUser.userName || "員工";
-        
-        winTitle.innerText = `系統郵件 - ${currentUser.name}`;
-        document.getElementById('user-display-name').innerText = currentUser.name
-        
-        renderMailList();
-        updateLEDStatus(); 
-    } else {
-        loginView.style.display = 'flex';
-        mailListView.style.display = 'none';
-        mailContentView.style.display = 'none';
-        winTitle.innerText = `系統郵件 - 鎖定中`;
-        updateLEDStatus();
-    }
-
 
 /** 渲染郵件列表 */
 function renderMailList() {

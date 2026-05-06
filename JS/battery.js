@@ -1,46 +1,47 @@
 /* ==========================================================
-   battery.js - 電池能源管理模組 (優化：登入關聯版)
+   battery.js - 電池能源管理模組 (完整整合版)
    ========================================================== */
 
-// 1. 初始化電量邏輯
-// 先確認是否為初次使用
+// --- 初始化變數 ---
 let savedBattery = localStorage.getItem('gx_battery');
+// 如果沒紀錄，預設 34%，否則讀取紀錄
+window.batteryLevel = (savedBattery === null) ? 34 : parseInt(savedBattery);
 
-// 如果沒登入過，電量預設 31%，否則讀取紀錄
-if (savedBattery === null) {
-    window.batteryLevel = 31;
-    localStorage.setItem('gx_battery', 31);
-} else {
-    window.batteryLevel = parseInt(savedBattery);
-}
-
-// 全域變數
+// 全域變數掛載
 window.lastAlertLevel = 0;
 window.chargingInterval = null;
 window.alert60Shown = false;
 window.alert30Shown = false;
 
-// --- 核心邏輯 ---
-
-function updateBatteryUI() {
-    // 只有在登入狀態下才更新 UI (避免沒登入時畫面閃爍)
+// --- 【關鍵修正】暴露給外部呼叫的更新函數 ---
+window.updateBatteryUI = function() {
+    // 只有在登入狀態下才更新 UI
     if (!localStorage.getItem('gx_user')) return;
 
     const fill = document.getElementById('battery-fill');
     const text = document.getElementById('battery-text');
     
+    // 同步儲存
     localStorage.setItem('gx_battery', batteryLevel);
     localStorage.setItem('gx_last_visit', Date.now()); 
 
-    if (!fill) return;
+    if (fill) {
+        fill.style.width = batteryLevel + '%';
+        // 確保顏色正確
+        fill.classList.remove('warning', 'danger');
+        if (batteryLevel < 30) fill.classList.add('danger');
+        else if (batteryLevel < 60) fill.classList.add('warning');
+    }
+    
+    if (text) {
+        text.innerText = batteryLevel + '%';
+    }
 
-    fill.style.width = batteryLevel + '%';
-    text.innerText = batteryLevel + '%';
-
-    // ... (維持你原本的狀態重置機制與類別切換)
+    // 更新彈窗內的數字顯示
     const alertDisplay = document.getElementById('alert-level-display');
     if (alertDisplay) alertDisplay.innerText = batteryLevel;
 
+    // 處理警示邏輯重置
     if (batteryLevel > 60) {
         alert60Shown = false;
         alert30Shown = false;
@@ -48,16 +49,12 @@ function updateBatteryUI() {
         alert30Shown = false;
     }
 
-    fill.classList.remove('warning', 'danger');
-    if (batteryLevel < 30) fill.classList.add('danger');
-    else if (batteryLevel < 60) fill.classList.add('warning');
-    
     checkBatteryAlerts();
-}
+};
 
-// --- 初始化與狀態恢復 (加入登入判定) ---
+// --- 初始化與狀態恢復 ---
 window.addEventListener('DOMContentLoaded', () => {
-    // 檢查是否有登入
+    // 檢查是否有登入，沒有的話先隱藏電量相關顯示或直接不運作
     if (!localStorage.getItem('gx_user')) return;
 
     const lastVisit = parseInt(localStorage.getItem('gx_last_visit') || Date.now());
@@ -65,6 +62,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const now = Date.now();
     const diffMs = now - lastVisit;
 
+    // 計算離線期間的電量變化
     if (isCharging) {
         const gainedPower = Math.floor(diffMs / 1500);
         batteryLevel = Math.min(100, batteryLevel + gainedPower);
@@ -74,23 +72,22 @@ window.addEventListener('DOMContentLoaded', () => {
         batteryLevel = Math.max(0, batteryLevel - lostDrain);
     }
 
-    updateBatteryUI();
+    // 初始更新 UI
+    window.updateBatteryUI();
 });
 
-// --- 自動耗電邏輯 (加入登入判定) ---
+// --- 自動耗電邏輯 ---
 setInterval(() => {
-    // 關鍵：如果沒登入，就不執行耗電
     if (!localStorage.getItem('gx_user')) return; 
-    
     if (chargingInterval !== null) return;
     if (batteryLevel > 0) drainBattery(1);
 }, 5000);
 
-// --- 以下輔助函數維持原狀 ---
+// --- 輔助函數 ---
 
 function drainBattery(amount) {
     batteryLevel = Math.max(0, batteryLevel - amount);
-    updateBatteryUI();
+    window.updateBatteryUI();
 }
 
 function stopCharging() {
@@ -111,10 +108,11 @@ function handleCharge() {
     chargingInterval = setInterval(() => {
         if (batteryLevel < 100) {
             batteryLevel++;
-            updateBatteryUI();
+            window.updateBatteryUI();
         } else {
             stopCharging();
-            alert("系統充能完畢。");
+            // 充飽了可以選配一個提醒，如果不需要可以註解掉
+            // alert("系統充能完畢。");
             alert60Shown = false; 
             alert30Shown = false;
         }
@@ -167,6 +165,7 @@ function hideChargingIndicator() {
     if (box) box.remove();
 }
 
+// 監聽器，供其他模組呼叫扣電
 document.addEventListener('battery-consume', (e) => {
     if (!localStorage.getItem('gx_user')) return;
     const amount = e.detail.amount || 1;

@@ -1,5 +1,4 @@
 // whoiswatching.js
-import { MAIL_DATABASE } from './mail_data.js'; // 假設你把資料庫分開存放
 
 export const ACCOUNTS = {
     "EMP001": {

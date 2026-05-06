@@ -10,8 +10,9 @@
     right: 20px;
     width: 50px;
     height: 80px;
-    background: #1a1a1a;
-    border: 2px solid #32CD32;
+    background: #2a2a2a; /* 稍微淡一點的黑，像氧化的金屬 */
+    border: 2px solid #555; /* 移除綠色邊框，改成黯淡的金屬色 */
+    box-shadow: inset 0 0 10px #000; /* 內部陰影，創造凹陷感 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -28,6 +29,7 @@
     height: 667px;
     z-index: 9000;
     transition: bottom 0.5s ease;
+    font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif !important;
 }
 
 .gx-phone-wrapper.is-open {
@@ -44,12 +46,12 @@
     background-position: center;
 }
 
-/* --- 登入遮罩 (新增樣式) --- */
+/* --- 登入遮罩 (已修正排版) --- */
 .gx-login-overlay {
     position: absolute;
     top: 22px; left: 43px; width: 80%; height: 74%;
     clip-path: polygon(
-    25px 0,                 /* 頂部切角開始 */
+    25px 0,               /* 頂部切角開始 */
     calc(100% - 25px) 0,    /* 頂部切角結束 */
     100% 25px,              /* 右側切角開始 */
     100% calc(100% - 25px), /* 右側切角結束 */
@@ -58,40 +60,53 @@
     0 calc(100% - 25px),    /* 左側切角開始 */
     0 25px                  /* 左側切角結束 */
 );
-    background: rgba(0, 0, 0, 0.98);
+    background: rgba(20, 18, 16, 0.98); /* 稍微帶點藍灰的深色 */
+    color: #a58d71; /* 黯淡的琥珀綠，降低飽和度 */
+    font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    text-shadow: 0 0 5px rgba(165, 141, 113, 0.3); /* 柔和的光暈，模擬舊 CRT 螢幕 */
     z-index: 240;
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    color: #32CD32;
-    font-family: monospace;
 }
 
+/* 修正後的登入容器排版 */
 .login-box { 
     display: flex; 
     flex-direction: column; 
     gap: 15px; 
-    width: 70%; 
+    width: 80%;
+    text-align: center;
+}
+
+.login-box h3 { 
+    color: #d3c4a1; /* 標題用黯淡的米黃色，增加滄桑感 */
+    letter-spacing: 2px;
+    margin: 0 0 10px 0;
 }
 
 .login-box input {
-    background: #000;
-    border: 1px solid #32CD32;
-    color: #32CD32;
+    background: #1a1a1a;
+    border: 1px solid #555; /* 黯淡邊框 */
+    color: #fff; /* 輸入文字用純白 */
+    font-family: sans-serif;
     padding: 10px;
-    font-family: monospace;
+    width: 100%;
+    box-sizing: border-box; /* 確保 padding 不會撐壞寬度 */
 }
 
 .login-box button {
-    background: #32CD32;
-    color: #000;
-    border: none;
+    background: #444; /* 按鈕不再是亮綠，改成黯淡的灰色塊 */
+    color: #ccc;
+    border: 1px solid #666;
+    font-family: sans-serif;
+    transition: background 0.3s;
     padding: 10px;
     cursor: pointer;
-    font-family: monospace;
     font-weight: bold;
 }
+
+.login-box button:hover { background: #555; }
 
 /* --- 2. APP 互動層 (核心排版) --- */
 .gx-app-layer {
@@ -104,7 +119,7 @@
     /* 這裡替換成新的切角邏輯 */
     /* 參數解釋：切角大小設定為 20px，您可以根據手機圖片實際的斜角大小微調這個數字 */
     clip-path: polygon(
-        0 0,                          /* 左上角 (不動) */
+        0 0,                        /* 左上角 (不動) */
         100% 0,                     /* 右上角 (不動) */
         100% calc(100% - 25px),     /* 右側邊緣往下直到切角起點 */
         calc(100% - 25px) 100%,     /* 右下角切角點 */
@@ -116,7 +131,9 @@
 }
 
 .gx-app-grid {
-    display: flex;          /* 使用 Flexbox */
+    display: grid;
+    /* 這裡原本可能是 2，請把它改成 3 */
+    grid-template-columns: repeat(3, 1fr);
     flex-wrap: wrap;        /* 自動換行 */
     justify-content: flex-start; /* 核心：由左往右排列 */
     align-content: flex-start;   /* 核心：由上往下排列 */
@@ -135,28 +152,44 @@
     align-items: center;
     cursor: pointer;
     transition: transform 0.1s;
+    /* 加入這行，確保格子大小絕對不會因為裡面的圖標而改變 */
+    flex-shrink: 0;
 }
 
 .gx-app-item:active { transform: scale(0.9); }
 
-.gx-app-icon {
+.app-icon {
     width: 50px;
     height: 50px;
-    background: rgba(50, 205, 50, 0.2);
-    border: 1px solid #32CD32;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #32CD32;
-    font-size: 24px;
-    margin-bottom: 5px;
+    /* 關鍵：設定圖片自身的比例，這行能解決擠壓問題 */
+    /* 如果你的原始圖片每個圖標是長方形，例如寬 100 高 80，就寫 5 / 4 */
+    /* 如果是正方形，就寫 1 / 1 */
+    aspect-ratio: 1 / 1;
+    background-repeat: no-repeat;
+    /* 設定 300% 寬度，確保 Sprite 邏輯正確 */
+    background-size: 300% auto; 
+    display: inline-block;
+    cursor: pointer;
+    /* 先把測試用的綠色底色拿掉，不然會蓋住圖片 */
+    background-color: transparent; 
 }
 
+/* 2. 狀態類別：只負責改變「位置」 */
+.stage-1 { background-position: 3% 50%; }
+.stage-2 { background-position: 49% 50%; }
+.stage-3 { background-position: 96% 50%; }
+
 .gx-app-name {
-    color: #32CD32;
-    font-size: 11px;
+    color: #6da912;
+    font-size: 12px;
     font-family: monospace;
+    font-weight: bold; /* 加粗文字，增加辨識度 */
+    
+    /* 1. 文字陰影：創造一個黑色光暈，讓綠色字體跳出來 */
+    text-shadow: 0 0 1px #000;
+    
+    /* 4. 確保文字不會因為加了背景而變太寬 */
+    margin-top: 4px;
 }
 
 /* --- 3. 狀態列與破碎效果 --- */
@@ -186,7 +219,7 @@
     align-items: center;
     padding: 11px 15px;
     font-size: 12px;
-    color: #32CD32;
+    color: #90c120;
     background: rgba(0, 0, 0, 0.5);
     z-index: 15;
     pointer-events: none;
@@ -207,27 +240,27 @@
     font-size: 16px;         /* 你想調多大就改這裡 */
     font-family: 'monospace'; /* 等寬字體，看起來才像數字鐘 */
     font-weight: bold;        /* 加粗一點點更清楚 */
-    color: #fff3ba;          /* 如果背景深，字體要設亮一點 */
+    color: #d3c4a1;         /* 如果背景深，字體要設亮一點 */
     margin: 0 10px;           /* 跟旁邊的訊號、電池留點距離 */
     letter-spacing: 1px;       /* 字距稍微拉開一點，讓數字更清晰 */
     opacity: 0.8;
 }
 
-.battery-body { width: 25px; height: 10px; border: 1px solid #32CD32; display: inline-block; vertical-align: middle; }
+.battery-body { width: 25px; height: 10px; border: 1px solid #a58d71; display: inline-block; vertical-align: middle; }
 
-.gx-phone-close { position: absolute; top: 10px; right: -10px; color: #18c018; font-size: 24px; cursor: pointer; }
+.gx-phone-close { position: absolute; top: 10px; right: -10px; color: #a58d71; font-size: 24px; cursor: pointer; }
 
 /* 修改電池填充物的樣式 */
 .battery-fill {
     height: 100%;
-    background: #32CD32; /* 初始綠色 */
+    background: #a58d71; /* 初始土褐色 */
     width: 100%;
     transition: width 0.5s ease, background 0.5s ease;
 }
 
 /* 低電量狀態 */
-.battery-fill.warning { background: #FFD700; } /* 黃色 */
-.battery-fill.danger { background: #FF4444; }  /* 紅色 */
+.battery-fill.warning { background: #b89b65; } /* 琥珀色 */
+.battery-fill.danger { background: #8b4545; }  /* 棕紅色 */
 
 /* --- 4. 彈出視窗 --- */
 .gx-modal {
@@ -236,8 +269,8 @@
     top: 56px; left: 39px; width: 81%; height: 69%;
     background: rgba(0, 0, 0, 0.8);
     clip-path: polygon(
-        0 0,                                /* 左上角 (不動) */
-        100% 0,                             /* 右上角 (不動) */
+        0 0,                                    /* 左上角 (不動) */
+        100% 0,                                     /* 右上角 (不動) */
         100% calc(100% - 25px),     /* 右側邊緣往下直到切角起點 */
         calc(100% - 25px) 100%,     /* 右下角切角點 */
         25px 100%,                  /* 左下角切角點 */
@@ -251,23 +284,23 @@
     top: 5%; left: 5%;
     width: 90%; height: 85%;
     background: #0a0a0a;
-    border: 1px solid #32CD32;
-    color: #32CD32;
+    border: 1px solid #7a6850;
+    color: #a58d71;
 }
 
-.gx-modal-header { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #32CD32; }
-.gx-modal-close { background: none; border: none; color: #ff4444; font-size: 20px; cursor: pointer; }
+.gx-modal-header { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #7a6850; }
+.gx-modal-close { background: none; border: none; color: #8b4545; font-size: 20px; cursor: pointer; }
 .gx-modal-body { padding: 20px; font-family: monospace; }
 
 #gx-battery-notifier {
     position: absolute;       /* 鎖定在手機螢幕內 */
-    top: 148px;                /* 位置調整 */
-    left: 55px;               /* 讓它有邊距 */
-    right: 31px;              /* 讓它有邊距 */
+    top: 148px;              /* 位置調整 */
+    left: 55px;             /* 讓它有邊距 */
+    right: 31px;            /* 讓它有邊距 */
     height: auto;             /* 高度隨內容自動調整 */
     background: rgba(34, 34, 34, 0.938); /* 黑色背景 */
-    border: 1px solid #32CD32;
-    color: #3a1d1d;
+    border: 1px solid #a58d71;
+    color: #a58d71;
     padding: 15px;
 
     /* 隱藏預設 */
@@ -295,15 +328,15 @@
     right: 8px;
     cursor: pointer;
     font-size: 18px;
-    color: #FF4444; /* 用紅色提醒是關閉 */
+    color: #8b4545; /* 用棕紅提醒是關閉 */
     font-weight: bold;
 }
 
-.gx-notify-close:hover { color: #ff8888; }
+.gx-notify-close:hover { color: #a56a6a; }
 
 #gx-battery-notifier:hover {
     background: #1a1a1a;
-    border-color: #4b634b;
+    border-color: #5d5040;
 }
 
 /* 充電遮罩層 */
@@ -312,12 +345,12 @@
     top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.9); /* 深色背景 */
-    z-index: 200;                 /* 確保蓋住所有 APP */
+    z-index: 200;               /* 確保蓋住所有 APP */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #32CD32;
+    color: #a58d71;
     font-family: monospace;
 }
 
@@ -327,7 +360,7 @@
     height: 100px;
     margin-bottom: 20px;
     /* 這裡可以放您的充電線圖片 */
-    border: 2px solid #32CD32;
+    border: 2px solid #a58d71;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -341,8 +374,8 @@
     width: 60px;
     height: 40px;
     background: rgba(0, 0, 0, 0.85);
-    border: 1px solid #32CD32;
-    color: #32CD32;
+    border: 1px solid #a58d71;
+    color: #a58d71;
     display: flex;
     flex-direction: column;
     align-items: center;
