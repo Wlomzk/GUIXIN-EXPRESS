@@ -133,10 +133,10 @@ function renderAppGrid() {
     const appSettings = JSON.parse(localStorage.getItem('gx_app_settings')) || {};
 
     const allApps = [
-        { id: 'app-mail', name: '信件匣', unlocked: true, iconPath: '../image/phone/mail.webp', action: handleOpenMail },
+        { id: 'app-mail', name: '信件匣', unlocked: true, iconPath: 'image/phone/mail.webp', action: handleOpenMail },
         { id: 'app-logs', name: '系統日誌', title: '系統日誌', content: '數據未加密...', unlocked: true },
         { id: 'app-secret-files', name: '人員清單', title: '人員清單', content: '成員：阿強、小明、[數據已刪除]', unlocked: true },
-        { id: 'app-evidence', name: '案件側錄', title: '案件側錄', unlocked: true, iconPath: '../image/phone/evidence.webp', action: handleOpenEvidence },
+        { id: 'app-evidence', name: '案件側錄', title: '案件側錄', unlocked: true, iconPath: 'image/phone/evidence.webp', action: handleOpenEvidence },
         null, null, null, null, null, null, null, null
     ];
 
