@@ -197,7 +197,8 @@ function renderAppGrid() {
     };
     
     grid.appendChild(div);
-});
+ });
+}
 
 // --- 功能執行函式 ---
 function handleOpenEvidence(filterType = 'all') {
