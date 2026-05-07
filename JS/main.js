@@ -1,31 +1,29 @@
-// --- 模組引入 ---
+// --- 1. 模組引入 ---
 import './firebase-init.js';
+import { auth } from './firebase-init.js';
+import { onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { toggleMenu, showPage, updateHeroBanner } from './ui.js';
 import { handleTrack, renderArchive } from './archive.js';
-// 這裡改成了 getOrGeneratePairingSession
 import { testConnection, getOrGeneratePairingSession, joinPairingSession } from './session.js';
-import { onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { auth } from './firebase-init.js';
 
-const isDev = true; // 上線時改為 false
+// --- 2. 狀態設定 ---
+const isDev = true;
 
-// 1. 裝置角色判斷 (核心翻轉：手機現在是 terminal，電腦是 controller)
+// --- 3. 裝置角色判斷邏輯 ---
 function getDeviceRole() {
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     return isMobile ? 'terminal' : 'controller';
 }
 
-// 2. 初始化 UI 顯示
+// --- 4. 初始化 UI 顯示控制 ---
 function setupDeviceUI() {
     const role = getDeviceRole();
     const terminalUI = document.getElementById('terminal-ui');
     const controllerUI = document.getElementById('controller-ui');
 
-    // 先全部隱藏
     terminalUI?.classList.add('hidden');
     controllerUI?.classList.add('hidden');
 
-    // 根據角色顯示
     if (role === 'terminal') {
         terminalUI?.classList.remove('hidden');
     } else {
@@ -34,27 +32,31 @@ function setupDeviceUI() {
     return role;
 }
 
-// --- 頁面載入執行 ---
+// --- 5. 核心事件綁定與初始化 ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 執行 UI 初始化
+    // A. 啟動裝置角色 UI
     const currentRole = setupDeviceUI();
     
-    // 初始化其他 UI 頁面功能
-    renderArchive();
+    // B. 初始化數據與橫幅
     updateHeroBanner();
+    renderArchive();
     
-    // 綁定導航與按鈕事件
+    // C. 常規導航事件綁定
     document.getElementById('nav-home')?.addEventListener('click', () => showPage('home'));
     document.getElementById('nav-services')?.addEventListener('click', () => showPage('services'));
     document.getElementById('nav-locations')?.addEventListener('click', () => showPage('locations'));
+    
+    // D. 手機版菜單事件
     document.getElementById('mobile-nav-home')?.addEventListener('click', () => showPage('home'));
     document.getElementById('mobile-nav-services')?.addEventListener('click', () => showPage('services'));
     document.getElementById('mobile-nav-locations')?.addEventListener('click', () => showPage('locations'));
     document.getElementById('mobile-menu-button')?.addEventListener('click', toggleMenu);
     document.getElementById('mobile-menu-close')?.addEventListener('click', toggleMenu);
+
+    // E. 貨物檢索功能綁定
     document.getElementById('search-btn')?.addEventListener('click', handleTrack);
 
-    // 綁定電腦端「同步資料」按鈕
+    // F. 配對同步功能 (電腦端 Controller 使用)
     document.getElementById('btn-pair')?.addEventListener('click', async () => {
         const code = document.getElementById('pairing-input').value;
         const statusText = document.getElementById('pairing-status');
@@ -71,27 +73,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 3. Firebase 狀態監聽 (核心連線邏輯)
+    // G. Firebase 帳號與連線監聽
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             localStorage.setItem('game_uid', user.uid);
             testConnection();
 
-            // 如果是手機(Terminal)，自動產生配對碼並顯示
+            // 若為手機(Terminal)角色，顯示自動生成的配對碼
             if (currentRole === 'terminal') {
                 const sessionData = await getOrGeneratePairingSession(user.uid);
                 const displayCode = document.getElementById('display-code');
-                
-                if (displayCode && sessionData && sessionData.pairingCode) {
+                if (displayCode && sessionData?.pairingCode) {
                     displayCode.innerText = sessionData.pairingCode;
                 }
             }
         } else {
-            // 未登入則自動匿名登入
             signInAnonymously(auth).catch((error) => console.error("登入失敗:", error));
         }
     });
 
-    // 視窗調整監聽
+    // H. 其他環境監聽
     window.addEventListener('resize', updateHeroBanner);
 });

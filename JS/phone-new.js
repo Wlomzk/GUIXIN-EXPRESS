@@ -4,8 +4,9 @@
 
 import { AuthSystem } from '../data/whoiswatching.js';
 import { MAIL_DATABASE } from '../data/mail_data.js';
-import { launchMailApp } from './mail_system.js'; 
 import { EVIDENCE_DATABASE } from '../data/evidence_data.js';
+import { launchMailApp } from './mail_system.js'; 
+import { gameState } from './state.js'; // 引入狀態管理模組
 
 // --- 全域函數掛載 ---
 window.closeApp = closeApp;
@@ -15,6 +16,20 @@ window.handleOpenEvidence = handleOpenEvidence;
 window.openEvidenceDetail = openEvidenceDetail;
 window.openImageModal = openImageModal; 
 window.closeImageModal = closeImageModal;
+
+// 監聽來自 state.js 的廣播
+window.addEventListener('stateUpdated', (e) => {
+    const newState = e.detail;
+    console.log("手機收到更新指令：", newState);
+
+    // 如果玩家現在正停留在「案件側錄 (Archive)」頁面，就立刻重新畫圖
+    // 這樣玩家就會親眼看到新的檔案「蹦」一聲跳出來！
+    if (currentActiveApp === 'archive') { 
+        renderArchiveList(newState.unlockedEvidences);
+    }
+    
+    // 如果客服有新訊息，這裡也可以順便檢查並顯示紅點
+});
 
 // --- 輔助函數 ---
 function updateAppStage(appId, newStage) {
@@ -190,7 +205,7 @@ function handleOpenEvidence(filterType = 'all') {
     let listHtml = `
         <div class="evidence-list" style="height: 250px; overflow-y: auto;">
             ${displayData.length > 0 ? displayData.map(item => `
-                <div style="padding:10px; border-bottom:1px solid #444; cursor:pointer;" 
+                <div style="padding:5px; border-bottom:1px solid #444; cursor:pointer;" 
                      onclick="window.openEvidenceDetail('${item.id}')">
                      <div style="font-size:0.9em; color:#ffcc00;">[${item.type.toUpperCase()}] ${item.title}</div>
                     <div style="font-size:0.7em; color:#888;">${item.timestamp}</div>
