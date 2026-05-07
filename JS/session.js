@@ -113,6 +113,12 @@ export async function joinPairingSession(inputCode, pcUid) {
             status: "paired"
         });
 
+        // --- 新增：如果已經配對過，且就是這個電腦端，直接算成功 ---
+        if (data.status === "paired" && data.pcUid === pcUid) {
+            console.log("[系統] 載體早已定錨，連線穩定。");
+            return true; 
+        }
+        
         console.log("[系統] 載體配對成功！儀式開始。");
         return true;
     } catch (error) {
