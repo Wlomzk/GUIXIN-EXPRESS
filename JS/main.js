@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const code = document.getElementById('pairing-input').value;
         const statusText = document.getElementById('pairing-status');
         
-        if (code.length !== 8) {
-            statusText.innerText = "代碼錯誤，請輸入 8 位數";
+        if (code.length !== 11) {
+            statusText.innerText = "代碼錯誤，請輸入 11 位數";
             return;
         }
 
