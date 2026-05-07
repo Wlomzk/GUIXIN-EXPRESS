@@ -184,8 +184,12 @@ function showChargingIndicator() {
     const indicator = document.createElement('div');
     indicator.className = 'gx-charging-indicator';
     indicator.id = 'gx-charging-box';
-    indicator.innerHTML = `<div>⚡</div><div style="font-size:8px;">充電中</div>`;
-    screen.appendChild(indicator);
+    // --- 拉姆修改：增加 onclick 事件與手勢游標，其餘 HTML 結構與文字保持不變 ---
+  indicator.setAttribute('onclick', 'stopCharging()');
+  indicator.style.cursor = 'pointer'; 
+  
+  indicator.innerHTML = `<div>⚡</div><div style="font-size:8px;">充電中</div>`;
+  screen.appendChild(indicator);
 }
 
 function hideChargingIndicator() {
