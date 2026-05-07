@@ -160,7 +160,7 @@ function renderAppGrid() {
         { id: 'app-logs', name: '系統日誌', title: '系統日誌', content: '數據未加密...', unlocked: true },
         { id: 'app-secret-files', name: '人員清單', title: '人員清單', content: '成員：阿強、小明、[數據已刪除]', unlocked: true },
         { id: 'app-evidence', name: '案件側錄', title: '案件側錄', unlocked: true, iconPath: 'image/phone/evidence.webp', action: handleOpenEvidence },
-        { id: 'app-nav', name: '尋蹤導航', unlocked: true, iconPath: 'image/phone/nav.webp', action: handleOpenNav },
+        { id: 'app-nav', name: '尋蹤導航', unlocked: true, iconPath: 'image/phone/navigation.webp', action: handleOpenNav },
         null, null, null, null, null, null, null
     ];
 
@@ -254,7 +254,7 @@ function handleOpenEvidence(filterType = 'all') {
             ${displayData.length > 0 ? displayData.map(item => {
                 const timeToShow = item.timeType === "static" ? item.fixedTime : (item.unlockedTime || "待偵測...");
                 return `
-                <div style="padding:10px 5px; border-bottom:1px solid #444; cursor:pointer;" 
+                <div style="padding:5px 5px; border-bottom:1px solid #444; cursor:pointer;" 
                      onclick="window.openEvidenceDetail('${item.id}')">
                      <div style="font-size:0.9em; color:#ffcc00;">[${item.type.toUpperCase()}] ${item.title}</div>
                     <div style="font-size:0.7em; color:#888;">${timeToShow}</div>

@@ -219,17 +219,8 @@
 .gx-nav-container {
     position: relative;
     width: 100%;
-    height: 380px;
+    height: 305px;
     background: #000;
-    /* 上方平整, 下方左右 25px 切角 */
-    clip-path: polygon(
-        0 0, 
-        100% 0, 
-        100% calc(100% - 25px), 
-        calc(100% - 25px) 100%, 
-        25px 100%, 
-        0 calc(100% - 25px)
-    );
     display: flex;
     flex-direction: column;
     overflow: hidden;
