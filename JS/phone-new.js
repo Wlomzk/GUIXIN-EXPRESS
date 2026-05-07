@@ -24,6 +24,7 @@ window.openEvidenceDetail = openEvidenceDetail;
 window.openImageModal = openImageModal; 
 window.closeImageModal = closeImageModal;
 window.handleNavSearch = handleNavSearch;   
+window.startNavConnection = startNavConnection; // 新增點擊連線函數
 window.executeNavigation = executeNavigation; 
 
 let currentTarget = null; 
@@ -203,19 +204,32 @@ function handleOpenNav() {
     document.getElementById('modal-title').innerText = '尋蹤導航';
     document.getElementById('modal-text').innerHTML = `
         <div class="gx-nav-container">
-            // --- 搜尋框改為監聽鍵盤事件 ---
-<input type="text" id="nav-search" class="gx-nav-search-bar" 
-       placeholder="輸入地點並按下 ENTER..." 
-       onkeydown="if(event.keyCode===13) window.handleNavSearch(this.value)">
+            <input type="text" id="nav-search" class="gx-nav-search-bar" 
+                   placeholder="輸入地點並按下 ENTER..." 
+                   onkeydown="if(event.keyCode===13) window.handleNavSearch(this.value)">
             <div class="gx-nav-map-area">
                 <img src="image/phone/TAMSUI-MAP.webp" style="width:100%; height:100%; object-fit:cover; opacity:0.6;">
-                <svg class="gx-nav-svg-layer"><line id="nav-line" x1="50%" y1="90%" x2="50%" y2="90%" stroke="#32CD32" stroke-width="2" stroke-dasharray="5,5" style="display:none;" /></svg>
+                <svg class="gx-nav-svg-layer" style="overflow:visible;">
+                    <line id="nav-line" x1="50%" y1="90%" x2="50%" y2="90%" 
+                          stroke="#00FF41" stroke-width="3" stroke-dasharray="8,4" 
+                          style="display:none; filter: drop-shadow(0 0 5px #00FF41); transition: all 0.8s ease-out;" />
+                </svg>
                 <div class="fx-breathing" style="position:absolute; bottom:10%; left:50%; width:10px; height:10px; background:#d41c16; border-radius:50%; transform:translate(-50%, 50%); z-index:11;"></div>
                 <div id="nav-poi-container">
-                    ${NAV_LOCATIONS.map(loc => `<div class="gx-nav-poi" id="poi-${loc.id}" style="left:${loc.x}%; top:${loc.y}%; display:none;"><span style="font-size:16px;">${loc.icon}</span><div style="font-size:9px; color:#fff;">${loc.name}</div></div>`).join('')}
+                    ${NAV_LOCATIONS.map(loc => `
+                        <div class="gx-nav-poi" id="poi-${loc.id}" 
+                             style="left:${loc.x}%; top:${loc.y}%; display:none; transform:translate(-50%, -50%); cursor:pointer;" 
+                             onclick="window.startNavConnection('${loc.id}')">
+                            <span style="font-size:24px;">${loc.icon}</span>
+                            <div style="font-size:10px; color:#fff; text-shadow:1px 1px 2px #000;">${loc.name}</div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
-            <button id="nav-go-btn" onclick="window.executeNavigation()" class="fx-unstable" style="display:none; position:absolute; bottom:35px; left:50%; transform:translateX(-50%); background:#32CD32; color:#000; border:none; padding:8px 20px; font-weight:bold; cursor:pointer; z-index:100;">[ 執行前往 ]</button>
+            <button id="nav-go-btn" onclick="window.executeNavigation()" class="fx-unstable" 
+                    style="display:none; position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:#32CD32; color:#000; border:none; padding:8px 15px; font-weight:bold; cursor:pointer; z-index:100; border-radius:4px;">
+                    [ 執行前往 ]
+            </button>
         </div>
     `;
     modal.style.display = 'block';
@@ -224,55 +238,53 @@ function handleOpenNav() {
 function handleNavSearch(val) {
     const line = document.getElementById('nav-line');
     const goBtn = document.getElementById('nav-go-btn');
-    const poiContainer = document.querySelectorAll('.gx-nav-poi');
+    const allPois = document.querySelectorAll('.gx-nav-poi');
     
-    // 1. 初始化：通通藏起來
-    poiContainer.forEach(p => {
-        p.style.display = 'none';
-        p.classList.remove('fx-unstable');
-    });
+    // 初始化：隱藏線條與按鈕
+    allPois.forEach(p => { p.style.display = 'none'; p.classList.remove('fx-unstable'); });
     line.style.display = 'none';
     goBtn.style.display = 'none';
     currentTarget = null;
 
     if (!val) return;
 
-    // 2. 比對地點
     const found = NAV_LOCATIONS.find(loc => loc.name.includes(val) || val.includes(loc.name));
 
     if (found) {
-        currentTarget = found;
         const poiEl = document.getElementById(`poi-${found.id}`);
-
-        // 3. 顯示圖標並加上跳動感
         poiEl.style.display = 'block';
-        poiEl.classList.add('fx-unstable'); 
-
-        // 4. SVG 連線動畫邏輯
-        // 先設定起點 (玩家) 與 終點 (目的地)
-        line.setAttribute('x1', '50%');
-        line.setAttribute('y1', '90%');
-        line.setAttribute('x2', '50%'); // 初始終點設在起點
-        line.setAttribute('y2', '90%');
-        line.style.display = 'block';
-
-        // 強制瀏覽器重繪動畫
-        setTimeout(() => {
-            line.style.transition = "all 0.8s ease-out"; // 讓線條用噴的出來
-            line.setAttribute('x2', `${found.x}%`);
-            line.setAttribute('y2', `${found.y}%`);
-        }, 50);
-
-        // 5. 等線跑完後，再跳出前往按鈕 (延遲 800ms)
-        setTimeout(() => {
-            goBtn.style.display = 'block';
-            goBtn.classList.add('fx-breathing'); // 讓按鈕也有呼吸感
-        }, 850);
-
-    } else {
-        console.log("導航系統：無法辨識的座標。");
-        // 這裡可以加個震動音效或紅字提示
+        poiEl.classList.add('fx-unstable'); // 搜尋出來先跳動，吸引點擊
+        console.log("目標鎖定，請點擊圖標建立連線...");
     }
+}
+
+// 關鍵新增：點擊圖標才連線
+function startNavConnection(locId) {
+    const found = NAV_LOCATIONS.find(loc => loc.id === locId);
+    if (!found) return;
+
+    const line = document.getElementById('nav-line');
+    const goBtn = document.getElementById('nav-go-btn');
+    currentTarget = found;
+
+    // 設定起點 (底端玩家位置)
+    line.setAttribute('x1', '50%');
+    line.setAttribute('y1', '90%');
+    line.setAttribute('x2', '50%'); 
+    line.setAttribute('y2', '90%');
+    line.style.display = 'block';
+
+    // 延時觸發噴射動畫
+    setTimeout(() => {
+        line.setAttribute('x2', `${found.x}%`);
+        line.setAttribute('y2', `${found.y}%`);
+    }, 50);
+
+    // 線條到達後顯示按鈕
+    setTimeout(() => {
+        goBtn.style.display = 'block';
+        goBtn.classList.add('fx-breathing');
+    }, 850);
 }
 
 function executeNavigation() {
@@ -281,7 +293,7 @@ function executeNavigation() {
     setTimeout(() => { window.location.href = currentTarget.scene; }, 1000);
 }
 
-// --- 證據系統還原 ---
+// --- 證據系統還原 (嚴格保護行距) ---
 function handleOpenEvidence(filterType = 'all') {
     const modal = document.getElementById('gx-modal');
     document.getElementById('modal-title').innerText = '案件側錄';
