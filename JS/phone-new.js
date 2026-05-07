@@ -197,20 +197,27 @@ function handleOpenEvidence(filterType = 'all') {
     const modal = document.getElementById('gx-modal');
     document.getElementById('modal-title').innerText = '案件側錄';
     
-    let displayData = EVIDENCE_DATABASE;
+    let displayData = EVIDENCE_DATABASE.filter(item => item.isLocked === false);
+
+    // --- 然後才過濾類型 (影像/筆記) ---
     if (filterType !== 'all') {
-        displayData = EVIDENCE_DATABASE.filter(item => item.type === filterType);
+        displayData = displayData.filter(item => item.type === filterType);
     }
 
     let listHtml = `
         <div class="evidence-list" style="height: 250px; overflow-y: auto;">
-            ${displayData.length > 0 ? displayData.map(item => `
-                <div style="padding:5px; border-bottom:1px solid #444; cursor:pointer;" 
+            ${displayData.length > 0 ? displayData.map(item => {
+                // --- 修正點：根據時空類型決定顯示的時間 ---
+                const timeToShow = item.timeType === "static" ? item.fixedTime : (item.unlockedTime || "待偵測...");
+                
+                return `
+                <div style="padding:10px 5px; border-bottom:1px solid #444; cursor:pointer;" 
                      onclick="window.openEvidenceDetail('${item.id}')">
                      <div style="font-size:0.9em; color:#ffcc00;">[${item.type.toUpperCase()}] ${item.title}</div>
-                    <div style="font-size:0.7em; color:#888;">${item.timestamp}</div>
+                    <div style="font-size:0.7em; color:#888;">${timeToShow}</div>
                 </div>
-            `).join('') : '<div style="padding:20px; color:#666; text-align:center;">無相關資料</div>'}
+                `;
+            }).join('') : '<div style="padding:20px; color:#666; text-align:center;">無相關資料</div>'}
         </div>
         <div style="display:flex; justify-content:space-around; padding-top:10px; border-top:1px solid #666;">
             <button onclick="handleOpenEvidence('all')">全部</button>
@@ -226,16 +233,19 @@ function handleOpenEvidence(filterType = 'all') {
 function openEvidenceDetail(id) {
     const item = EVIDENCE_DATABASE.find(i => i.id == id);
     if (!item) {
-        console.error("找不到該證據，請檢查證據資料庫 ID 是否正確！");
+        console.error("找不到該證據 ID:", id);
         return;
     }
 
     document.getElementById('modal-title').innerText = item.title;
+    
+    // --- 修正點：詳情頁的時間也要對應 ---
+    const timeToShow = item.timeType === "static" ? item.fixedTime : (item.unlockedTime || "待偵測...");
 
     const detailHtml = `
-        <button onclick="handleOpenEvidence()" style="margin-bottom:10px; cursor:pointer;">← 返回清單</button>
-        <div style="color:#aaa; font-size:0.8em; margin-bottom:10px;">${item.timestamp}</div>
-        <div style="margin-bottom:15px; line-height:1.5;">${item.content}</div>
+        <button onclick="handleOpenEvidence()" style="margin-bottom:10px; cursor:pointer; background:#333; color:#fff; border:1px solid #555; padding:2px 8px;">← 返回清單</button>
+        <div style="color:#aaa; font-size:0.8em; margin-bottom:10px;">側錄時間：${timeToShow}</div>
+        <div style="margin-bottom:15px; line-height:1.5; color:#eee;">${item.content}</div>
         ${item.imagePath ? `<img src="${item.imagePath}" style="width:100%; border-radius:5px; border:1px solid #555; cursor:pointer;" onclick="window.openImageModal('${item.imagePath}')">` : ''}
     `;
     

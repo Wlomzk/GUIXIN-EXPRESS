@@ -2,7 +2,7 @@
  * 歸心物流 - 核心關鍵字資料庫
  * 這裡存放所有可被檢索的「失物」與「成就」定義。
  */
-export const ARCHIVE_DATABASE = {
+export const KEYWORD_DATABASE = {
   "絳紅": {
     "title": "絳紅殘綢",
     "content": "這是一段被時光磨損的絲綢，上面隱約可見靈舒的字跡。它曾在牧野分撥中心滯留了三百年，等待一個永遠不會來的收件人。"

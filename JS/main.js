@@ -3,7 +3,7 @@ import './firebase-init.js';
 import { auth } from './firebase-init.js';
 import { onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { toggleMenu, showPage, updateHeroBanner } from './ui.js';
-import { handleTrack, renderArchive } from './archive.js';
+import { handleTrack, renderArchive } from './keyword.js';
 import { testConnection, getOrGeneratePairingSession, joinPairingSession } from './session.js';
 
 // --- 2. 狀態設定 ---
