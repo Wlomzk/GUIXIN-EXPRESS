@@ -163,44 +163,46 @@ function renderAppGrid() {
     ];
 
     allApps.forEach(app => {
-        if (!app || !app.unlocked) return;
+    if (!app || !app.unlocked) return;
 
-        app.stage = appSettings[app.id] || 1;
+    app.stage = appSettings[app.id] || 1;
 
-        const div = document.createElement('div');
-        div.className = 'gx-app-item';
+    const div = document.createElement('div');
+    div.className = 'gx-app-item';
 
-        if (app.iconPath) {
-            const iconDiv = document.createElement('div');
-            iconDiv.className = `app-icon stage-${app.stage}`;
-            iconDiv.style.backgroundImage = `url('${app.iconPath}')`;
-            div.appendChild(iconDiv);
+    if (app.iconPath) {
+        const iconDiv = document.createElement('div');
+        iconDiv.className = `app-icon stage-${app.stage}`;
+        iconDiv.style.backgroundImage = `url('${app.iconPath}')`;
+        div.appendChild(iconDiv);
+    } else {
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'gx-app-icon';
+        iconDiv.innerText = app.icon || '📱';
+        div.appendChild(iconDiv);
+    }
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'gx-app-name';
+    nameSpan.innerText = app.name;
+    div.appendChild(nameSpan);
+
+    div.onclick = () => {
+        // --- 修正處：正確的 CustomEvent 寫法 ---
+        document.dispatchEvent(new CustomEvent('battery-consume', { 
+            detail: { amount: 10 } 
+        })); // 這裡需要結束括號與分號
+
+        if (app.action) {
+            app.action();
         } else {
-            const iconDiv = document.createElement('div');
-            iconDiv.className = 'gx-app-icon';
-            iconDiv.innerText = app.icon || '📱';
-            div.appendChild(iconDiv);
+            openApp(app.title, app.content);
         }
+    };
+    
+    grid.appendChild(div);
+});
 
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'gx-app-name';
-        nameSpan.innerText = app.name;
-        div.appendChild(nameSpan);
-
-        div.onclick = () => {
-            // --- 拉姆新增：點擊 APP 耗電 10% 測試功能 ---
-            document.dispatchEvent(new CustomEvent)'battery-consume', { 
-                detail: { amount: 10 }
-            if (app.action) {
-                app.action();
-            } else {
-                openApp(app.title, app.content);
-            }
-        };
-        
-        grid.appendChild(div);
-    });
-}
 
 
 // --- 功能執行函式 ---
