@@ -96,7 +96,7 @@ function updateAppStage(appId, newStage) {
             </div>
             <div id="mail-content-view" class="gx-modal" style="display:none; z-index:91;">
                 <div class="gx-modal-content">
-                    <div class="gx-modal-header"><button onclick="window.backToMailList()" style="margin-bottom:10px; cursor:pointer; background:#333; color:#fff; border:1px solid #555; padding:2px 8px;">← 返回列表</button><span id="mail-detail-title"></span></div>
+                    <div class="gx-modal-header"><button onclick="window.backToMailList()" style="margin-bottom:2px; font-size: 90%; cursor:pointer; background:#333; color:#fff; border:1px solid #555; padding:2px 8px;">← 返回列表</button><span id="mail-detail-title"></span></div>
                     <div class="gx-modal-body">
                         <div id="mail-detail-sender" style="font-weight:bold; color:#ffcc00; margin-bottom:5px;"></div>
                         <div id="mail-detail-text"></div>
