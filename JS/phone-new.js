@@ -200,7 +200,6 @@ function renderAppGrid() {
 });
 
 
-<<<<<<< HEAD
         div.onclick = () => {
             // --- 拉姆新增：點擊 APP 耗電 10% 測試功能 ---
             document.dispatchEvent(new CustomEvent('battery-consume', { 
@@ -217,8 +216,6 @@ function renderAppGrid() {
         grid.appendChild(div);
     });
 }
-=======
->>>>>>> c50feffe89480017e7a21c7fba93a0fefefcfb1f
 
 // --- 功能執行函式 ---
 function handleOpenEvidence(filterType = 'all') {
