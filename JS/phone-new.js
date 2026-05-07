@@ -72,7 +72,7 @@ function updateAppStage(appId, newStage) {
             <div class="gx-phone-close" id="gx-close" style="z-index: 100;">×</div>
             <div class="gx-app-layer"><div class="gx-app-grid"></div></div>
             <!-- 電力耗盡鎖定圖層 -->
-<div id="gx-power-off-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index:9999; flex-direction:column; justify-content:center; align-items:center; color:#d41c16; text-align:center;">
+<div id="gx-power-off-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:#000; flex-direction:column; justify-content:center; align-items:center; color:#d41c16; text-align:center;">
     <div style="font-size: 50px; margin-bottom: 20px;">🪫</div>
     <div style="font-size: 18px; font-weight:bold; margin-bottom:10px;">系統電力已耗盡</div>
     <div style="font-size: 14px; color:#666; margin-bottom:20px;">請立即接入能源載體...</div>
@@ -189,7 +189,7 @@ function renderAppGrid() {
 
         div.onclick = () => {
             // --- 拉姆新增：點擊 APP 耗電 10% 測試功能 ---
-            document.dispatchEvent(new CustomEvent('battery-consume', { 
+            document.dispatchEvent(new CustomEvent)'battery-consume', { 
                 detail: { amount: 10 }
             if (app.action) {
                 app.action();
@@ -201,6 +201,7 @@ function renderAppGrid() {
         grid.appendChild(div);
     });
 }
+
 
 // --- 功能執行函式 ---
 function handleOpenEvidence(filterType = 'all') {
