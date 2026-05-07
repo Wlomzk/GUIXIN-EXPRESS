@@ -22,13 +22,9 @@ window.addEventListener('stateUpdated', (e) => {
     const newState = e.detail;
     console.log("手機收到更新指令：", newState);
 
-    // 如果玩家現在正停留在「案件側錄 (Archive)」頁面，就立刻重新畫圖
-    // 這樣玩家就會親眼看到新的檔案「蹦」一聲跳出來！
     if (currentActiveApp === 'archive') { 
         renderArchiveList(newState.unlockedEvidences);
     }
-    
-    // 如果客服有新訊息，這裡也可以順便檢查並顯示紅點
 });
 
 // --- 輔助函數 ---
@@ -71,13 +67,12 @@ function updateAppStage(appId, newStage) {
             </div>   
             <div class="gx-phone-close" id="gx-close" style="z-index: 100;">×</div>
             <div class="gx-app-layer"><div class="gx-app-grid"></div></div>
-            <!-- 電力耗盡鎖定圖層 -->
-<div id="gx-power-off-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:#000; flex-direction:column; justify-content:center; align-items:center; color:#d41c16; text-align:center;">
-    <div style="font-size: 50px; margin-bottom: 20px;">🪫</div>
-    <div style="font-size: 18px; font-weight:bold; margin-bottom:10px;">系統電力已耗盡</div>
-    <div style="font-size: 14px; color:#666; margin-bottom:20px;">請立即接入能源載體...</div>
-    <button onclick="handleCharge()" style="background:#32CD32; color: #000; border:none; padding:10px 20px; cursor:pointer; font-weight:bold; border-radius:5px;">[ 啟動緊急充電 ]</button>
-</div>
+            <div id="gx-power-off-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:#000; flex-direction:column; justify-content:center; align-items:center; color:#d41c16; text-align:center;">
+                <div style="font-size: 50px; margin-bottom: 20px;">🪫</div>
+                <div style="font-size: 18px; font-weight:bold; margin-bottom:10px;">系統電力已耗盡</div>
+                <div style="font-size: 14px; color:#666; margin-bottom:20px;">請立即接入能源載體...</div>
+                <button onclick="handleCharge()" style="background:#32CD32; color: #000; border:none; padding:10px 20px; cursor:pointer; font-weight:bold; border-radius:5px;">[ 啟動緊急充電 ]</button>
+            </div>
             <div class="gx-crack-overlay"></div>
             <div class="gx-glitch-overlay"></div>
             <div id="gx-battery-notifier"></div>
@@ -139,7 +134,8 @@ function handleLogin() {
 
 function checkAuthOnStartup() {
     if (localStorage.getItem('gx_user')) {
-        document.getElementById('gx-login-overlay').style.display = 'none';
+        const overlay = document.getElementById('gx-login-overlay');
+        if (overlay) overlay.style.display = 'none';
         renderAppGrid();
     }
 }
@@ -204,6 +200,25 @@ function renderAppGrid() {
 });
 
 
+<<<<<<< HEAD
+        div.onclick = () => {
+            // --- 拉姆新增：點擊 APP 耗電 10% 測試功能 ---
+            document.dispatchEvent(new CustomEvent('battery-consume', { 
+                detail: { amount: 10 } 
+            }));
+
+            if (app.action) {
+                app.action();
+            } else {
+                openApp(app.title, app.content);
+            }
+        };
+
+        grid.appendChild(div);
+    });
+}
+=======
+>>>>>>> c50feffe89480017e7a21c7fba93a0fefefcfb1f
 
 // --- 功能執行函式 ---
 function handleOpenEvidence(filterType = 'all') {
@@ -212,7 +227,6 @@ function handleOpenEvidence(filterType = 'all') {
     
     let displayData = EVIDENCE_DATABASE.filter(item => item.isLocked === false);
 
-    // --- 然後才過濾類型 (影像/筆記) ---
     if (filterType !== 'all') {
         displayData = displayData.filter(item => item.type === filterType);
     }
@@ -220,9 +234,7 @@ function handleOpenEvidence(filterType = 'all') {
     let listHtml = `
         <div class="evidence-list" style="height: 250px; overflow-y: auto;">
             ${displayData.length > 0 ? displayData.map(item => {
-                // --- 修正點：根據時空類型決定顯示的時間 ---
                 const timeToShow = item.timeType === "static" ? item.fixedTime : (item.unlockedTime || "待偵測...");
-                
                 return `
                 <div style="padding:10px 5px; border-bottom:1px solid #444; cursor:pointer;" 
                      onclick="window.openEvidenceDetail('${item.id}')">
@@ -245,14 +257,9 @@ function handleOpenEvidence(filterType = 'all') {
 
 function openEvidenceDetail(id) {
     const item = EVIDENCE_DATABASE.find(i => i.id == id);
-    if (!item) {
-        console.error("找不到該證據 ID:", id);
-        return;
-    }
+    if (!item) return;
 
     document.getElementById('modal-title').innerText = item.title;
-    
-    // --- 修正點：詳情頁的時間也要對應 ---
     const timeToShow = item.timeType === "static" ? item.fixedTime : (item.unlockedTime || "待偵測...");
 
     const detailHtml = `
