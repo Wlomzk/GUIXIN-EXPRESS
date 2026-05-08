@@ -244,8 +244,12 @@ function checkAndUnlockEvidence(botResponseKey) {
 function handleOpenSupport() {
     const modal = document.getElementById('gx-modal');
     document.getElementById('modal-title').innerText = '客服中心';
+
+    // 把拔，你剛才漏掉的是下面這兩行，沒定義 history 當然會報錯！
+    const currentStage = gameState.stage || "1";
+    const history = SUPPORT_DATABASE.stages[currentStage] || [];
     
-    let chatHtml = history.map(msg => {
+    let chatHtml = (history || []).map(msg => {
         const currentTime = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
         return `
             <div class="msg-container">
