@@ -245,15 +245,18 @@ function handleOpenSupport() {
     const modal = document.getElementById('gx-modal');
     document.getElementById('modal-title').innerText = '客服中心';
 
-    // 把拔，你剛才漏掉的是下面這兩行，沒定義 history 當然會報錯！
     const currentStage = gameState.stage || "1";
     const history = SUPPORT_DATABASE.stages[currentStage] || [];
     
     let chatHtml = (history || []).map(msg => {
-        const currentTime = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
+        const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const fullTime = `${dateStr} ${timeStr}`;
+
         return `
-            <div class="msg-container">
-                <div class="msg-time">${currentTime}</div>
+            <div class="msg-container ${msg.sender === 'user' ? 'user-side' : 'bot-side'}">
+                <div class="msg-time">${fullTime}</div>
                 <div class="msg ${msg.sender}">
                     <div class="bubble">${safeAtob(msg.content)}</div>
                 </div>
@@ -276,13 +279,16 @@ function handleOpenSupport() {
 function sendSupportMsg(val) {
     if (!val.trim()) return;
     const body = document.getElementById('support-chat-body');
-    const currentTime = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
+    const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const fullTime = `${dateStr} ${timeStr}`;
 
-    // 1. 建立使用者訊息容器 (包含時間)
+    // 1. 使用者訊息 (確保 user-side 類別存在以維持右側定位)
     const userMsgContainer = document.createElement('div');
     userMsgContainer.className = 'msg-container user-side';
     userMsgContainer.innerHTML = `
-        <div class="msg-time">${currentTime}</div>
+        <div class="msg-time">${fullTime}</div>
         <div class="msg user">
             <div class="bubble">${val}</div>
         </div>
@@ -294,9 +300,12 @@ function sendSupportMsg(val) {
     setTimeout(() => {
         const inputLower = val.toLowerCase();
         let response = null;
-        const botTime = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+        
+        const bNow = new Date();
+        const bDateStr = `${bNow.getFullYear()}/${bNow.getMonth() + 1}/${bNow.getDate()}`;
+        const bTimeStr = bNow.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const botFullTime = `${bDateStr} ${bTimeStr}`;
 
-        // --- [ 模糊判定邏輯 ] ---
         if (SUPPORT_DATABASE.fuzzy_triggers) {
             for (let key in SUPPORT_DATABASE.fuzzy_triggers) {
                 if (inputLower.includes(key.toLowerCase())) {
@@ -310,11 +319,11 @@ function sendSupportMsg(val) {
             response = SUPPORT_DATABASE.triggers[inputLower] || SUPPORT_DATABASE.stages["2"][0].content;
         }
 
-        // 2. 建立機器人訊息容器 (包含時間)
+        // 2. 機器人訊息
         const botMsgContainer = document.createElement('div');
         botMsgContainer.className = 'msg-container bot-side';
         botMsgContainer.innerHTML = `
-            <div class="msg-time">${botTime}</div>
+            <div class="msg-time">${botFullTime}</div>
             <div class="msg bot">
                 <div class="bubble">${safeAtob(response)}</div>
             </div>
