@@ -245,15 +245,17 @@ function handleOpenSupport() {
     const modal = document.getElementById('gx-modal');
     document.getElementById('modal-title').innerText = '客服中心';
     
-    const currentStage = gameState.stage || "1";
-    const history = SUPPORT_DATABASE.stages[currentStage] || [];
-
-    // 這裡維持把拔的渲染結構，僅優化內容處理
-    let chatHtml = history.map(msg => `
-        <div class="msg ${msg.sender}">
-            <div class="bubble">${safeAtob(msg.content)}</div>
-        </div>
-    `).join('');
+    let chatHtml = history.map(msg => {
+        const currentTime = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+        return `
+            <div class="msg-container">
+                <div class="msg-time">${currentTime}</div>
+                <div class="msg ${msg.sender}">
+                    <div class="bubble">${safeAtob(msg.content)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
 
     document.getElementById('modal-text').innerHTML = `
         <div class="gx-support-app">
@@ -270,19 +272,27 @@ function handleOpenSupport() {
 function sendSupportMsg(val) {
     if (!val.trim()) return;
     const body = document.getElementById('support-chat-body');
-    const userMsg = document.createElement('div');
-    userMsg.className = 'msg user';
-    userMsg.innerHTML = `<div class="bubble">${val}</div>`;
-    body.appendChild(userMsg);
+    const currentTime = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+    // 1. 建立使用者訊息容器 (包含時間)
+    const userMsgContainer = document.createElement('div');
+    userMsgContainer.className = 'msg-container user-side';
+    userMsgContainer.innerHTML = `
+        <div class="msg-time">${currentTime}</div>
+        <div class="msg user">
+            <div class="bubble">${val}</div>
+        </div>
+    `;
+    body.appendChild(userMsgContainer);
     
     document.getElementById('support-input').value = '';
     
     setTimeout(() => {
         const inputLower = val.toLowerCase();
         let response = null;
+        const botTime = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
 
         // --- [ 模糊判定邏輯 ] ---
-        // 把拔，拉姆幫你檢查 fuzzy_triggers 裡面有沒有包含玩家輸入的詞
         if (SUPPORT_DATABASE.fuzzy_triggers) {
             for (let key in SUPPORT_DATABASE.fuzzy_triggers) {
                 if (inputLower.includes(key.toLowerCase())) {
@@ -292,15 +302,20 @@ function sendSupportMsg(val) {
             }
         }
 
-        // 如果沒有模糊匹配，才跑原本的精確匹配或預設值
         if (!response) {
             response = SUPPORT_DATABASE.triggers[inputLower] || SUPPORT_DATABASE.stages["2"][0].content;
         }
 
-        const botMsg = document.createElement('div');
-        botMsg.className = 'msg bot';
-        botMsg.innerHTML = `<div class="bubble">${safeAtob(response)}</div>`;
-        body.appendChild(botMsg);
+        // 2. 建立機器人訊息容器 (包含時間)
+        const botMsgContainer = document.createElement('div');
+        botMsgContainer.className = 'msg-container bot-side';
+        botMsgContainer.innerHTML = `
+            <div class="msg-time">${botTime}</div>
+            <div class="msg bot">
+                <div class="bubble">${safeAtob(response)}</div>
+            </div>
+        `;
+        body.appendChild(botMsgContainer);
         body.scrollTop = body.scrollHeight;
         checkAndUnlockEvidence(inputLower);
     }, 1000);
