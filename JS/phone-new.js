@@ -1,5 +1,5 @@
 /* ==========================================================
-   phone-new.js (絕對還原版 - 嚴格保留所有間距、字體與原始參數)
+   phone-new.js (絕對還原整合版 - 嚴格保留所有參數與間距)
    ========================================================== */
 
 import { AuthSystem } from '../data/whoiswatching.js';
@@ -80,7 +80,6 @@ function updateAppStage(appId, newStage) {
                 <button onclick="window.handleCharge()" class="fx-unstable" style="z-index: 241; background:#32CD32; color: #000; border:none; padding:10px 20px; cursor:pointer; font-weight:bold; border-radius:5px;">[ 啟動緊急充電 ]</button>
             </div>
             <div class="gx-crack-overlay" style="z-index: 500; pointer-events: none;"></div>
-            <div class="gx-crack-overlay"></div>
             <div class="gx-glitch-overlay"></div>
             <div id="gx-battery-notifier"></div>
             <div id="gx-modal" class="gx-modal">
@@ -209,9 +208,9 @@ function handleOpenNav() {
                    onkeydown="if(event.keyCode===13) window.handleNavSearch(this.value)">
             <div class="gx-nav-map-area">
                 <img src="image/phone/TAMSUI-MAP.webp" style="width:100%; height:100%; object-fit:cover; opacity:0.6;">
-                <svg class="gx-nav-svg-layer">
-                    <line id="nav-line" x1="50%" y1="90%" x2="50%" y2="90%" style="display:none;" />
-                </svg>
+                <svg class="gx-nav-svg-layer" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
+    <polyline id="nav-line" points="" style="display:none; fill:none; stroke: #5D4037; stroke-width: 3; stroke-dasharray: 2; stroke-linecap: round; stroke-linejoin: round;" />
+</svg>
                 <div style="position:absolute; bottom:10%; left:50%; width:10px; height:10px; background:#d41c16; border-radius:50%; transform:translate(-50%, 50%); z-index:11;"></div>
                 <div id="nav-poi-container">
                     ${NAV_LOCATIONS.map(loc => `
@@ -248,7 +247,7 @@ function handleNavSearch(val) {
 
     if (found) {
         const poiEl = document.getElementById(`poi-${found.id}`);
-        poiEl.style.display = 'flex'; // 使用 flex 以匹配 CSS 的垂直排列
+        poiEl.style.display = 'flex';
     }
 }
 
@@ -256,24 +255,71 @@ function startNavConnection(locId) {
     const found = NAV_LOCATIONS.find(loc => loc.id === locId);
     if (!found) return;
 
-    const line = document.getElementById('nav-line');
+    const path = document.getElementById('nav-line');
     const goBtn = document.getElementById('nav-go-btn');
     currentTarget = found;
 
-    line.setAttribute('x1', '50%');
-    line.setAttribute('y1', '90%');
-    line.setAttribute('x2', '50%'); 
-    line.setAttribute('y2', '90%');
-    line.style.display = 'block';
+    const startX = 50, startY = 90;
+    const endX = found.x, endY = found.y;
 
-    setTimeout(() => {
-        line.setAttribute('x2', `${found.x}%`);
-        line.setAttribute('y2', `${found.y}%`);
-    }, 50);
+    // --- 核心邏輯：有序隨機路徑 ---
+    const waypoints = [{ x: startX, y: startY }];
+    const segments = 6; 
 
-    setTimeout(() => {
-        goBtn.style.display = 'block';
-    }, 850);
+    for (let i = 1; i < segments; i++) {
+        // 1. 強制進度：Y 軸必須線性靠近目的地，不准往回跑
+        const t = i / segments;
+        const baseY = startY + (endY - startY) * t;
+        
+        // 2. 限制偏移：X 軸在縮小的範圍內抖動
+        // 距離越近，抖動越小 (t 越大，(1-t) 越小)
+        const maxOffset = 25 * (1 - t * 0.5); 
+        const offsetX = (Math.random() - 0.5) * maxOffset;
+
+        waypoints.push({ 
+            x: startX + (endX - startX) * t + offsetX, 
+            // 這裡給 Y 軸一點點微小抖動（不超過前進幅度的一半），增加自然感
+            y: baseY + (Math.random() - 0.5) * 5 
+        });
+    }
+    
+    waypoints.push({ x: endX, y: endY });
+
+    // --- 動畫邏輯 ---
+    path.style.display = 'block';
+    let progress = 0;
+    const duration = 2500; // 降低速度：從 1.4s 變為 2.5s，讓把拔看清楚它的爬行
+    const startTime = performance.now();
+
+    function animate(time) {
+        let elapsed = time - startTime;
+        progress = Math.min(elapsed / duration, 1);
+
+        const totalSegments = waypoints.length - 1;
+        const currentIdx = Math.floor(progress * totalSegments);
+        let pointsStr = "";
+        
+        for (let i = 0; i <= currentIdx; i++) {
+            pointsStr += `${waypoints[i].x},${waypoints[i].y} `;
+        }
+
+        if (progress < 1) {
+            const segProgress = (progress * totalSegments) % 1;
+            const nextX = waypoints[currentIdx].x + (waypoints[currentIdx+1].x - waypoints[currentIdx].x) * segProgress;
+            const nextY = waypoints[currentIdx].y + (waypoints[currentIdx+1].y - waypoints[currentIdx].y) * segProgress;
+            pointsStr += `${nextX},${nextY}`;
+        }
+
+        path.setAttribute('points', pointsStr);
+
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            // 抵達後增加一個小小的停頓感再顯示按鈕
+            setTimeout(() => { goBtn.style.display = 'block'; }, 200);
+        }
+    }
+    requestAnimationFrame(animate);
 }
 
 function executeNavigation() {

@@ -474,21 +474,25 @@
 /* 右側充電指示框 */
 .gx-charging-indicator {
     position: absolute;
-    top: 500px;           /* 調整垂直位置 */
-    right: 110px;          /* 固定在右側 */
-    width: 60px;
-    height: 40px;
-    background: rgba(0, 0, 0, 0.85);
+    /* 改用 bottom，確保它從螢幕底部往上算，不會跌出去 */
+    bottom: 90px;          
+    right: 105px;           /* 靠右邊一點 */
+    width: 65px;           /* 稍微寬一點點，比較好點 */
+    height: 45px;
+    background: rgba(20, 15, 10, 0.9); /* 深色背景 */
     border: 1px solid #a58d71;
     color: #a58d71;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 9px;       /* 小型字體 */
+    font-size: 9px;
     font-family: monospace;
-    z-index: 100;         /* 確保在最上層 */
-    pointer-events: none; /* 讓點擊穿透，不會擋到其他操作 */
+    z-index: 10001;        /* 給它一個超級高的權限 */
+    pointer-events: auto !important; /* 絕對要 auto，不然點不到 */
+    cursor: pointer;       /* 滑鼠移上去要變小手 */
+    border-radius: 4px;    /* 稍微圓角比較有質感 */
+    box-shadow: 0 0 10px rgba(165, 141, 113, 0.3); /* 增加發光感 */
 }
 
 /* --- 隱藏 APP 邏輯 --- */

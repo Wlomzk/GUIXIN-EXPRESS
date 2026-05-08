@@ -1,160 +1,119 @@
 /* ==========================================================
-   battery.js - 電池能源管理模組 (完整整合版)
+   battery.js - 電池能源管理模組 (整合手機 UI 更新邏輯)
    ========================================================== */
 
-// --- 初始化變數 ---
+// --- 【1. 初始化與全域變數】 ---
 let savedBattery = localStorage.getItem('gx_battery');
-// 如果沒紀錄，預設 34%，否則讀取紀錄
 window.batteryLevel = (savedBattery === null) ? 34 : parseInt(savedBattery);
-
-// 全域變數掛載
 window.lastAlertLevel = 0;
 window.chargingInterval = null;
 window.alert60Shown = false;
 window.alert30Shown = false;
 
-window.handleCharge = function() { // 拉姆將其掛載至 window 以供 HTML 按鈕呼叫
-    if (chargingInterval) return;
+// --- 【2. 核心電力運算】 ---
+
+// 扣電執行
+function drainBattery(amount) {
+    window.batteryLevel = Math.max(0, window.batteryLevel - amount);
+    window.updateBatteryUI();
+}
+
+// 停止充電邏輯
+window.stopCharging = function() {
+    if (window.chargingInterval) {
+        clearInterval(window.chargingInterval);
+        window.chargingInterval = null;
+    }
+    localStorage.setItem('isCharging', 'false');
+    hideChargingIndicator();
+
+    // 拔掉充電後，立刻恢復 UI 更新，確保自然耗電計時器能正常運作
+    window.updateBatteryUI();
+    console.log("🔌 充電線已拔除");
+};
+
+// 啟動充電邏輯
+window.handleCharge = function() {
+    if (window.chargingInterval) return;
     closeBatteryAlert();
     showChargingIndicator();
     localStorage.setItem('isCharging', 'true');
     localStorage.setItem('chargeStartTime', Date.now());
-    chargingInterval = setInterval(() => {
-        if (batteryLevel < 100) {
-            batteryLevel++;
+    
+    window.chargingInterval = setInterval(() => {
+        if (window.batteryLevel < 100) {
+            window.batteryLevel++;
             window.updateBatteryUI();
         } else {
-            stopCharging();
-            alert60Shown = false; 
-            alert30Shown = false;
+            window.stopCharging();
+            window.alert60Shown = false; 
+            window.alert30Shown = false;
         }
-    }, 1500);
+    }, 1500); // 每 1.5 秒充 1%
 };
 
-// --- 【關鍵修正】暴露給外部呼叫的更新函數 ---
+// --- 【3. UI 更新與狀態同步】 ---
+
 window.updateBatteryUI = function() {
-    // 只有在登入狀態下才更新 UI
     if (!localStorage.getItem('gx_user')) return;
 
     const fill = document.getElementById('battery-fill');
     const text = document.getElementById('battery-text');
-    const powerOverlay = document.getElementById('gx-power-off-overlay'); // 拉姆新增：抓取鎖定圖層
+    const powerOverlay = document.getElementById('gx-power-off-overlay'); 
     
-    // 同步儲存
-    localStorage.setItem('gx_battery', batteryLevel);
+    // 同步到數據庫
+    localStorage.setItem('gx_battery', window.batteryLevel);
     localStorage.setItem('gx_last_visit', Date.now()); 
 
+    // 更新電池條長度與顏色 (從手機邏輯搬遷至此)
     if (fill) {
-        fill.style.width = batteryLevel + '%';
-        // 確保顏色正確
+        fill.style.width = window.batteryLevel + '%';
         fill.classList.remove('warning', 'danger');
-        if (batteryLevel < 30) fill.classList.add('danger');
-        else if (batteryLevel < 60) fill.classList.add('warning');
-    }
-    
-    if (text) {
-        text.innerText = batteryLevel + '%';
-    }
-
-    /* --- 拉姆新增：電力歸零鎖定邏輯 --- */
-    if (powerOverlay) {
-        if (batteryLevel <= 0) {
-            powerOverlay.style.display = 'flex';
+        if (window.batteryLevel < 30) {
+            fill.style.backgroundColor = '#ff4444'; // 這裡補上手機需要的顏色參數
+            fill.classList.add('danger');
+        } else if (window.batteryLevel < 60) {
+            fill.style.backgroundColor = '#ffcc00';
+            fill.classList.add('warning');
         } else {
-            powerOverlay.style.display = 'none';
+            fill.style.backgroundColor = '#32CD32';
         }
     }
-
-    // 更新彈窗內的數字顯示
-    const alertDisplay = document.getElementById('alert-level-display');
-    if (alertDisplay) alertDisplay.innerText = batteryLevel;
-
-    // 處理警示邏輯重置
-    if (batteryLevel > 60) {
-        alert60Shown = false;
-        alert30Shown = false;
-    } else if (batteryLevel > 30) {
-        alert30Shown = false;
+    
+    // 更新百分比文字
+    if (text) {
+        text.innerText = window.batteryLevel + '%';
     }
 
+    // 電力歸零：顯示「系統電力已耗盡」遮罩
+    if (powerOverlay) {
+        powerOverlay.style.display = (window.batteryLevel <= 0) ? 'flex' : 'none';
+    }
+
+    // 更新警示視窗內的數字
+    const alertDisplay = document.getElementById('alert-level-display');
+    if (alertDisplay) alertDisplay.innerText = window.batteryLevel;
+
+    // 重置警示標記（當充電超過閥值時）
+    if (window.batteryLevel > 60) {
+        window.alert60Shown = false; window.alert30Shown = false;
+    } else if (window.batteryLevel > 30) {
+        window.alert30Shown = false;
+    }
+    
     checkBatteryAlerts();
 };
 
-// --- 初始化與狀態恢復 ---
-window.addEventListener('DOMContentLoaded', () => {
-    // 檢查是否有登入，沒有的話先隱藏電量相關顯示或直接不運作
-    if (!localStorage.getItem('gx_user')) return;
-
-    const lastVisit = parseInt(localStorage.getItem('gx_last_visit') || Date.now());
-    const isCharging = localStorage.getItem('isCharging') === 'true';
-    const now = Date.now();
-    const diffMs = now - lastVisit;
-
-    // 計算離線期間的電量變化
-    if (isCharging) {
-        const gainedPower = Math.floor(diffMs / 1500);
-        batteryLevel = Math.min(100, batteryLevel + gainedPower);
-        handleCharge();
-    } else {
-        const lostDrain = Math.floor(diffMs / 5000); 
-        batteryLevel = Math.max(0, batteryLevel - lostDrain);
-    }
-
-    // 初始更新 UI
-    window.updateBatteryUI();
-});
-
-// --- 自動耗電邏輯 ---
-setInterval(() => {
-    if (!localStorage.getItem('gx_user')) return; 
-    if (chargingInterval !== null) return;
-    if (batteryLevel > 0) drainBattery(1);
-}, 5000); // 每 5 秒扣 1% 電
-
-// --- 輔助函數 ---
-
-function drainBattery(amount) {
-    batteryLevel = Math.max(0, batteryLevel - amount);
-    window.updateBatteryUI();
-}
-
-function stopCharging() {
-    if (chargingInterval) {
-        clearInterval(chargingInterval);
-        chargingInterval = null;
-    }
-    localStorage.setItem('isCharging', 'false');
-    hideChargingIndicator();
-}
-
-function handleCharge() {
-    if (chargingInterval) return;
-    closeBatteryAlert();
-    showChargingIndicator();
-    localStorage.setItem('isCharging', 'true');
-    localStorage.setItem('chargeStartTime', Date.now());
-    chargingInterval = setInterval(() => {
-        if (batteryLevel < 100) {
-            batteryLevel++;
-            window.updateBatteryUI();
-        } else {
-            stopCharging();
-            // 充飽了可以選配一個提醒，如果不需要可以註解掉
-            // alert("系統充能完畢。");
-            alert60Shown = false; 
-            alert30Shown = false;
-        }
-    }, 1500);
-}
+// --- 【4. 警示與通知系統】 ---
 
 function checkBatteryAlerts() {
-    if (chargingInterval !== null) return;
-    if (batteryLevel <= 30 && !alert30Shown) {
-        alert30Shown = true;
-        showBatteryAlert(batteryLevel);
-    } else if (batteryLevel <= 60 && !alert60Shown) {
-        alert60Shown = true;
-        showBatteryAlert(batteryLevel);
+    if (window.chargingInterval !== null) return; // 充電中不噴警示
+    if (window.batteryLevel <= 30 && !window.alert30Shown) {
+        window.alert30Shown = true;
+        showBatteryAlert(window.batteryLevel);
+    } else if (window.batteryLevel <= 60 && !window.alert60Shown) {
+        window.alert60Shown = true;
+        showBatteryAlert(window.batteryLevel);
     }
 }
 
@@ -172,24 +131,26 @@ function showBatteryAlert(level) {
     notifier.style.display = 'flex';
 }
 
-function closeBatteryAlert() {
+window.closeBatteryAlert = function() {
     const notifier = document.getElementById('gx-battery-notifier');
     if(notifier) notifier.style.display = 'none';
-}
+};
+
+// --- 【5. 充電視覺效果】 ---
 
 function showChargingIndicator() {
     const screen = document.querySelector('.gx-phone-screen');
-    if(!screen) return;
-    if(document.getElementById('gx-charging-box')) return;
+    if(!screen || document.getElementById('gx-charging-box')) return;
+    
     const indicator = document.createElement('div');
     indicator.className = 'gx-charging-indicator';
     indicator.id = 'gx-charging-box';
-    // --- 拉姆修改：增加 onclick 事件與手勢游標，其餘 HTML 結構與文字保持不變 ---
-  indicator.setAttribute('onclick', 'stopCharging()');
-  indicator.style.cursor = 'pointer'; 
-  
-  indicator.innerHTML = `<div>⚡</div><div style="font-size:8px;">充電中</div>`;
-  screen.appendChild(indicator);
+    indicator.setAttribute('onclick', 'stopCharging()');
+    indicator.style.cursor = 'pointer';  
+    indicator.style.zIndex = '9999'; // 確保在所有視窗之上
+    indicator.innerHTML = `<div>⚡</div><div style="font-size:8px;">充電中</div>`;
+    indicator.innerHTML += `<div style="font-size:8px; opacity:0.7; margin-top:2px;">[ 點擊拔除 ]</div>`;
+    screen.appendChild(indicator);
 }
 
 function hideChargingIndicator() {
@@ -197,7 +158,38 @@ function hideChargingIndicator() {
     if (box) box.remove();
 }
 
-// 監聽器，供其他模組呼叫扣電
+// --- 【6. 生命週期管理與離線計算】 ---
+
+window.addEventListener('DOMContentLoaded', () => {
+    if (!localStorage.getItem('gx_user')) return;
+
+    const lastVisit = parseInt(localStorage.getItem('gx_last_visit') || Date.now());
+    const isCharging = localStorage.getItem('isCharging') === 'true';
+    const now = Date.now();
+    const diffMs = now - lastVisit;
+
+    if (isCharging) {
+        // 離線充電計算
+        const gainedPower = Math.floor(diffMs / 1500);
+        window.batteryLevel = Math.min(100, window.batteryLevel + gainedPower);
+        window.handleCharge();
+    } else {
+        // 離線耗電計算 (每 5 秒扣 1%)
+        const lostDrain = Math.floor(diffMs / 5000); 
+        window.batteryLevel = Math.max(0, window.batteryLevel - lostDrain);
+    }
+    window.updateBatteryUI();
+});
+
+// 定時自然耗電
+setInterval(() => {
+    if (!localStorage.getItem('gx_user')) return; 
+    if (window.chargingInterval !== null) return;
+    if (window.batteryLevel > 0) drainBattery(1);
+}, 5000);
+
+// --- 【7. 外部通訊介面】 ---
+// 接收來自 phone-new.js 的指令
 document.addEventListener('battery-consume', (e) => {
     if (!localStorage.getItem('gx_user')) return;
     const amount = e.detail.amount || 1;
