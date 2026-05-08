@@ -34,13 +34,19 @@ window.checkAndUnlockEvidence = checkAndUnlockEvidence; // 補上聯動檢查掛
 
 let currentTarget = null; 
 
-// --- [ 3. 安全解碼工具 ] (修正報錯的核心) ---
+// --- [ 3. 安全解碼工具 ] (拉姆修正版：防止非 Base64 數據導致亂碼) ---
 function safeAtob(str) {
+    if (!str) return "";
+    
+    // 把拔，拉姆幫你檢查這是不是 Base64 格式，如果不是就直接回傳
+    const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+    
     try {
-        return atob(str);
+        if (base64Regex.test(str)) {
+            return decodeURIComponent(escape(atob(str))); // 支援 UTF-8 解碼
+        }
+        return str;
     } catch (e) {
-        // 如果不是正確的 Base64 或包含特殊字元，直接回傳原字串，避免崩潰
-        console.warn("[系統警告] 訊息解碼失敗，顯示原始數據。");
         return str;
     }
 }
@@ -242,7 +248,7 @@ function handleOpenSupport() {
     const currentStage = gameState.stage || "1";
     const history = SUPPORT_DATABASE.stages[currentStage] || [];
 
-    // 這裡使用了 safeAtob 確保不會報錯
+    // 這裡維持把拔的渲染結構，僅優化內容處理
     let chatHtml = history.map(msg => `
         <div class="msg ${msg.sender}">
             <div class="bubble">${safeAtob(msg.content)}</div>
