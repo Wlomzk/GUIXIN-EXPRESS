@@ -1,8 +1,8 @@
-/* ==============================
-   歸心物流終端機 - 整合優化版
-   ============================== */
+/* ==========================================================
+   歸心物流終端機 - 整合優化版 (分區備註功能版)
+   ========================================================== */
 
-/* --- 1. 觸發與容器 --- */
+/* --- [ 區塊 1: 觸發與容器 ] --- */
 .gx-terminal-trigger {
     pointer-events: auto !important;
     position: fixed;
@@ -69,7 +69,7 @@
     text-align:center;
     }
 
-/* --- 登入遮罩 (已修正排版) --- */
+/* --- [ 區塊 2: 登入遮罩系統 ] --- */
 .gx-login-overlay {
     position: absolute;
     top: 22px; left: 43px; width: 80%; height: 74%;
@@ -93,7 +93,6 @@
     align-items: center;
 }
 
-/* 修正後的登入容器排版 */
 .login-box { 
     display: flex; 
     flex-direction: column; 
@@ -131,16 +130,13 @@
 
 .login-box button:hover { background: #555; }
 
-/* --- 2. APP 互動層 (核心排版) --- */
+/* --- [ 區塊 3: APP 桌面互動層 ] --- */
 .gx-app-layer {
     position: absolute;
-    /* 這裡透過設定邊距來控制範圍，不要寫 width/height */
     top: 56px;
     left: 39px;
     right: 12px;
     bottom: 141px;
-    /* 這裡替換成新的切角邏輯 */
-    /* 參數解釋：切角大小設定為 20px，您可以根據手機圖片實際的斜角大小微調這個數字 */
     clip-path: polygon(
         0 0,                        /* 左上角 (不動) */
         100% 0,                     /* 右上角 (不動) */
@@ -150,12 +146,10 @@
         0 calc(100% - 25px)         /* 左側邊緣往下直到切角起點 */
         );
     z-index: 10;
-    
 }
 
 .gx-app-grid {
     display: grid;
-    /* 這裡原本可能是 2，請把它改成 3 */
     grid-template-columns: repeat(3, 1fr);
     flex-wrap: wrap;        /* 自動換行 */
     justify-content: flex-start; /* 核心：由左往右排列 */
@@ -168,14 +162,12 @@
 
 .gx-app-item {
     display: flex;
-    /* 確保每個 App 大小固定，不要被擠壓 */
     flex: 0 0 calc(33.33% - 15px); 
     box-sizing: border-box;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
     transition: transform 0.1s;
-    /* 加入這行，確保格子大小絕對不會因為裡面的圖標而改變 */
     flex-shrink: 0;
 }
 
@@ -184,20 +176,14 @@
 .app-icon {
     width: 50px;
     height: 50px;
-    /* 關鍵：設定圖片自身的比例，這行能解決擠壓問題 */
-    /* 如果你的原始圖片每個圖標是長方形，例如寬 100 高 80，就寫 5 / 4 */
-    /* 如果是正方形，就寫 1 / 1 */
     aspect-ratio: 1 / 1;
     background-repeat: no-repeat;
-    /* 設定 300% 寬度，確保 Sprite 邏輯正確 */
     background-size: 300% auto; 
     display: inline-block;
     cursor: pointer;
-    /* 先把測試用的綠色底色拿掉，不然會蓋住圖片 */
     background-color: transparent; 
 }
 
-/* 2. 狀態類別：只負責改變「位置」 */
 .stage-1 { background-position: 3% 50%; }
 .stage-2 { background-position: 49% 50%; }
 .stage-3 { background-position: 96% 50%; }
@@ -207,15 +193,11 @@
     font-size: 12px;
     font-family: monospace;
     font-weight: bold; /* 加粗文字，增加辨識度 */
-    
-    /* 1. 文字陰影：創造一個黑色光暈，讓綠色字體跳出來 */
     text-shadow: 0 0 1px #000;
-    
-    /* 4. 確保文字不會因為加了背景而變太寬 */
     margin-top: 4px;
 }
 
-/* --- 導航 System (下半部雙切角) --- */
+/* --- [ 區塊 4: 尋蹤導航系統 ] --- */
 .gx-nav-container {
     position: relative;
     width: 100%;
@@ -255,7 +237,6 @@
     z-index: 5;
 }
 
-/* 修正後的 POI：讓文字與圖標垂直排列 */
 .gx-nav-poi {
     position: absolute;
     display: flex;
@@ -266,7 +247,6 @@
     cursor: pointer;
 }
 
-/* 地點文字：顯示在圖標上方，寬度縮小 */
 .gx-nav-poi div {
     font-size: 9px;
     color: #fff;
@@ -280,10 +260,8 @@
 #nav-line {
     transition: all 0.8s ease-out;
     stroke: #32CD32; /* 確保顏色清楚 */
-    /* 已移除 filter: drop-shadow，防止玩家眼睛受傷 */
 }
 
-/* 確保按鈕是原始小顆樣式 */
 #nav-go-btn {
     position: absolute;
     bottom: -4px;
@@ -298,13 +276,12 @@
     z-index: 100;
 }
 
-/* --- 導航區 --- */
-/* 客服系統專用樣式 - 日常悽涼風 */
+/* --- [ 區塊 5: 偽客服系統 (拉姆調整版) ] --- */
 .gx-support-app {
-    height: 300px; /* 根據妳的 modal 高度調整 */
+    height: 300px; 
     display: flex;
     flex-direction: column;
-    background: #e5e0d8; /* 舊紙張色 */
+    background: #2b2621; /* 把拔，拉姆降低了亮度，現在是暗沉的深咖啡色 */
 }
 
 .support-chat-body {
@@ -323,7 +300,7 @@
 .msg .avatar {
     width: 20px;
     height: 20px;
-    background: #332b24;
+    background: #1a1612; /* 調整頭像底色 */
     margin: 0 5px;
     flex-shrink: 0;
 }
@@ -331,18 +308,25 @@
 .msg .bubble {
     padding: 6px 10px;
     font-size: 12px;
-    border: 1px solid #332b24;
+    border: 1px solid #4a4035; /* 降低對比，邊框改為深琥珀 */
     line-height: 1.4;
 }
 
-.msg.bot .bubble { background: #332b24; color: #a58d71; }
-.msg.user .bubble { background: #fff; color: #332b24; }
+.msg.bot .bubble { 
+    background: #1a1612; 
+    color: #8c765d; /* 客服字體調暗，減少刺眼感 */
+}
+
+.msg.user .bubble { 
+    background: #d1ccc4; /* 玩家泡泡不再死白，改為灰白色 */
+    color: #2b2621; /* 字體深色，確保清晰 */
+}
 
 .support-input-area {
     display: flex;
     padding: 8px;
-    border-top: 1px solid #332b24;
-    background: #d8d2c9;
+    border-top: 1px solid #1a1612;
+    background: #3d352c; /* 輸入區也調暗了 */
 }
 
 #support-input {
@@ -352,10 +336,11 @@
     outline: none;
     font-family: inherit;
     font-size: 12px;
+    color: #a58d71;
 }
 
 .support-input-area button {
-    background: #332b24;
+    background: #1a1612;
     color: #a58d71;
     border: none;
     padding: 2px 8px;
@@ -367,23 +352,21 @@
     width: 3px;
 }
 .support-chat-body::-webkit-scrollbar-thumb {
-    background: #332b24; /* 讓捲軸跟妳的咖啡色標籤統一 */
+    background: #1a1612; 
 }
 
-/* 讓 Bot 的頭像帶有一點雜訊感 */
 .msg.bot .avatar {
-    background-image: url('image/phone/support-icon-glitch.webp'); /* 建議放一個模糊的物流標誌 */
+    background-image: url('image/phone/support-icon-glitch.webp'); 
     background-size: cover;
     opacity: 0.8;
 }
 
-/* 玩家的泡泡稍微白一點，增加對比的悽涼感 */
 .msg.user .bubble {
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 2px 2px 0px rgba(51, 43, 36, 0.2);
+    background: rgba(209, 204, 196, 0.85); /* 增加一點點透明，配合背景 */
+    box-shadow: 2px 2px 0px rgba(26, 22, 18, 0.4);
 }
 
-/* --- 3. 狀態列與破碎效果 --- */
+/* --- [ 區塊 6: 狀態列與破碎效果 ] --- */
 .gx-crack-overlay {
     position: absolute;
     top: 11px;
@@ -404,7 +387,6 @@
     left: 40px;
     width: 80%;
     box-sizing: border-box;
-
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -414,8 +396,6 @@
     background: rgba(0, 0, 0, 0.5);
     z-index: 15;
     pointer-events: none;
-    /* 這裡替換成新的切角邏輯 */
-    /* 參數解釋：切角大小設定為 20px，您可以根據手機圖片實際的斜角大小微調這個數字 */
     clip-path: polygon(
         0 25px,              /* 左側邊緣往下 (留出切角空間) */
     25px 0,              /* 左上角切角點 */
@@ -426,14 +406,13 @@
         );
 }
 
-/* 專門控制時間的樣式 */
 .gx-time-display {
-    font-size: 16px;         /* 你想調多大就改這裡 */
-    font-family: 'monospace'; /* 等寬字體，看起來才像數字鐘 */
-    font-weight: bold;        /* 加粗一點點更清楚 */
-    color: #d3c4a1;         /* 如果背景深，字體要設亮一點 */
-    margin: 0 10px;           /* 跟旁邊的訊號、電池留點距離 */
-    letter-spacing: 1px;       /* 字距稍微拉開一點，讓數字更清晰 */
+    font-size: 16px; 
+    font-family: 'monospace'; 
+    font-weight: bold; 
+    color: #d3c4a1; 
+    margin: 0 10px; 
+    letter-spacing: 1px; 
     opacity: 0.8;
 }
 
@@ -441,19 +420,17 @@
 
 .gx-phone-close { position: absolute; top: 10px; right: -10px; color: #a58d71; font-size: 24px; cursor: pointer; }
 
-/* 修改電池填充物的樣式 */
 .battery-fill {
     height: 100%;
-    background: #a58d71; /* 初始土褐色 */
+    background: #a58d71; 
     width: 100%;
     transition: width 0.5s ease, background 0.5s ease;
 }
 
-/* 低電量狀態 */
-.battery-fill.warning { background: #b89b65; } /* 琥珀色 */
-.battery-fill.danger { background: #8b4545; }  /* 棕紅色 */
+.battery-fill.warning { background: #b89b65; } 
+.battery-fill.danger { background: #8b4545; }  
 
-/* --- 4. 彈出視窗 --- */
+/* --- [ 區塊 7: 系統視窗與通知 ] --- */
 .gx-modal {
     display: none;
     position: absolute;
@@ -484,42 +461,32 @@
 .gx-modal-body { padding: 6px; font-family: monospace; }
 
 #gx-battery-notifier {
-    position: absolute;       /* 鎖定在手機螢幕內 */
-    top: 148px;              /* 位置調整 */
-    left: 55px;             /* 讓它有邊距 */
-    right: 31px;            /* 讓它有邊距 */
-    height: auto;             /* 高度隨內容自動調整 */
-    background: rgba(34, 34, 34, 0.938); /* 黑色背景 */
+    position: absolute;       
+    top: 148px;              
+    left: 55px;             
+    right: 31px;            
+    height: auto;             
+    background: rgba(34, 34, 34, 0.938); 
     border: 1px solid #a58d71;
     color: #a58d71;
     padding: 15px;
-
-    /* 隱藏預設 */
     display: none; 
     z-index: 105;
-    
-    /* 橫式佈局 */
     justify-content: space-between;
     align-items: center;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     font-family: monospace;
-    
-    /* 視覺裝飾 */
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     cursor: default;
-    font-family: monospace;
 }
 
-/* 關閉按鈕樣式 */
 .gx-notify-close {
     position: absolute;
     top: 5px;
     right: 8px;
     cursor: pointer;
     font-size: 18px;
-    color: #8b4545; /* 用棕紅提醒是關閉 */
+    color: #8b4545; 
     font-weight: bold;
 }
 
@@ -530,13 +497,13 @@
     border-color: #5d5040;
 }
 
-/* 充電遮罩層 */
+/* --- [ 區塊 8: 充電系統與遮罩 ] --- */
 .gx-charging-overlay {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.9); /* 深色背景 */
-    z-index: 200;               /* 確保蓋住所有 APP */
+    background: rgba(0, 0, 0, 0.9); 
+    z-index: 200;               
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -545,27 +512,23 @@
     font-family: monospace;
 }
 
-/* 充電圖示或圖片的樣式 */
 .gx-charging-icon {
     width: 100px;
     height: 100px;
     margin-bottom: 20px;
-    /* 這裡可以放您的充電線圖片 */
     border: 2px solid #a58d71;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* 右側充電指示框 */
 .gx-charging-indicator {
     position: absolute;
-    /* 改用 bottom，確保它從螢幕底部往上算，不會跌出去 */
     bottom: 90px;          
-    right: 105px;           /* 靠右邊一點 */
-    width: 65px;           /* 稍微寬一點點，比較好點 */
+    right: 105px;           
+    width: 65px;           
     height: 45px;
-    background: rgba(20, 15, 10, 0.9); /* 深色背景 */
+    background: rgba(20, 15, 10, 0.9); 
     border: 1px solid #a58d71;
     color: #a58d71;
     display: flex;
@@ -574,21 +537,23 @@
     justify-content: center;
     font-size: 9px;
     font-family: monospace;
-    z-index: 10001;        /* 給它一個超級高的權限 */
-    pointer-events: auto !important; /* 絕對要 auto，不然點不到 */
-    cursor: pointer;       /* 滑鼠移上去要變小手 */
-    border-radius: 4px;    /* 稍微圓角比較有質感 */
-    box-shadow: 0 0 10px rgba(165, 141, 113, 0.3); /* 增加發光感 */
+    z-index: 10001;        
+    pointer-events: auto !important; 
+    cursor: pointer;       
+    border-radius: 4px;    
+    box-shadow: 0 0 10px rgba(165, 141, 113, 0.3); 
 }
 
-/* --- 隱藏 APP 邏輯 --- */
 .gx-app-item.is-locked {
     display: flex;
     filter: grayscale(1) brightness(0.5);
     pointer-events: none; 
 }
 
-/* --- 5. 響應式調整 --- */
+/* --- [ 區塊 9: 響應式佈局調整 ] --- */
+/* ----------------------------------------------------------
+   Media Queries: 手機與平板適配區
+   ---------------------------------------------------------- */
 @media (max-width: 600px) {
     .gx-phone-wrapper { right: 0; left: 0; width: 90%; margin: 0 auto; }
     .gx-phone-wrapper.is-open { left: -30px; bottom: 20px; }
@@ -601,9 +566,7 @@
     .gx-battery-notifier { height: 73%;}
 }
 
-/* --- 故障效果核心邏輯 --- */
-
-/* 1. 更暴力的閃爍 (快、強烈) */
+/* --- [ 區塊 10: 故障與動畫特效 ] --- */
 @keyframes flicker {
   0% { opacity: 1; }
   10% { opacity: 0.3; }
@@ -613,10 +576,9 @@
   100% { opacity: 1; }
 }
 
-/* 2. 真正的故障感 (顏色錯位 + 震動) */
 @keyframes glitch-shift {
   0% { transform: translateX(0); filter: hue-rotate(0deg); }
-  20% { transform: translateX(-5px); filter: hue-rotate(90deg); } /* 產生色差錯位 */
+  20% { transform: translateX(-5px); filter: hue-rotate(90deg); } 
   40% { transform: translateX(5px); filter: hue-rotate(-90deg); }
   60% { transform: translateX(-2px); }
   100% { transform: translateX(0); filter: hue-rotate(0deg); }
@@ -627,21 +589,15 @@
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* --- 應用這些效果的 CSS 類別 --- */
-
-/* 當您想讓整個層級閃爍時，加上這個 class */
 .effect-flicker {
-  animation: flicker 0.1s infinite; /* 閃爍頻率非常快 */
+  animation: flicker 0.1s infinite; 
 }
 
-/* 當您想讓畫面抖動一下時，加上這個 class */
 .effect-glitch {
-  animation: glitch-shift 0.2s; /* 只跑一次，模擬瞬間干擾 */
+  animation: glitch-shift 0.2s; 
 }
 
-/* --- 修正：將「點擊攔截」權限歸還給網頁 --- */
-
-/* 2. 把手機系統內部的功能元件設回「可點擊」，否則妳的終端機就按不動了 */
+/* --- [ 區塊 11: 系統底層權限修正 ] --- */
 .gx-phone-screen, 
 .gx-terminal-trigger,
 .gx-modal {
