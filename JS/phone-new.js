@@ -7,6 +7,7 @@ import { MAIL_DATABASE } from '../data/mail_data.js';
 import { EVIDENCE_DATABASE } from '../data/evidence_data.js';
 import { launchMailApp } from './mail_system.js'; 
 import { gameState } from './state.js'; 
+import { SUPPORT_DATABASE } from '../data/support_data.js';
 
 // --- 導航據點設定 (預留據點) ---
 const NAV_LOCATIONS = [
@@ -26,6 +27,8 @@ window.closeImageModal = closeImageModal;
 window.handleNavSearch = handleNavSearch;   
 window.startNavConnection = startNavConnection; 
 window.executeNavigation = executeNavigation; 
+window.handleOpenSupport = handleOpenSupport;
+window.sendSupportMsg = sendSupportMsg;
 
 let currentTarget = null; 
 
@@ -157,8 +160,9 @@ function renderAppGrid() {
 
     const allApps = [
         { id: 'app-mail', name: '信件匣', unlocked: true, iconPath: 'image/phone/mail.webp', action: handleOpenMail },
-        { id: 'app-logs', name: '系統日誌', title: '系統日誌', content: '數據未加密...', unlocked: true },
-        { id: 'app-secret-files', name: '人員清單', title: '人員清單', content: '成員：阿強、小明、[數據已刪除]', unlocked: true },
+        { id: 'app-logs', name: '系統日誌', unlocked: true, title: '系統日誌', content: '數據未加密...' },
+        { id: 'app-support', name: '偽客服系統', unlocked: true, iconPath: 'image/phone/support.webp', action: handleOpenSupport },
+        { id: 'app-secret-files', name: '人員清單', unlocked: true, title: '人員清單', content: '成員：阿強、小明、[數據已刪除]' },
         { id: 'app-evidence', name: '案件側錄', title: '案件側錄', unlocked: true, iconPath: 'image/phone/evidence.webp', action: handleOpenEvidence },
         { id: 'app-nav', name: '尋蹤導航', unlocked: true, iconPath: 'image/phone/navigation.webp', action: handleOpenNav },
         null, null, null, null, null, null, null
@@ -195,6 +199,98 @@ function renderAppGrid() {
         };
         grid.appendChild(div);
     });
+}
+
+// --- ( 客服功能 ) ---
+function handleOpenSupport() {
+    const modal = document.getElementById('gx-modal');
+    document.getElementById('modal-title').innerText = '物流通訊中心';
+    
+    // 取得當前劇情的初始對話 (假設 gameState.stage 存在)
+    const currentStage = gameState.stage || "1";
+    const history = SUPPORT_DATABASE.stages[currentStage] || [];
+
+    let chatHtml = history.map(msg => `
+        <div class="msg ${msg.sender}">
+            ${msg.sender === 'bot' ? '<div class="avatar"></div>' : ''}
+            <div class="bubble">${atob(msg.content)}</div>
+            ${msg.sender === 'user' ? '<div class="avatar user-avatar"></div>' : ''}
+        </div>
+    `).join('');
+
+    document.getElementById('modal-text').innerHTML = `
+        <div class="gx-support-app">
+            <div id="support-chat-body" class="support-chat-body">
+                ${chatHtml}
+            </div>
+            <div class="support-input-area">
+                <input type="text" id="support-input" placeholder="輸入訊息..." 
+                       onkeydown="if(event.keyCode===13) window.sendSupportMsg(this.value)">
+                <button onclick="window.sendSupportMsg(document.getElementById('support-input').value)">發送</button>
+            </div>
+        </div>
+    `;
+    modal.style.display = 'block';
+    
+    // 自動捲動到底部
+    setTimeout(() => {
+        const body = document.getElementById('support-chat-body');
+        if(body) body.scrollTop = body.scrollHeight;
+    }, 100);
+}
+
+function sendSupportMsg(val) {
+    if (!val.trim()) return;
+    const body = document.getElementById('support-chat-body');
+    const input = document.getElementById('support-input');
+
+    // 在 sendSupportMsg 的客服回覆邏輯中加入：
+function checkAndUnlockEvidence(botResponseKey) {
+    // 定義哪些對話 Key 對應哪些證據 ID
+    const keyToEvidenceMap = {
+        "found_truth_01": "evid_04", // 比如聊到真相 A，解鎖證據 04
+        "hidden_coord": "evid_09"    // 聊到隱藏座標，解鎖證據 09
+    };
+
+    const evidenceId = keyToEvidenceMap[botResponseKey];
+    
+    if (evidenceId && !gameState.unlockedEvidences.includes(evidenceId)) {
+        // 1. 解鎖證據
+        gameState.unlockedEvidences.push(evidenceId);
+        
+        // 2. 存入 LocalStorage (這就是妳說的存檔，完全不佔空間)
+        localStorage.setItem('gx_game_state', JSON.stringify(gameState));
+        
+        // 3. 拋出事件通知「案件側錄」APP 更新紅點或列表
+        document.dispatchEvent(new CustomEvent('stateUpdated', { detail: gameState }));
+        
+        console.log(`[系統通知] 關鍵數據已同步至案件側錄：${evidenceId}`);
+    }
+}
+
+    // 1. 渲染玩家訊息
+    const userMsg = document.createElement('div');
+    userMsg.className = 'msg user';
+    userMsg.innerHTML = `<div class="bubble">${val}</div><div class="avatar user-avatar"></div>`;
+    body.appendChild(userMsg);
+    
+    input.value = '';
+    body.scrollTop = body.scrollHeight;
+
+    // 2. 判斷關鍵字或默認回覆
+    setTimeout(() => {
+        let responseBase64 = SUPPORT_DATABASE.triggers[val.toLowerCase()] || SUPPORT_DATABASE.stages["2"][0].content;
+        
+        const botMsg = document.createElement('div');
+        botMsg.className = 'msg bot';
+        // 增加一點點「已讀」的悽涼感
+        botMsg.innerHTML = `<div class="avatar"></div><div class="bubble">${atob(responseBase64)}</div>`;
+        body.appendChild(botMsg);
+        body.scrollTop = body.scrollHeight;
+        
+        // 這裡可以連動電力消耗
+        document.dispatchEvent(new CustomEvent('battery-consume', { detail: { amount: 2 } }));
+    }, 1200);
 }
 
 // --- 導航功能 (UI 修正版) ---
