@@ -29,6 +29,8 @@ window.startNavConnection = startNavConnection;
 window.executeNavigation = executeNavigation; 
 window.handleOpenSupport = handleOpenSupport;
 window.sendSupportMsg = sendSupportMsg;
+indow.handleOpenNav = handleOpenNav; // 補上這行，導航才能開
+window.checkAndUnlockEvidence = checkAndUnlockEvidence; // 補上這行，聯動才不會報錯
 
 let currentTarget = null; 
 
@@ -202,6 +204,22 @@ function renderAppGrid() {
 }
 
 // --- ( 客服功能 ) ---
+// 在 sendSupportMsg 的客服回覆邏輯中加入：
+function checkAndUnlockEvidence(botResponseKey) {
+    const keyToEvidenceMap = {
+        "found_truth_01": "evid_04", 
+        "hidden_coord": "evid_09"    
+    };
+
+    const evidenceId = keyToEvidenceMap[botResponseKey];
+    if (evidenceId && !gameState.unlockedEvidences.includes(evidenceId)) {
+        gameState.unlockedEvidences.push(evidenceId);
+        localStorage.setItem('gx_game_state', JSON.stringify(gameState));
+        document.dispatchEvent(new CustomEvent('stateUpdated', { detail: gameState }));
+        console.log(`[系統通知] 關鍵數據已同步：${evidenceId}`);
+    }
+}
+
 function handleOpenSupport() {
     const modal = document.getElementById('gx-modal');
     document.getElementById('modal-title').innerText = '物流通訊中心';
@@ -239,36 +257,16 @@ function handleOpenSupport() {
     }, 100);
 }
 
+    
+
+    // --- 2. 修正後的發送函數 ---
 function sendSupportMsg(val) {
     if (!val.trim()) return;
+    
     const body = document.getElementById('support-chat-body');
     const input = document.getElementById('support-input');
 
-    // 在 sendSupportMsg 的客服回覆邏輯中加入：
-function checkAndUnlockEvidence(botResponseKey) {
-    // 定義哪些對話 Key 對應哪些證據 ID
-    const keyToEvidenceMap = {
-        "found_truth_01": "evid_04", // 比如聊到真相 A，解鎖證據 04
-        "hidden_coord": "evid_09"    // 聊到隱藏座標，解鎖證據 09
-    };
-
-    const evidenceId = keyToEvidenceMap[botResponseKey];
-    
-    if (evidenceId && !gameState.unlockedEvidences.includes(evidenceId)) {
-        // 1. 解鎖證據
-        gameState.unlockedEvidences.push(evidenceId);
-        
-        // 2. 存入 LocalStorage (這就是妳說的存檔，完全不佔空間)
-        localStorage.setItem('gx_game_state', JSON.stringify(gameState));
-        
-        // 3. 拋出事件通知「案件側錄」APP 更新紅點或列表
-        document.dispatchEvent(new CustomEvent('stateUpdated', { detail: gameState }));
-        
-        console.log(`[系統通知] 關鍵數據已同步至案件側錄：${evidenceId}`);
-    }
-}
-
-    // 1. 渲染玩家訊息
+    // 渲染玩家訊息
     const userMsg = document.createElement('div');
     userMsg.className = 'msg user';
     userMsg.innerHTML = `<div class="bubble">${val}</div><div class="avatar user-avatar"></div>`;
@@ -277,21 +275,25 @@ function checkAndUnlockEvidence(botResponseKey) {
     input.value = '';
     body.scrollTop = body.scrollHeight;
 
-    // 2. 判斷關鍵字或默認回覆
+    // 模擬客服回覆
     setTimeout(() => {
-        let responseBase64 = SUPPORT_DATABASE.triggers[val.toLowerCase()] || SUPPORT_DATABASE.stages["2"][0].content;
+        // 判斷觸發詞，如果沒有就走預設回覆
+        let triggerKey = val.toLowerCase();
+        let responseBase64 = SUPPORT_DATABASE.triggers[triggerKey] || SUPPORT_DATABASE.stages["2"][0].content;
         
         const botMsg = document.createElement('div');
         botMsg.className = 'msg bot';
-        // 增加一點點「已讀」的悽涼感
         botMsg.innerHTML = `<div class="avatar"></div><div class="bubble">${atob(responseBase64)}</div>`;
         body.appendChild(botMsg);
         body.scrollTop = body.scrollHeight;
+
+        // 這裡調用聯動檢查 (把 triggerKey 丟進去)
+        checkAndUnlockEvidence(triggerKey);
         
-        // 這裡可以連動電力消耗
         document.dispatchEvent(new CustomEvent('battery-consume', { detail: { amount: 2 } }));
     }, 1200);
-}
+  }
+ 
 
 // --- 導航功能 (UI 修正版) ---
 function handleOpenNav() {
