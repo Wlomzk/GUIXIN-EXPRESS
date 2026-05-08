@@ -1,541 +1,545 @@
 /* ==========================================================
-   phone-new.js (絕對還原整合版 - 分區備註功能版)
-   ========================================================== */
+   phone-new.js (絕對還原整合版 - 分區備註功能版)
+   ========================================================== */
 
 import { AuthSystem } from '../data/whoiswatching.js';
 import { MAIL_DATABASE } from '../data/mail_data.js';
 import { EVIDENCE_DATABASE } from '../data/evidence_data.js';
-import { launchMailApp } from './mail_system.js'; 
-import { gameState } from './state.js'; 
+import { launchMailApp } from './mail_system.js'; 
+import { gameState } from './state.js'; 
 import { SUPPORT_DATABASE } from '../data/support_data.js';
 
 // --- [區塊 1: 導航據點資料設定] ---
 const NAV_LOCATIONS = [
-    { id: 'temple', name: '淡水大廟', x: 30, y: 35, icon: '⛩️', scene: 'scene_temple.html' },
-    { id: 'hermit', name: '深山隱居處', x: 85, y: 15, icon: '🛖', scene: 'scene_mountain.html' },
-    { id: 'muye', name: '牧野分撥中心', x: 50, y: 50, icon: '📦', scene: 'scene_muye.html' }
+    { id: 'temple', name: '淡水大廟', x: 30, y: 35, icon: '⛩️', scene: 'scene_temple.html' },
+    { id: 'hermit', name: '深山隱居處', x: 85, y: 15, icon: '🛖', scene: 'scene_mountain.html' },
+    { id: 'muye', name: '牧野分撥中心', x: 50, y: 50, icon: '📦', scene: 'scene_muye.html' }
 ];
 
 // --- [區塊 2: 全域函數掛載] (確保 HTML 內 onclick 可正確觸發) ---
 window.closeApp = closeApp;
 window.openApp = openApp;
-window.updateAppStage = updateAppStage; 
+window.updateAppStage = updateAppStage; 
 window.handleOpenEvidence = handleOpenEvidence;
 window.openEvidenceDetail = openEvidenceDetail;
-window.openImageModal = openImageModal; 
+window.openImageModal = openImageModal; 
 window.closeImageModal = closeImageModal;
-window.handleNavSearch = handleNavSearch;   
-window.startNavConnection = startNavConnection; 
-window.executeNavigation = executeNavigation; 
+window.handleNavSearch = handleNavSearch;   
+window.startNavConnection = startNavConnection; 
+window.executeNavigation = executeNavigation; 
 window.handleOpenSupport = handleOpenSupport;
 window.sendSupportMsg = sendSupportMsg;
 window.handleOpenNav = handleOpenNav; // 已修正：補回原本漏掉的 w
 window.checkAndUnlockEvidence = checkAndUnlockEvidence; // 補上聯動檢查掛載
 
-let currentTarget = null; 
+let currentTarget = null; 
 
 // --- [ 3. 安全解碼工具 ] (拉姆修正版：防止非 Base64 數據導致亂碼) ---
 function safeAtob(str) {
-    if (!str) return "";
-    
-    // 把拔，拉姆幫你檢查這是不是 Base64 格式，如果不是就直接回傳
-    const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
-    
-    try {
-        if (base64Regex.test(str)) {
-            return decodeURIComponent(escape(atob(str))); // 支援 UTF-8 解碼
-        }
-        return str;
-    } catch (e) {
-        return str;
-    }
+    if (!str) return "";
+    
+    // 把拔，拉姆幫你檢查這是不是 Base64 格式，如果不是就直接回傳
+    const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+    
+    try {
+        if (base64Regex.test(str)) {
+            return decodeURIComponent(escape(atob(str))); // 支援 UTF-8 解碼
+        }
+        return str;
+    } catch (e) {
+        return str;
+    }
 }
 
 // 監聽狀態更新 (用於證據清單即時同步)
 window.addEventListener('stateUpdated', (e) => {
-    const newState = e.detail;
-    if (typeof currentActiveApp !== 'undefined' && currentActiveApp === 'archive') { 
-        renderArchiveList(newState.unlockedEvidences);
-    }
+    const newState = e.detail;
+    if (typeof currentActiveApp !== 'undefined' && currentActiveApp === 'archive') { 
+        renderArchiveList(newState.unlockedEvidences);
+    }
 });
 
 // 更新 App 圖示階段狀態
 function updateAppStage(appId, newStage) {
-    let appSettings = JSON.parse(localStorage.getItem('gx_app_settings')) || {};
-    appSettings[appId] = newStage;
-    localStorage.setItem('gx_app_settings', JSON.stringify(appSettings));
-    renderAppGrid();
+    let appSettings = JSON.parse(localStorage.getItem('gx_app_settings')) || {};
+    appSettings[appId] = newStage;
+    localStorage.setItem('gx_app_settings', JSON.stringify(appSettings));
+    renderAppGrid();
 }
 
 // --- [區塊 3: 手機核心初始化邏輯] ---
 (function() {
-    document.addEventListener("DOMContentLoaded", function() {
-        if (window.hasInitializedPhone) return;
-        window.hasInitializedPhone = true;
+    document.addEventListener("DOMContentLoaded", function() {
+        if (window.hasInitializedPhone) return;
+        window.hasInitializedPhone = true;
 
-        const phoneWrapper = document.createElement("div");
-        phoneWrapper.className = "gx-phone-wrapper";
-        phoneWrapper.id = "gx-phone";
+        const phoneWrapper = document.createElement("div");
+        phoneWrapper.className = "gx-phone-wrapper";
+        phoneWrapper.id = "gx-phone";
 
-        const phoneScreen = document.createElement("div");
-        phoneScreen.className = "gx-phone-screen";
-        phoneScreen.innerHTML = `
-            <div id="gx-login-overlay" class="gx-login-overlay">
-                <div class="login-box">
-                    <h3>歸心物流 - 系統登入</h3>
-                    <input type="text" id="login-id" placeholder="User ID">
-                    <input type="password" id="login-pass" placeholder="Password">
-                    <button id="login-btn">登入系統</button>
-                    <p id="login-error" style="color: red; font-size: 0.8em; margin-top: 10px;"></p>
-                </div>
-            </div>
-            <div class="gx-status-bar">
-                <div class="gx-status-signal" id="status-signal">信号: 强</div>
-                <div id="system-time" class="gx-time-display">--:--</div>
-                <div class="gx-status-battery" id="status-battery">
-                    <div class="battery-body"><div class="battery-fill" id="battery-fill"></div></div>
-                    <span id="battery-text">--%</span>
-                </div>
-            </div>   
-            <div class="gx-phone-close" id="gx-close" style="z-index: 100;">×</div>
-            <div class="gx-app-layer"><div class="gx-app-grid"></div></div>
-            <div id="gx-power-off-overlay" class="gx-power-off-overlay">
-                <div style="font-size: 50px; margin-bottom: 20px;">🪫</div>
-                <div style="font-size: 18px; font-weight:bold; margin-bottom:10px;">系統電力已耗盡</div>
-                <button onclick="window.handleCharge()" class="fx-unstable" style="z-index: 241; background:#32CD32; color: #000; border:none; padding:10px 20px; cursor:pointer; font-weight:bold; border-radius:5px;">[ 啟動緊急充電 ]</button>
-            </div>
-            <div class="gx-crack-overlay" style="z-index: 500; pointer-events: none;"></div>
-            <div class="gx-glitch-overlay"></div>
-            <div id="gx-battery-notifier"></div>
-            <div id="gx-modal" class="gx-modal">
-                <div class="gx-modal-content">
-                    <div class="gx-modal-header"><span id="modal-title"></span><button class="gx-modal-close" onclick="closeApp()">×</button></div>
-                    <div class="gx-modal-body"><p id="modal-text"></p></div>
-                </div>
-            </div>
-            <div id="mail-list-view" class="gx-modal" style="display:none; z-index:90;">
-                <div class="gx-modal-content">
-                    <div class="gx-modal-header"><span id="mail-win-title">系統郵件</span><button class="gx-modal-close" onclick="closeApp()">×</button></div>
-                    <div id="mail-items-container" class="gx-modal-body"></div>
-                </div>
-            </div>
-            <div id="mail-content-view" class="gx-modal" style="display:none; z-index:91;">
-                <div class="gx-modal-content">
-                    <div class="gx-modal-header"><button onclick="window.backToMailList()" style="margin-bottom:2px; font-size: 90%; cursor:pointer; background:#333; color:#fff; border:1px solid #555; padding:2px 8px;">← 返回列表</button><span id="mail-detail-title"></span></div>
-                    <div class="gx-modal-body">
-                        <div id="mail-detail-sender" style="font-weight:bold; color:#ffcc00; margin-bottom:5px;"></div>
-                        <div id="mail-detail-text"></div>
-                    </div>
-                </div>
-            </div>
-            <div id="gx-image-viewer" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:999; justify-content:center; align-items:center; cursor:pointer;" onclick="closeImageModal()">
-                <img id="viewer-img" src="" style="max-width:90%; max-height:90%; border:2px solid #fff; box-shadow:0 0 20px rgba(255,255,255,0.5);">
-            </div>
-        `;
+        const phoneScreen = document.createElement("div");
+        phoneScreen.className = "gx-phone-screen";
+        phoneScreen.innerHTML = `
+            <div id="gx-login-overlay" class="gx-login-overlay">
+                <div class="login-box">
+                    <h3>歸心物流 - 系統登入</h3>
+                    <input type="text" id="login-id" placeholder="User ID">
+                    <input type="password" id="login-pass" placeholder="Password">
+                    <button id="login-btn">登入系統</button>
+                    <p id="login-error" style="color: red; font-size: 0.8em; margin-top: 10px;"></p>
+                </div>
+            </div>
+            <div class="gx-status-bar">
+                <div class="gx-status-signal" id="status-signal">信号: 强</div>
+                <div id="system-time" class="gx-time-display">--:--</div>
+                <div class="gx-status-battery" id="status-battery">
+                    <div class="battery-body"><div class="battery-fill" id="battery-fill"></div></div>
+                    <span id="battery-text">--%</span>
+                </div>
+            </div>   
+            <div class="gx-phone-close" id="gx-close" style="z-index: 100;">×</div>
+            <div class="gx-app-layer"><div class="gx-app-grid"></div></div>
+            <div id="gx-power-off-overlay" class="gx-power-off-overlay">
+                <div style="font-size: 50px; margin-bottom: 20px;">🪫</div>
+                <div style="font-size: 18px; font-weight:bold; margin-bottom:10px;">系統電力已耗盡</div>
+                <button onclick="window.handleCharge()" class="fx-unstable" style="z-index: 241; background:#32CD32; color: #000; border:none; padding:10px 20px; cursor:pointer; font-weight:bold; border-radius:5px;">[ 啟動緊急充電 ]</button>
+            </div>
+            <div class="gx-crack-overlay" style="z-index: 500; pointer-events: none;"></div>
+            <div class="gx-glitch-overlay"></div>
+            <div id="gx-battery-notifier"></div>
+            <div id="gx-modal" class="gx-modal">
+                <div class="gx-modal-content">
+                    <div class="gx-modal-header"><span id="modal-title"></span><button class="gx-modal-close" onclick="closeApp()">×</button></div>
+                    <div class="gx-modal-body"><p id="modal-text"></p></div>
+                </div>
+            </div>
+            <div id="mail-list-view" class="gx-modal" style="display:none; z-index:90;">
+                <div class="gx-modal-content">
+                    <div class="gx-modal-header"><span id="mail-win-title">系統郵件</span><button class="gx-modal-close" onclick="closeApp()">×</button></div>
+                    <div id="mail-items-container" class="gx-modal-body"></div>
+                </div>
+            </div>
+            <div id="mail-content-view" class="gx-modal" style="display:none; z-index:91;">
+                <div class="gx-modal-content">
+                    <div class="gx-modal-header"><button onclick="window.backToMailList()" style="margin-bottom:2px; font-size: 90%; cursor:pointer; background:#333; color:#fff; border:1px solid #555; padding:2px 8px;">← 返回列表</button><span id="mail-detail-title"></span></div>
+                    <div class="gx-modal-body">
+                        <div id="mail-detail-sender" style="font-weight:bold; color:#ffcc00; margin-bottom:5px;"></div>
+                        <div id="mail-detail-text"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="gx-image-viewer" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:999; justify-content:center; align-items:center; cursor:pointer;" onclick="closeImageModal()">
+                <img id="viewer-img" src="" style="max-width:90%; max-height:90%; border:2px solid #fff; box-shadow:0 0 20px rgba(255,255,255,0.5);">
+            </div>
+        `;
 
-        phoneWrapper.appendChild(phoneScreen);
-        document.body.appendChild(phoneWrapper);
+        phoneWrapper.appendChild(phoneScreen);
+        document.body.appendChild(phoneWrapper);
 
-        const terminalTrigger = document.createElement("div");
-        terminalTrigger.className = "gx-terminal-trigger";
-        document.body.appendChild(terminalTrigger);
+        const terminalTrigger = document.createElement("div");
+        terminalTrigger.className = "gx-terminal-trigger";
+        document.body.appendChild(terminalTrigger);
 
-        document.getElementById('login-btn').addEventListener('click', handleLogin);
-        terminalTrigger.addEventListener("click", togglePhone);
-        document.getElementById("gx-close").addEventListener("click", togglePhone);
+        document.getElementById('login-btn').addEventListener('click', handleLogin);
+        terminalTrigger.addEventListener("click", togglePhone);
+        document.getElementById("gx-close").addEventListener("click", togglePhone);
 
-        checkAuthOnStartup();
-        setInterval(updateClock, 1000);
-    });
+        checkAuthOnStartup();
+        setInterval(updateClock, 1000);
+    });
 })();
 
 // --- [區塊 4: 登入與身份驗證] ---
 function handleLogin() {
-    const id = document.getElementById('login-id').value;
-    const pass = document.getElementById('login-pass').value;
-    const result = AuthSystem.checkLogin(id, pass);
-    if (result.success) {
-        localStorage.setItem('gx_user', JSON.stringify({ ...result.user, id: id }));
-        document.getElementById('gx-login-overlay').style.display = 'none';
-        renderAppGrid();
-    } else {
-        document.getElementById('login-error').innerText = result.message;
-    }
+    const id = document.getElementById('login-id').value;
+    const pass = document.getElementById('login-pass').value;
+    const result = AuthSystem.checkLogin(id, pass);
+    if (result.success) {
+        localStorage.setItem('gx_user', JSON.stringify({ ...result.user, id: id }));
+        document.getElementById('gx-login-overlay').style.display = 'none';
+        renderAppGrid();
+    } else {
+        document.getElementById('login-error').innerText = result.message;
+    }
 }
 
 function checkAuthOnStartup() {
-    if (localStorage.getItem('gx_user')) {
-        const overlay = document.getElementById('gx-login-overlay');
-        if (overlay) overlay.style.display = 'none';
-        renderAppGrid();
-    }
+    if (localStorage.getItem('gx_user')) {
+        const overlay = document.getElementById('gx-login-overlay');
+        if (overlay) overlay.style.display = 'none';
+        renderAppGrid();
+    }
 }
 
 // --- [區塊 5: App 桌面渲染] ---
 function renderAppGrid() {
-    const grid = document.querySelector('.gx-app-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    
-    const userJson = localStorage.getItem('gx_user');
-    if (!userJson) return;
+    const grid = document.querySelector('.gx-app-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    
+    const userJson = localStorage.getItem('gx_user');
+    if (!userJson) return;
 
-    const appSettings = JSON.parse(localStorage.getItem('gx_app_settings')) || {};
+    const appSettings = JSON.parse(localStorage.getItem('gx_app_settings')) || {};
 
-    const allApps = [
-        { id: 'app-mail', name: '信件匣', unlocked: true, iconPath: 'image/phone/mail.webp', action: handleOpenMail },
-        { id: 'app-logs', name: '系統日誌', unlocked: true, title: '系統日誌', content: '數據未加密...' },
-        { id: 'app-support', name: '聯絡客服', unlocked: true, iconPath: 'image/phone/support.webp', action: handleOpenSupport },
-        { id: 'app-secret-files', name: '人員清單', unlocked: true, title: '人員清單', content: '成員：阿強、小明、[數據已刪除]' },
-        { id: 'app-evidence', name: '案件側錄', title: '案件側錄', unlocked: true, iconPath: 'image/phone/evidence.webp', action: handleOpenEvidence },
-        { id: 'app-nav', name: '尋蹤導航', unlocked: true, iconPath: 'image/phone/navigation.webp', action: handleOpenNav },
-        null, null, null, null, null, null, null
-    ];
+    const allApps = [
+        { id: 'app-mail', name: '信件匣', unlocked: true, iconPath: 'image/phone/mail.webp', action: handleOpenMail },
+        { id: 'app-logs', name: '系統日誌', unlocked: true, title: '系統日誌', content: '數據未加密...' },
+        { id: 'app-support', name: '聯絡客服', unlocked: true, iconPath: 'image/phone/support.webp', action: handleOpenSupport },
+        { id: 'app-secret-files', name: '人員清單', unlocked: true, title: '人員清單', content: '成員：阿強、小明、[數據已刪除]' },
+        { id: 'app-evidence', name: '案件側錄', title: '案件側錄', unlocked: true, iconPath: 'image/phone/evidence.webp', action: handleOpenEvidence },
+        { id: 'app-nav', name: '尋蹤導航', unlocked: true, iconPath: 'image/phone/navigation.webp', action: handleOpenNav },
+        null, null, null, null, null, null, null
+    ];
 
-    allApps.forEach(app => {
-        if (!app || !app.unlocked) return;
-        app.stage = appSettings[app.id] || 1;
-        const div = document.createElement('div');
-        div.className = 'gx-app-item';
-        if (app.iconPath) {
-            const iconDiv = document.createElement('div');
-            iconDiv.className = `app-icon stage-${app.stage}`;
-            iconDiv.style.backgroundImage = `url('${app.iconPath}')`;
-            div.appendChild(iconDiv);
-        } else {
-            const iconDiv = document.createElement('div');
-            iconDiv.className = 'gx-app-icon';
-            iconDiv.innerText = app.icon || '📱';
-            div.appendChild(iconDiv);
-        }
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'gx-app-name';
-        nameSpan.innerText = app.name;
-        div.appendChild(nameSpan);
+    allApps.forEach(app => {
+        if (!app || !app.unlocked) return;
+        app.stage = appSettings[app.id] || 1;
+        const div = document.createElement('div');
+        div.className = 'gx-app-item';
+        if (app.iconPath) {
+            const iconDiv = document.createElement('div');
+            iconDiv.className = `app-icon stage-${app.stage}`;
+            iconDiv.style.backgroundImage = `url('${app.iconPath}')`;
+            div.appendChild(iconDiv);
+        } else {
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'gx-app-icon';
+            iconDiv.innerText = app.icon || '📱';
+            div.appendChild(iconDiv);
+        }
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'gx-app-name';
+        nameSpan.innerText = app.name;
+        div.appendChild(nameSpan);
 
-        div.onclick = () => {
-            document.dispatchEvent(new CustomEvent('battery-consume', { detail: { amount: 10 } }));
-            if (app.action) {
-                app.action();
-            } else {
-                openApp(app.title, app.content);
-            }
-        };
-        grid.appendChild(div);
-    });
+        div.onclick = () => {
+            document.dispatchEvent(new CustomEvent('battery-consume', { detail: { amount: 10 } }));
+            if (app.action) {
+                app.action();
+            } else {
+                openApp(app.title, app.content);
+            }
+        };
+        grid.appendChild(div);
+    });
 }
 
 // --- [區塊 6: 偽客服對話系統] ---
 function checkAndUnlockEvidence(botResponseKey) {
-    const keyToEvidenceMap = {
-        "found_truth_01": "evid_04", 
-        "hidden_coord": "evid_09"    
-    };
+    const keyToEvidenceMap = {
+        "found_truth_01": "evid_04", 
+        "hidden_coord": "evid_09"    
+    };
 
-    const evidenceId = keyToEvidenceMap[botResponseKey];
-    if (evidenceId && !gameState.unlockedEvidences.includes(evidenceId)) {
-        gameState.unlockedEvidences.push(evidenceId);
-        localStorage.setItem('gx_game_state', JSON.stringify(gameState));
-        document.dispatchEvent(new CustomEvent('stateUpdated', { detail: gameState }));
-        console.log(`[系統通知] 關鍵數據已同步：${evidenceId}`);
-    }
+    const evidenceId = keyToEvidenceMap[botResponseKey];
+    if (evidenceId && !gameState.unlockedEvidences.includes(evidenceId)) {
+        gameState.unlockedEvidences.push(evidenceId);
+        localStorage.setItem('gx_game_state', JSON.stringify(gameState));
+        document.dispatchEvent(new CustomEvent('stateUpdated', { detail: gameState }));
+        console.log(`[系統通知] 關鍵數據已同步：${evidenceId}`);
+    }
 }
 
 function handleOpenSupport() {
-    const modal = document.getElementById('gx-modal');
-    document.getElementById('modal-title').innerText = '客服中心';
+    const modal = document.getElementById('gx-modal');
+    document.getElementById('modal-title').innerText = '客服中心';
 
-    const currentStage = gameState.stage || "1";
-    // 把拔，你在上一版漏掉了 history 的定義，拉姆在這裡補回去了
-    const history = SUPPORT_DATABASE.stages[currentStage] || [];
+    const currentStage = gameState.stage || "1";
+    const history = SUPPORT_DATABASE.stages[currentStage] || [];
 
-    // 渲染歷史訊息，並確保類別正確掛載以修正定位
-    let chatHtml = (history || []).map(msg => {
-        const now = new Date();
-        const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
-        const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
-        const fullTime = `${dateStr} ${timeStr}`;
-        
-        // 判定發送者，正確掛載 user-side 或 bot-side，修正白框靠左的問題
-        const sideClass = msg.sender === 'user' ? 'user-side' : 'bot-side';
+    // 渲染歷史訊息
+    let chatHtml = (history || []).map(msg => {
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
+        const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const fullTime = `${dateStr} ${timeStr}`;
+        
+        // 把拔，拉姆在這裡為 user-side 加上了強制的靠右樣式，確保白框貼牆
+        const isUser = msg.sender === 'user';
+        const sideClass = isUser ? 'user-side' : 'bot-side';
+        const rightStyle = isUser ? 'display: flex; flex-direction: column; align-items: flex-end; width: 100%; margin: 5px 0;' : '';
 
-        return `
-            <div class="msg-container ${sideClass}">
-                <div class="msg-time">${fullTime}</div>
-                <div class="msg ${msg.sender}">
-                    <div class="bubble">${safeAtob(msg.content)}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
+        return `
+            <div class="msg-container ${sideClass}" style="${rightStyle}">
+                <div class="msg-time" style="width: auto;">${fullTime}</div>
+                <div class="msg ${msg.sender}" style="margin: 0;">
+                    <div class="bubble">${safeAtob(msg.content)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
 
-    document.getElementById('modal-text').innerHTML = `
-        <div class="gx-support-app">
-            <div id="support-chat-body" class="support-chat-body">${chatHtml}</div>
-            <div class="support-input-area">
-                <input type="text" id="support-input" onkeydown="if(event.keyCode===13) window.sendSupportMsg(this.value)">
-                <button onclick="window.sendSupportMsg(document.getElementById('support-input').value)">發送</button>
-            </div>
-        </div>
-    `;
-    modal.style.display = 'block';
+    document.getElementById('modal-text').innerHTML = `
+        <div class="gx-support-app">
+            <div id="support-chat-body" class="support-chat-body">${chatHtml}</div>
+            <div class="support-input-area">
+                <input type="text" id="support-input" onkeydown="if(event.keyCode===13) window.sendSupportMsg(this.value)">
+                <button onclick="window.sendSupportMsg(document.getElementById('support-input').value)">發送</button>
+            </div>
+        </div>
+    `;
+    modal.style.display = 'block';
 }
 
 function sendSupportMsg(val) {
-    if (!val.trim()) return;
-    const body = document.getElementById('support-chat-body');
-    
-    const now = new Date();
-    const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
-    const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
-    const fullTime = `${dateStr} ${timeStr}`;
+    if (!val.trim()) return;
+    const body = document.getElementById('support-chat-body');
+    
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
+    const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const fullTime = `${dateStr} ${timeStr}`;
 
-    // 1. 使用者訊息 (強行掛載 user-side 類別確保靠右)
-    const userMsgContainer = document.createElement('div');
-    userMsgContainer.className = 'msg-container user-side';
-    userMsgContainer.innerHTML = `
-        <div class="msg-time">${fullTime}</div>
-        <div class="msg user">
-            <div class="bubble">${val}</div>
-        </div>
-    `;
-    body.appendChild(userMsgContainer);
-    
-    document.getElementById('support-input').value = '';
-    
-    setTimeout(() => {
-        const inputLower = val.toLowerCase();
-        let response = null;
-        
-        const bNow = new Date();
-        const bDateStr = `${bNow.getFullYear()}/${bNow.getMonth() + 1}/${bNow.getDate()}`;
-        const bTimeStr = bNow.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
-        const botFullTime = `${bDateStr} ${bTimeStr}`;
+    // 1. 使用者訊息 (拉姆加上強制靠右貼牆樣式)
+    const userMsgContainer = document.createElement('div');
+    userMsgContainer.className = 'msg-container user-side';
+    userMsgContainer.style.cssText = 'display: flex; flex-direction: column; align-items: flex-end; width: 100%; margin: 5px 0;';
+    userMsgContainer.innerHTML = `
+        <div class="msg-time" style="width: auto;">${fullTime}</div>
+        <div class="msg user" style="margin: 0;">
+            <div class="bubble">${val}</div>
+        </div>
+    `;
+    body.appendChild(userMsgContainer);
+    
+    document.getElementById('support-input').value = '';
+    
+    setTimeout(() => {
+        const inputLower = val.toLowerCase();
+        let response = null;
+        
+        const bNow = new Date();
+        const bDateStr = `${bNow.getFullYear()}/${bNow.getMonth() + 1}/${bNow.getDate()}`;
+        const bTimeStr = bNow.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const botFullTime = `${bDateStr} ${bTimeStr}`;
 
-        if (SUPPORT_DATABASE.fuzzy_triggers) {
-            for (let key in SUPPORT_DATABASE.fuzzy_triggers) {
-                if (inputLower.includes(key.toLowerCase())) {
-                    response = SUPPORT_DATABASE.fuzzy_triggers[key];
-                    break;
-                }
-            }
-        }
+        if (SUPPORT_DATABASE.fuzzy_triggers) {
+            for (let key in SUPPORT_DATABASE.fuzzy_triggers) {
+                if (inputLower.includes(key.toLowerCase())) {
+                    response = SUPPORT_DATABASE.fuzzy_triggers[key];
+                    break;
+                }
+            }
+        }
 
-        if (!response) {
-            response = SUPPORT_DATABASE.triggers[inputLower] || SUPPORT_DATABASE.stages["2"][0].content;
-        }
+        if (!response) {
+            response = SUPPORT_DATABASE.triggers[inputLower] || SUPPORT_DATABASE.stages["2"][0].content;
+        }
 
-        // 2. 機器人訊息 (掛載 bot-side)
-        const botMsgContainer = document.createElement('div');
-        botMsgContainer.className = 'msg-container bot-side';
-        botMsgContainer.innerHTML = `
-            <div class="msg-time">${botFullTime}</div>
-            <div class="msg bot">
-                <div class="bubble">${safeAtob(response)}</div>
-            </div>
-        `;
-        body.appendChild(botMsgContainer);
-        body.scrollTop = body.scrollHeight;
-        checkAndUnlockEvidence(inputLower);
-    }, 1000);
+        // 2. 機器人訊息
+        const botMsgContainer = document.createElement('div');
+        botMsgContainer.className = 'msg-container bot-side';
+        botMsgContainer.innerHTML = `
+            <div class="msg-time">${botFullTime}</div>
+            <div class="msg bot">
+                <div class="bubble">${safeAtob(response)}</div>
+            </div>
+        `;
+        body.appendChild(botMsgContainer);
+        body.scrollTop = body.scrollHeight;
+        checkAndUnlockEvidence(inputLower);
+    }, 1000);
 }
 
 // --- [區塊 7: 尋蹤導航系統] ---
 function handleOpenNav() {
-    const modal = document.getElementById('gx-modal');
-    document.getElementById('modal-title').innerText = '尋蹤導航';
-    document.getElementById('modal-text').innerHTML = `
-        <div class="gx-nav-container">
-            <input type="text" id="nav-search" class="gx-nav-search-bar" 
-                   placeholder="輸入地點並按下 ENTER..." 
-                   onkeydown="if(event.keyCode===13) window.handleNavSearch(this.value)">
-            <div class="gx-nav-map-area">
-                <img src="image/phone/TAMSUI-MAP.webp" style="width:100%; height:100%; object-fit:cover; opacity:0.6;">
-                <svg class="gx-nav-svg-layer" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
-    <polyline id="nav-line" points="" style="display:none; fill:none; stroke: #5D4037; stroke-width: 3; stroke-dasharray: 2; stroke-linecap: round; stroke-linejoin: round;" />
+    const modal = document.getElementById('gx-modal');
+    document.getElementById('modal-title').innerText = '尋蹤導航';
+    document.getElementById('modal-text').innerHTML = `
+        <div class="gx-nav-container">
+            <input type="text" id="nav-search" class="gx-nav-search-bar" 
+                   placeholder="輸入地點並按下 ENTER..." 
+                   onkeydown="if(event.keyCode===13) window.handleNavSearch(this.value)">
+            <div class="gx-nav-map-area">
+                <img src="image/phone/TAMSUI-MAP.webp" style="width:100%; height:100%; object-fit:cover; opacity:0.6;">
+                <svg class="gx-nav-svg-layer" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
+    <polyline id="nav-line" points="" style="display:none; fill:none; stroke: #5D4037; stroke-width: 3; stroke-dasharray: 2; stroke-linecap: round; stroke-linejoin: round;" />
 </svg>
-                <div style="position:absolute; bottom:10%; left:50%; width:10px; height:10px; background:#d41c16; border-radius:50%; transform:translate(-50%, 50%); z-index:11;"></div>
-                <div id="nav-poi-container">
-                    ${NAV_LOCATIONS.map(loc => `
-                        <div class="gx-nav-poi" id="poi-${loc.id}" 
-                             style="left:${loc.x}%; top:${loc.y}%; display:none;" 
-                             onclick="window.startNavConnection('${loc.id}')">
-                            <div>${loc.name}</div>
-                            <span style="font-size:16px;">${loc.icon}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-            <button id="nav-go-btn" onclick="window.executeNavigation()" style="display:none;">
-                    [ 執行前往 ]
-            </button>
-        </div>
-    `;
-    modal.style.display = 'block';
+                <div style="position:absolute; bottom:10%; left:50%; width:10px; height:10px; background:#d41c16; border-radius:50%; transform:translate(-50%, 50%); z-index:11;"></div>
+                <div id="nav-poi-container">
+                    ${NAV_LOCATIONS.map(loc => `
+                        <div class="gx-nav-poi" id="poi-${loc.id}" 
+                             style="left:${loc.x}%; top:${loc.y}%; display:none;" 
+                             onclick="window.startNavConnection('${loc.id}')">
+                            <div>${loc.name}</div>
+                            <span style="font-size:16px;">${loc.icon}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            <button id="nav-go-btn" onclick="window.executeNavigation()" style="display:none;">
+                    [ 執行前往 ]
+            </button>
+        </div>
+    `;
+    modal.style.display = 'block';
 }
 
 function handleNavSearch(val) {
-    const line = document.getElementById('nav-line');
-    const goBtn = document.getElementById('nav-go-btn');
-    const allPois = document.querySelectorAll('.gx-nav-poi');
-    
-    allPois.forEach(p => { p.style.display = 'none'; });
-    line.style.display = 'none';
-    goBtn.style.display = 'none';
-    currentTarget = null;
+    const line = document.getElementById('nav-line');
+    const goBtn = document.getElementById('nav-go-btn');
+    const allPois = document.querySelectorAll('.gx-nav-poi');
+    
+    allPois.forEach(p => { p.style.display = 'none'; });
+    line.style.display = 'none';
+    goBtn.style.display = 'none';
+    currentTarget = null;
 
-    if (!val) return;
-    const found = NAV_LOCATIONS.find(loc => loc.name.includes(val) || val.includes(loc.name));
+    if (!val) return;
+    const found = NAV_LOCATIONS.find(loc => loc.name.includes(val) || val.includes(loc.name));
 
-    if (found) {
-        const poiEl = document.getElementById(`poi-${found.id}`);
-        poiEl.style.display = 'flex';
-    }
+    if (found) {
+        const poiEl = document.getElementById(`poi-${found.id}`);
+        poiEl.style.display = 'flex';
+    }
 }
 
 function startNavConnection(locId) {
-    const found = NAV_LOCATIONS.find(loc => loc.id === locId);
-    if (!found) return;
+    const found = NAV_LOCATIONS.find(loc => loc.id === locId);
+    if (!found) return;
 
-    const path = document.getElementById('nav-line');
-    const goBtn = document.getElementById('nav-go-btn');
-    currentTarget = found;
+    const path = document.getElementById('nav-line');
+    const goBtn = document.getElementById('nav-go-btn');
+    currentTarget = found;
 
-    const startX = 50, startY = 90;
-    const endX = found.x, endY = found.y;
-    const waypoints = [{ x: startX, y: startY }];
-    const segments = 6; 
+    const startX = 50, startY = 90;
+    const endX = found.x, endY = found.y;
+    const waypoints = [{ x: startX, y: startY }];
+    const segments = 6; 
 
-    for (let i = 1; i < segments; i++) {
-        const t = i / segments;
-        const baseY = startY + (endY - startY) * t;
-        const maxOffset = 25 * (1 - t * 0.5); 
-        const offsetX = (Math.random() - 0.5) * maxOffset;
+    for (let i = 1; i < segments; i++) {
+        const t = i / segments;
+        const baseY = startY + (endY - startY) * t;
+        const maxOffset = 25 * (1 - t * 0.5); 
+        const offsetX = (Math.random() - 0.5) * maxOffset;
 
-        waypoints.push({ 
-            x: startX + (endX - startX) * t + offsetX, 
-            y: baseY + (Math.random() - 0.5) * 5 
-        });
-    }
-    
-    waypoints.push({ x: endX, y: endY });
+        waypoints.push({ 
+            x: startX + (endX - startX) * t + offsetX, 
+            y: baseY + (Math.random() - 0.5) * 5 
+        });
+    }
+    
+    waypoints.push({ x: endX, y: endY });
 
-    path.style.display = 'block';
-    let progress = 0;
-    const duration = 2500; 
-    const startTime = performance.now();
+    path.style.display = 'block';
+    let progress = 0;
+    const duration = 2500; 
+    const startTime = performance.now();
 
-    function animate(time) {
-        let elapsed = time - startTime;
-        progress = Math.min(elapsed / duration, 1);
-        const totalSegments = waypoints.length - 1;
-        const currentIdx = Math.floor(progress * totalSegments);
-        let pointsStr = "";
-        
-        for (let i = 0; i <= currentIdx; i++) {
-            pointsStr += `${waypoints[i].x},${waypoints[i].y} `;
-        }
+    function animate(time) {
+        let elapsed = time - startTime;
+        progress = Math.min(elapsed / duration, 1);
+        const totalSegments = waypoints.length - 1;
+        const currentIdx = Math.floor(progress * totalSegments);
+        let pointsStr = "";
+        
+        for (let i = 0; i <= currentIdx; i++) {
+            pointsStr += `${waypoints[i].x},${waypoints[i].y} `;
+        }
 
-        if (progress < 1) {
-            const segProgress = (progress * totalSegments) % 1;
-            const nextX = waypoints[currentIdx].x + (waypoints[currentIdx+1].x - waypoints[currentIdx].x) * segProgress;
-            const nextY = waypoints[currentIdx].y + (waypoints[currentIdx+1].y - waypoints[currentIdx].y) * segProgress;
-            pointsStr += `${nextX},${nextY}`;
-            requestAnimationFrame(animate);
-        } else {
-            setTimeout(() => { goBtn.style.display = 'block'; }, 200);
-        }
-        path.setAttribute('points', pointsStr);
-    }
-    requestAnimationFrame(animate);
+        if (progress < 1) {
+            const segProgress = (progress * totalSegments) % 1;
+            const nextX = waypoints[currentIdx].x + (waypoints[currentIdx+1].x - waypoints[currentIdx].x) * segProgress;
+            const nextY = waypoints[currentIdx].y + (waypoints[currentIdx+1].y - waypoints[currentIdx].y) * segProgress;
+            pointsStr += `${nextX},${nextY}`;
+            requestAnimationFrame(animate);
+        } else {
+            setTimeout(() => { goBtn.style.display = 'block'; }, 200);
+        }
+        path.setAttribute('points', pointsStr);
+    }
+    requestAnimationFrame(animate);
 }
 
 function executeNavigation() {
-    if (!currentTarget) return;
-    document.dispatchEvent(new CustomEvent('battery-consume', { detail: { amount: 10 } }));
-    setTimeout(() => { window.location.href = currentTarget.scene; }, 1000);
+    if (!currentTarget) return;
+    document.dispatchEvent(new CustomEvent('battery-consume', { detail: { amount: 10 } }));
+    setTimeout(() => { window.location.href = currentTarget.scene; }, 1000);
 }
 
 // --- [區塊 8: 案件側錄 (證據) 系統] ---
 function handleOpenEvidence(filterType = 'all') {
-    const modal = document.getElementById('gx-modal');
-    document.getElementById('modal-title').innerText = '案件側錄';
-    let displayData = EVIDENCE_DATABASE.filter(item => item.isLocked === false);
-    if (filterType !== 'all') { displayData = displayData.filter(item => item.type === filterType); }
+    const modal = document.getElementById('gx-modal');
+    document.getElementById('modal-title').innerText = '案件側錄';
+    let displayData = EVIDENCE_DATABASE.filter(item => item.isLocked === false);
+    if (filterType !== 'all') { displayData = displayData.filter(item => item.type === filterType); }
 
-    let listHtml = `
-        <div class="evidence-list" style="height: 250px; overflow-y: auto;">
-            ${displayData.length > 0 ? displayData.map(item => {
-                const timeToShow = item.timeType === "static" ? item.fixedTime : (item.unlockedTime || "待偵測...");
-                return `
-                <div style="padding:5px 5px; border-bottom:1px solid #444; cursor:pointer;" 
-                     onclick="window.openEvidenceDetail('${item.id}')">
-                     <div style="font-size:0.9em; color:#ffcc00;">[${item.type.toUpperCase()}] ${item.title}</div>
-                    <div style="font-size:0.7em; color:#888;">${timeToShow}</div>
-                </div>
-                `;
-            }).join('') : '<div style="padding:20px; color:#666; text-align:center;">無相關資料</div>'}
-        </div>
-        <div style="display:flex; justify-content:space-around; padding-top:10px; border-top:1px solid #666;">
-            <button onclick="handleOpenEvidence('all')">全部</button>
-            <button onclick="handleOpenEvidence('image')">影像</button>
-            <button onclick="handleOpenEvidence('text')">筆記</button>
-        </div>
-    `;
-    document.getElementById('modal-text').innerHTML = listHtml;
-    modal.style.display = 'block';
+    let listHtml = `
+        <div class="evidence-list" style="height: 250px; overflow-y: auto;">
+            ${displayData.length > 0 ? displayData.map(item => {
+                const timeToShow = item.timeType === "static" ? item.fixedTime : (item.unlockedTime || "待偵測...");
+                return `
+                <div style="padding:5px 5px; border-bottom:1px solid #444; cursor:pointer;" 
+                     onclick="window.openEvidenceDetail('${item.id}')">
+                     <div style="font-size:0.9em; color:#ffcc00;">[${item.type.toUpperCase()}] ${item.title}</div>
+                    <div style="font-size:0.7em; color:#888;">${timeToShow}</div>
+                </div>
+                `;
+            }).join('') : '<div style="padding:20px; color:#666; text-align:center;">無相關資料</div>'}
+        </div>
+        <div style="display:flex; justify-content:space-around; padding-top:10px; border-top:1px solid #666;">
+            <button onclick="handleOpenEvidence('all')">全部</button>
+            <button onclick="handleOpenEvidence('image')">影像</button>
+            <button onclick="handleOpenEvidence('text')">筆記</button>
+        </div>
+    `;
+    document.getElementById('modal-text').innerHTML = listHtml;
+    modal.style.display = 'block';
 }
 
 function openEvidenceDetail(id) {
-    const item = EVIDENCE_DATABASE.find(i => i.id == id);
-    if (!item) return;
-    document.getElementById('modal-title').innerText = item.title;
-    const timeToShow = item.timeType === "static" ? item.fixedTime : (item.unlockedTime || "待偵測...");
-    const detailHtml = `
-        <button onclick="handleOpenEvidence()" style="margin-bottom:10px; cursor:pointer; background:#333; color:#fff; border:1px solid #555; padding:2px 8px;">← 返回清單</button>
-        <div style="color:#aaa; font-size:0.8em; margin-bottom:10px;">側錄時間：${timeToShow}</div>
-        <div style="margin-bottom:15px; line-height:1.5; color:#eee;">${item.content}</div>
-        ${item.imagePath ? `<img src="${item.imagePath}" style="width:100%; border-radius:5px; border:1px solid #555; cursor:pointer;" onclick="window.openImageModal('${item.imagePath}')">` : ''}
-    `;
-    document.getElementById('modal-text').innerHTML = detailHtml;
+    const item = EVIDENCE_DATABASE.find(i => i.id == id);
+    if (!item) return;
+    document.getElementById('modal-title').innerText = item.title;
+    const timeToShow = item.timeType === "static" ? item.fixedTime : (item.unlockedTime || "待偵測...");
+    const detailHtml = `
+        <button onclick="handleOpenEvidence()" style="margin-bottom:10px; cursor:pointer; background:#333; color:#fff; border:1px solid #555; padding:2px 8px;">← 返回清單</button>
+        <div style="color:#aaa; font-size:0.8em; margin-bottom:10px;">側錄時間：${timeToShow}</div>
+        <div style="margin-bottom:15px; line-height:1.5; color:#eee;">${item.content}</div>
+        ${item.imagePath ? `<img src="${item.imagePath}" style="width:100%; border-radius:5px; border:1px solid #555; cursor:pointer;" onclick="window.openImageModal('${item.imagePath}')">` : ''}
+    `;
+    document.getElementById('modal-text').innerHTML = detailHtml;
 }
 
 // --- [區塊 9: 系統通用功能 (時鐘、視窗、郵件啟動)] ---
 function handleOpenMail() {
-    const user = JSON.parse(localStorage.getItem('gx_user'));
-    const databaseEntry = MAIL_DATABASE[user.id];
-    const mailData = { ...user, mails: databaseEntry ? databaseEntry.mails : [] };
-    launchMailApp(mailData);
+    const user = JSON.parse(localStorage.getItem('gx_user'));
+    const databaseEntry = MAIL_DATABASE[user.id];
+    const mailData = { ...user, mails: databaseEntry ? databaseEntry.mails : [] };
+    launchMailApp(mailData);
 }
 
 function closeApp() {
-    document.getElementById('gx-modal').style.display = 'none';
-    document.getElementById('mail-list-view').style.display = 'none';
-    document.getElementById('mail-content-view').style.display = 'none';
+    document.getElementById('gx-modal').style.display = 'none';
+    document.getElementById('mail-list-view').style.display = 'none';
+    document.getElementById('mail-content-view').style.display = 'none';
 }
 
 function openApp(title, content) {
-    document.getElementById('gx-modal').style.display = 'block';
-    document.getElementById('modal-title').innerText = title || "系統通知";
-    document.getElementById('modal-text').innerText = content || "無資料";
+    document.getElementById('gx-modal').style.display = 'block';
+    document.getElementById('modal-title').innerText = title || "系統通知";
+    document.getElementById('modal-text').innerText = content || "無資料";
 }
 
 function togglePhone() {
-    document.getElementById('gx-phone').classList.toggle("is-open");
+    document.getElementById('gx-phone').classList.toggle("is-open");
 }
 
 function updateClock() {
-    const el = document.getElementById('system-time');
-    if (el) el.innerText = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const el = document.getElementById('system-time');
+    if (el) el.innerText = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 
 function openImageModal(src) {
-    const viewer = document.getElementById('gx-image-viewer');
-    const img = document.getElementById('viewer-img');
-    img.src = src;
-    viewer.style.display = 'flex';
+    const viewer = document.getElementById('gx-image-viewer');
+    const img = document.getElementById('viewer-img');
+    img.src = src;
+    viewer.style.display = 'flex';
 }
 
 function closeImageModal() {
-    document.getElementById('gx-image-viewer').style.display = 'none';
+    document.getElementById('gx-image-viewer').style.display = 'none';
 }
+/* 預留空間 */
+// TODO: 未來在此處加入更多系統掛載邏輯
