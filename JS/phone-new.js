@@ -263,31 +263,23 @@ function handleOpenSupport() {
 
 function sendSupportMsg(val) {
     if (!val.trim()) return;
-    
     const body = document.getElementById('support-chat-body');
-    const input = document.getElementById('support-input');
-
     const userMsg = document.createElement('div');
     userMsg.className = 'msg user';
-    userMsg.innerHTML = `<div class="bubble">${val}</div><div class="avatar user-avatar"></div>`;
+    userMsg.innerHTML = `<div class="bubble">${val}</div>`;
     body.appendChild(userMsg);
     
-    input.value = '';
-    body.scrollTop = body.scrollHeight;
-
+    document.getElementById('support-input').value = '';
+    
     setTimeout(() => {
-        let triggerKey = val.toLowerCase();
-        let responseBase64 = SUPPORT_DATABASE.triggers[triggerKey] || SUPPORT_DATABASE.stages["2"][0].content;
-        
+        let response = SUPPORT_DATABASE.triggers[val.toLowerCase()] || SUPPORT_DATABASE.stages["2"][0].content;
         const botMsg = document.createElement('div');
         botMsg.className = 'msg bot';
-        botMsg.innerHTML = `<div class="avatar"></div><div class="bubble">${atob(responseBase64)}</div>`;
+        botMsg.innerHTML = `<div class="bubble">${safeAtob(response)}</div>`;
         body.appendChild(botMsg);
         body.scrollTop = body.scrollHeight;
-
-        checkAndUnlockEvidence(triggerKey);
-        document.dispatchEvent(new CustomEvent('battery-consume', { detail: { amount: 2 } }));
-    }, 1200);
+        checkAndUnlockEvidence(val.toLowerCase());
+    }, 1000);
 }
 
 // --- [區塊 7: 尋蹤導航系統] ---
