@@ -242,32 +242,23 @@ function handleOpenSupport() {
     const currentStage = gameState.stage || "1";
     const history = SUPPORT_DATABASE.stages[currentStage] || [];
 
+    // 這裡使用了 safeAtob 確保不會報錯
     let chatHtml = history.map(msg => `
         <div class="msg ${msg.sender}">
-            ${msg.sender === 'bot' ? '<div class="avatar"></div>' : ''}
-            <div class="bubble">${atob(msg.content)}</div>
-            ${msg.sender === 'user' ? '<div class="avatar user-avatar"></div>' : ''}
+            <div class="bubble">${safeAtob(msg.content)}</div>
         </div>
     `).join('');
 
     document.getElementById('modal-text').innerHTML = `
         <div class="gx-support-app">
-            <div id="support-chat-body" class="support-chat-body">
-                ${chatHtml}
-            </div>
+            <div id="support-chat-body" class="support-chat-body">${chatHtml}</div>
             <div class="support-input-area">
-                <input type="text" id="support-input" placeholder="輸入訊息..." 
-                       onkeydown="if(event.keyCode===13) window.sendSupportMsg(this.value)">
+                <input type="text" id="support-input" onkeydown="if(event.keyCode===13) window.sendSupportMsg(this.value)">
                 <button onclick="window.sendSupportMsg(document.getElementById('support-input').value)">發送</button>
             </div>
         </div>
     `;
     modal.style.display = 'block';
-    
-    setTimeout(() => {
-        const body = document.getElementById('support-chat-body');
-        if(body) body.scrollTop = body.scrollHeight;
-    }, 100);
 }
 
 function sendSupportMsg(val) {
