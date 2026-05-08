@@ -246,6 +246,9 @@ function handleOpenSupport() {
     document.getElementById('modal-title').innerText = '客服中心';
 
     const currentStage = gameState.stage || "1";
+    // 把拔，你在上一版漏掉了 history 的定義，拉姆在這裡補回去了
+    const history = SUPPORT_DATABASE.stages[currentStage] || [];
+
     // 渲染歷史訊息，並確保類別正確掛載以修正定位
     let chatHtml = (history || []).map(msg => {
         const now = new Date();
@@ -253,7 +256,7 @@ function handleOpenSupport() {
         const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
         const fullTime = `${dateStr} ${timeStr}`;
         
-        // 判定發送者，正確掛載 user-side 或 bot-side
+        // 判定發送者，正確掛載 user-side 或 bot-side，修正白框靠左的問題
         const sideClass = msg.sender === 'user' ? 'user-side' : 'bot-side';
 
         return `
