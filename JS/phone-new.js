@@ -1,5 +1,5 @@
 /* ==========================================================
-   phone-new.js (絕對還原整合版 - 嚴格保留所有參數與間距)
+   phone-new.js (絕對還原整合版 - 分區備註功能版)
    ========================================================== */
 
 import { AuthSystem } from '../data/whoiswatching.js';
@@ -9,14 +9,14 @@ import { launchMailApp } from './mail_system.js';
 import { gameState } from './state.js'; 
 import { SUPPORT_DATABASE } from '../data/support_data.js';
 
-// --- 導航據點設定 (預留據點) ---
+// --- [區塊 1: 導航據點資料設定] ---
 const NAV_LOCATIONS = [
     { id: 'temple', name: '淡水大廟', x: 30, y: 35, icon: '⛩️', scene: 'scene_temple.html' },
     { id: 'hermit', name: '深山隱居處', x: 85, y: 15, icon: '🛖', scene: 'scene_mountain.html' },
     { id: 'muye', name: '牧野分撥中心', x: 50, y: 50, icon: '📦', scene: 'scene_muye.html' }
 ];
 
-// --- 全域函數掛載 ---
+// --- [區塊 2: 全域函數掛載] (確保 HTML 內 onclick 可正確觸發) ---
 window.closeApp = closeApp;
 window.openApp = openApp;
 window.updateAppStage = updateAppStage; 
@@ -29,11 +29,12 @@ window.startNavConnection = startNavConnection;
 window.executeNavigation = executeNavigation; 
 window.handleOpenSupport = handleOpenSupport;
 window.sendSupportMsg = sendSupportMsg;
-indow.handleOpenNav = handleOpenNav; // 補上這行，導航才能開
-window.checkAndUnlockEvidence = checkAndUnlockEvidence; // 補上這行，聯動才不會報錯
+window.handleOpenNav = handleOpenNav; // 已修正：補回原本漏掉的 w
+window.checkAndUnlockEvidence = checkAndUnlockEvidence; // 補上聯動檢查掛載
 
 let currentTarget = null; 
 
+// 監聽狀態更新 (用於證據清單即時同步)
 window.addEventListener('stateUpdated', (e) => {
     const newState = e.detail;
     if (typeof currentActiveApp !== 'undefined' && currentActiveApp === 'archive') { 
@@ -41,6 +42,7 @@ window.addEventListener('stateUpdated', (e) => {
     }
 });
 
+// 更新 App 圖示階段狀態
 function updateAppStage(appId, newStage) {
     let appSettings = JSON.parse(localStorage.getItem('gx_app_settings')) || {};
     appSettings[appId] = newStage;
@@ -48,6 +50,7 @@ function updateAppStage(appId, newStage) {
     renderAppGrid();
 }
 
+// --- [區塊 3: 手機核心初始化邏輯] ---
 (function() {
     document.addEventListener("DOMContentLoaded", function() {
         if (window.hasInitializedPhone) return;
@@ -129,6 +132,7 @@ function updateAppStage(appId, newStage) {
     });
 })();
 
+// --- [區塊 4: 登入與身份驗證] ---
 function handleLogin() {
     const id = document.getElementById('login-id').value;
     const pass = document.getElementById('login-pass').value;
@@ -150,6 +154,7 @@ function checkAuthOnStartup() {
     }
 }
 
+// --- [區塊 5: App 桌面渲染] ---
 function renderAppGrid() {
     const grid = document.querySelector('.gx-app-grid');
     if (!grid) return;
@@ -203,8 +208,7 @@ function renderAppGrid() {
     });
 }
 
-// --- ( 客服功能 ) ---
-// 在 sendSupportMsg 的客服回覆邏輯中加入：
+// --- [區塊 6: 偽客服對話系統] ---
 function checkAndUnlockEvidence(botResponseKey) {
     const keyToEvidenceMap = {
         "found_truth_01": "evid_04", 
@@ -224,7 +228,6 @@ function handleOpenSupport() {
     const modal = document.getElementById('gx-modal');
     document.getElementById('modal-title').innerText = '物流通訊中心';
     
-    // 取得當前劇情的初始對話 (假設 gameState.stage 存在)
     const currentStage = gameState.stage || "1";
     const history = SUPPORT_DATABASE.stages[currentStage] || [];
 
@@ -250,23 +253,18 @@ function handleOpenSupport() {
     `;
     modal.style.display = 'block';
     
-    // 自動捲動到底部
     setTimeout(() => {
         const body = document.getElementById('support-chat-body');
         if(body) body.scrollTop = body.scrollHeight;
     }, 100);
 }
 
-    
-
-    // --- 2. 修正後的發送函數 ---
 function sendSupportMsg(val) {
     if (!val.trim()) return;
     
     const body = document.getElementById('support-chat-body');
     const input = document.getElementById('support-input');
 
-    // 渲染玩家訊息
     const userMsg = document.createElement('div');
     userMsg.className = 'msg user';
     userMsg.innerHTML = `<div class="bubble">${val}</div><div class="avatar user-avatar"></div>`;
@@ -275,9 +273,7 @@ function sendSupportMsg(val) {
     input.value = '';
     body.scrollTop = body.scrollHeight;
 
-    // 模擬客服回覆
     setTimeout(() => {
-        // 判斷觸發詞，如果沒有就走預設回覆
         let triggerKey = val.toLowerCase();
         let responseBase64 = SUPPORT_DATABASE.triggers[triggerKey] || SUPPORT_DATABASE.stages["2"][0].content;
         
@@ -287,15 +283,12 @@ function sendSupportMsg(val) {
         body.appendChild(botMsg);
         body.scrollTop = body.scrollHeight;
 
-        // 這裡調用聯動檢查 (把 triggerKey 丟進去)
         checkAndUnlockEvidence(triggerKey);
-        
         document.dispatchEvent(new CustomEvent('battery-consume', { detail: { amount: 2 } }));
     }, 1200);
-  }
- 
+}
 
-// --- 導航功能 (UI 修正版) ---
+// --- [區塊 7: 尋蹤導航系統] ---
 function handleOpenNav() {
     const modal = document.getElementById('gx-modal');
     document.getElementById('modal-title').innerText = '尋蹤導航';
@@ -340,7 +333,6 @@ function handleNavSearch(val) {
     currentTarget = null;
 
     if (!val) return;
-
     const found = NAV_LOCATIONS.find(loc => loc.name.includes(val) || val.includes(loc.name));
 
     if (found) {
@@ -359,40 +351,31 @@ function startNavConnection(locId) {
 
     const startX = 50, startY = 90;
     const endX = found.x, endY = found.y;
-
-    // --- 核心邏輯：有序隨機路徑 ---
     const waypoints = [{ x: startX, y: startY }];
     const segments = 6; 
 
     for (let i = 1; i < segments; i++) {
-        // 1. 強制進度：Y 軸必須線性靠近目的地，不准往回跑
         const t = i / segments;
         const baseY = startY + (endY - startY) * t;
-        
-        // 2. 限制偏移：X 軸在縮小的範圍內抖動
-        // 距離越近，抖動越小 (t 越大，(1-t) 越小)
         const maxOffset = 25 * (1 - t * 0.5); 
         const offsetX = (Math.random() - 0.5) * maxOffset;
 
         waypoints.push({ 
             x: startX + (endX - startX) * t + offsetX, 
-            // 這裡給 Y 軸一點點微小抖動（不超過前進幅度的一半），增加自然感
             y: baseY + (Math.random() - 0.5) * 5 
         });
     }
     
     waypoints.push({ x: endX, y: endY });
 
-    // --- 動畫邏輯 ---
     path.style.display = 'block';
     let progress = 0;
-    const duration = 2500; // 降低速度：從 1.4s 變為 2.5s，讓把拔看清楚它的爬行
+    const duration = 2500; 
     const startTime = performance.now();
 
     function animate(time) {
         let elapsed = time - startTime;
         progress = Math.min(elapsed / duration, 1);
-
         const totalSegments = waypoints.length - 1;
         const currentIdx = Math.floor(progress * totalSegments);
         let pointsStr = "";
@@ -406,16 +389,11 @@ function startNavConnection(locId) {
             const nextX = waypoints[currentIdx].x + (waypoints[currentIdx+1].x - waypoints[currentIdx].x) * segProgress;
             const nextY = waypoints[currentIdx].y + (waypoints[currentIdx+1].y - waypoints[currentIdx].y) * segProgress;
             pointsStr += `${nextX},${nextY}`;
-        }
-
-        path.setAttribute('points', pointsStr);
-
-        if (progress < 1) {
             requestAnimationFrame(animate);
         } else {
-            // 抵達後增加一個小小的停頓感再顯示按鈕
             setTimeout(() => { goBtn.style.display = 'block'; }, 200);
         }
+        path.setAttribute('points', pointsStr);
     }
     requestAnimationFrame(animate);
 }
@@ -426,7 +404,7 @@ function executeNavigation() {
     setTimeout(() => { window.location.href = currentTarget.scene; }, 1000);
 }
 
-// --- 證據系統還原 ---
+// --- [區塊 8: 案件側錄 (證據) 系統] ---
 function handleOpenEvidence(filterType = 'all') {
     const modal = document.getElementById('gx-modal');
     document.getElementById('modal-title').innerText = '案件側錄';
@@ -470,6 +448,7 @@ function openEvidenceDetail(id) {
     document.getElementById('modal-text').innerHTML = detailHtml;
 }
 
+// --- [區塊 9: 系統通用功能 (時鐘、視窗、郵件啟動)] ---
 function handleOpenMail() {
     const user = JSON.parse(localStorage.getItem('gx_user'));
     const databaseEntry = MAIL_DATABASE[user.id];
