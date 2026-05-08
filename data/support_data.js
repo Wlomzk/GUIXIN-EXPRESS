@@ -16,9 +16,15 @@ export const SUPPORT_DATABASE = {
         ]
     },
 
-    // 關鍵字觸發 (JUMP SCARE 用)
+    // 關鍵字觸發 (精確匹配用)
     "triggers": {
         "help": "5rKh5pyJ5Lq66IO95bmr5L2g44CC", // 沒有人能幫妳。
         "who": "5oiR5Yid5piv5L2g77yM5L2g5b6M5piv5oiR44CC" // 我初是妳，妳後是我。
+    },
+
+    // --- [ 拉姆新增：模糊判定關鍵字庫 ] ---
+    "fuzzy_triggers": {
+        "靈舒": "5Zi75Zi7Li4uLuS9oOetieS4jeWPiuS6huWXpS4u5oiR5Lmf5piv5ZS3Li4uLg==" 
+        // 翻譯：嘻嘻....你等不及了嗎..我也是唷....
     }
 };

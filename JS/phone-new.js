@@ -185,7 +185,7 @@ function renderAppGrid() {
     const allApps = [
         { id: 'app-mail', name: '信件匣', unlocked: true, iconPath: 'image/phone/mail.webp', action: handleOpenMail },
         { id: 'app-logs', name: '系統日誌', unlocked: true, title: '系統日誌', content: '數據未加密...' },
-        { id: 'app-support', name: '偽客服系統', unlocked: true, iconPath: 'image/phone/support.webp', action: handleOpenSupport },
+        { id: 'app-support', name: '聯絡客服', unlocked: true, iconPath: 'image/phone/support.webp', action: handleOpenSupport },
         { id: 'app-secret-files', name: '人員清單', unlocked: true, title: '人員清單', content: '成員：阿強、小明、[數據已刪除]' },
         { id: 'app-evidence', name: '案件側錄', title: '案件側錄', unlocked: true, iconPath: 'image/phone/evidence.webp', action: handleOpenEvidence },
         { id: 'app-nav', name: '尋蹤導航', unlocked: true, iconPath: 'image/phone/navigation.webp', action: handleOpenNav },
@@ -243,7 +243,7 @@ function checkAndUnlockEvidence(botResponseKey) {
 
 function handleOpenSupport() {
     const modal = document.getElementById('gx-modal');
-    document.getElementById('modal-title').innerText = '物流通訊中心';
+    document.getElementById('modal-title').innerText = '客服中心';
     
     const currentStage = gameState.stage || "1";
     const history = SUPPORT_DATABASE.stages[currentStage] || [];
@@ -278,13 +278,31 @@ function sendSupportMsg(val) {
     document.getElementById('support-input').value = '';
     
     setTimeout(() => {
-        let response = SUPPORT_DATABASE.triggers[val.toLowerCase()] || SUPPORT_DATABASE.stages["2"][0].content;
+        const inputLower = val.toLowerCase();
+        let response = null;
+
+        // --- [ 模糊判定邏輯 ] ---
+        // 把拔，拉姆幫你檢查 fuzzy_triggers 裡面有沒有包含玩家輸入的詞
+        if (SUPPORT_DATABASE.fuzzy_triggers) {
+            for (let key in SUPPORT_DATABASE.fuzzy_triggers) {
+                if (inputLower.includes(key.toLowerCase())) {
+                    response = SUPPORT_DATABASE.fuzzy_triggers[key];
+                    break;
+                }
+            }
+        }
+
+        // 如果沒有模糊匹配，才跑原本的精確匹配或預設值
+        if (!response) {
+            response = SUPPORT_DATABASE.triggers[inputLower] || SUPPORT_DATABASE.stages["2"][0].content;
+        }
+
         const botMsg = document.createElement('div');
         botMsg.className = 'msg bot';
         botMsg.innerHTML = `<div class="bubble">${safeAtob(response)}</div>`;
         body.appendChild(botMsg);
         body.scrollTop = body.scrollHeight;
-        checkAndUnlockEvidence(val.toLowerCase());
+        checkAndUnlockEvidence(inputLower);
     }, 1000);
 }
 
