@@ -246,16 +246,18 @@ function handleOpenSupport() {
     document.getElementById('modal-title').innerText = '客服中心';
 
     const currentStage = gameState.stage || "1";
-    const history = SUPPORT_DATABASE.stages[currentStage] || [];
-    
+    // 渲染歷史訊息，並確保類別正確掛載以修正定位
     let chatHtml = (history || []).map(msg => {
         const now = new Date();
         const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
         const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
         const fullTime = `${dateStr} ${timeStr}`;
+        
+        // 判定發送者，正確掛載 user-side 或 bot-side
+        const sideClass = msg.sender === 'user' ? 'user-side' : 'bot-side';
 
         return `
-            <div class="msg-container ${msg.sender === 'user' ? 'user-side' : 'bot-side'}">
+            <div class="msg-container ${sideClass}">
                 <div class="msg-time">${fullTime}</div>
                 <div class="msg ${msg.sender}">
                     <div class="bubble">${safeAtob(msg.content)}</div>
@@ -279,12 +281,13 @@ function handleOpenSupport() {
 function sendSupportMsg(val) {
     if (!val.trim()) return;
     const body = document.getElementById('support-chat-body');
+    
     const now = new Date();
     const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
     const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: true });
     const fullTime = `${dateStr} ${timeStr}`;
 
-    // 1. 使用者訊息 (確保 user-side 類別存在以維持右側定位)
+    // 1. 使用者訊息 (強行掛載 user-side 類別確保靠右)
     const userMsgContainer = document.createElement('div');
     userMsgContainer.className = 'msg-container user-side';
     userMsgContainer.innerHTML = `
@@ -319,7 +322,7 @@ function sendSupportMsg(val) {
             response = SUPPORT_DATABASE.triggers[inputLower] || SUPPORT_DATABASE.stages["2"][0].content;
         }
 
-        // 2. 機器人訊息
+        // 2. 機器人訊息 (掛載 bot-side)
         const botMsgContainer = document.createElement('div');
         botMsgContainer.className = 'msg-container bot-side';
         botMsgContainer.innerHTML = `
