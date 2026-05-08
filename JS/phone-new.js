@@ -34,6 +34,17 @@ window.checkAndUnlockEvidence = checkAndUnlockEvidence; // 補上聯動檢查掛
 
 let currentTarget = null; 
 
+// --- [ 3. 安全解碼工具 ] (修正報錯的核心) ---
+function safeAtob(str) {
+    try {
+        return atob(str);
+    } catch (e) {
+        // 如果不是正確的 Base64 或包含特殊字元，直接回傳原字串，避免崩潰
+        console.warn("[系統警告] 訊息解碼失敗，顯示原始數據。");
+        return str;
+    }
+}
+
 // 監聽狀態更新 (用於證據清單即時同步)
 window.addEventListener('stateUpdated', (e) => {
     const newState = e.detail;
