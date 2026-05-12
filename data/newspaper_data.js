@@ -1,7 +1,7 @@
 // data/newspaper_data.js
 
 export const NEWSPAPER_DATA = [
-    { id: "page_0", text: "1967年10月：物流樞紐的初步落成", eggImages: ["../image/GUIXIN.webp", "../image/Ghost-marriage.webp", "../image/stop-sad.webp"], eggDescs: ["想幹死拉姆姊姊", "首任站長的簽署", "消失的建材清單"] },
+    { id: "page_0", text: "1967年10月：物流樞紐的初步落成", eggImages: ["../image/GUIXIN.webp", "../image/Ghost-marriage.webp", "../image/stop-sad.webp"], eggDescs: ["一個祕密的誕生", "首任站長的簽署", "消失的建材清單"] },
     { id: "page_1", text: "深夜的異響：員工宿舍的神祕投訴", eggImages: ["../image/GUIXIN.webp", "../image/Ghost-marriage.webp", "../image/stop-sad.webp"], eggDescs: ["宿舍204號房的筆記", "深夜走廊的模糊身影", "掉落的古銅色鑰匙"] },
     { id: "page_2", text: "包裹 GX-882：絕密配送的起點", eggImages: ["../image/GUIXIN.webp", "../image/Ghost-marriage.webp", "../image/stop-sad.webp"], eggDescs: ["被蠟密封的包裹邊緣", "禁止開啟的鮮紅標籤", "不符合物理規律的重量"] },
     { id: "page_3", text: "雨夜中的遺失物：招領處的第一件物品", eggImages: ["../image/GUIXIN.webp", "../image/Ghost-marriage.webp", "../image/stop-sad.webp"], eggDescs: ["被雨水浸濕的舊相框", "背面寫著：『別忘了回家』", "相片中模糊的三人"] },
