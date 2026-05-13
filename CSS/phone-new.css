@@ -72,7 +72,7 @@
 /* --- [ 區塊 2: 登入遮罩系統 ] --- */
 .gx-login-overlay {
     position: absolute;
-    top: 22px; left: 43px; width: 80%; height: 74%;
+    top: 22px; left: 41px; width: 82%; height: 74%;
     clip-path: polygon(
     25px 0,               /* 頂部切角開始 */
     calc(100% - 25px) 0,    /* 頂部切角結束 */
@@ -569,7 +569,7 @@
     .gx-app-grid { gap: 16px; padding: 19px 13px; }
     .gx-modal { top: 43px; left: 56px; width: 75%; height: 73%;}
     .gx-battery-notifier { height: 73%;}
-    .gx-login-overlay {top: 3px; left: 59px; width: 73%; height: 80%;}
+    .gx-login-overlay {top: 3px; left: 59px; width: 73%; height: 79%;}
 }
 
 /* --- [ 區塊 10: 故障與動畫特效 ] --- */
