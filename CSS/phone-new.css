@@ -569,6 +569,7 @@
     .gx-app-grid { gap: 16px; padding: 19px 13px; }
     .gx-modal { top: 43px; left: 56px; width: 75%; height: 73%;}
     .gx-battery-notifier { height: 73%;}
+    .gx-login-overlay {top: 3px; left: 59px; width: 73%; height: 80%;}
 }
 
 /* --- [ 區塊 10: 故障與動畫特效 ] --- */
